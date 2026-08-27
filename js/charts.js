@@ -36,7 +36,9 @@ function initExposureTrendChart(canvasId) {
     const firstCompanyId = COMPANIES[0].id;
     const months = MONTHLY_STATS[firstCompanyId].map(stat => stat.month);
 
-    const datasets = COMPANIES.map(company => {
+    const pointStyles = ['circle', 'triangle', 'rect', 'star', 'cross', 'rectRot', 'crossRot', 'dash'];
+
+    const datasets = COMPANIES.map((company, idx) => {
         const data = MONTHLY_STATS[company.id].map(stat => stat.mediaCoverage);
         return {
             label: company.name,
@@ -46,6 +48,7 @@ function initExposureTrendChart(canvasId) {
             borderWidth: 2,
             pointRadius: 3,
             pointHoverRadius: 6,
+            pointStyle: pointStyles[idx % pointStyles.length],
             tension: 0.4 // 平滑曲線
         };
     });

@@ -69,7 +69,7 @@ def update_data_file():
             excerpt: '{excerpt}',
             date: '{date_str}',
             source: '系統模擬',
-            synthetic: True
+            synthetic: true
         }},"""
 
     # 尋找 PRESS_RELEASES 陣列起始位置插入

@@ -256,9 +256,16 @@ function showProvenanceModal(companyName, month, docs) {
     const modalBody = document.getElementById('modalBody');
     if (!modal || !modalBody) return;
 
+    // 找出該公司的 newsUrl，提供給空狀態使用
+    const company = COMPANIES.find(c => c.name === companyName);
+    const newsUrl = company ? (company.newsUrl || company.website) : null;
+
     let docsListHtml = '';
     if (!docs || docs.length === 0) {
-        docsListHtml = '<div style="text-align:center; padding: 20px; color: var(--text-muted);">該月份暫無登記之原始新聞來源清單。</div>';
+        const newsLink = newsUrl
+            ? `<br><a href="${newsUrl}" target="_blank" rel="noopener" style="color:#2d5a3f;font-weight:700;">→ 前往 ${companyName} 官方新聞專區 ↗</a>`
+            : '';
+        docsListHtml = `<div style="text-align:center; padding: 20px; color: var(--text-muted);">該月份暫無登記之原始新聞來源清單。${newsLink}</div>`;
     } else {
         docsListHtml = docs.map(d => `
             <li style="margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); list-style: none;">
@@ -471,6 +478,10 @@ function renderNews(append = false) {
         const item = document.createElement('div');
         item.className = 'timeline-item animate-on-scroll is-visible';
         item.style.setProperty('--item-brand-color', news.companyColor || '#2d5a3f');
+        // F-08 Option B：合成資料徽章
+        const syntheticBadge = news.synthetic
+            ? '<span style="background:#fef3c7;color:#92400e;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">🤖 模擬資料</span>'
+            : '';
 
         item.innerHTML = `
             <div class="timeline-dot"></div>
@@ -481,7 +492,7 @@ function renderNews(append = false) {
                     </span>
                     <span class="timeline-date">${news.date}</span>
                 </div>
-                <h4 class="timeline-title">${news.title}</h4>
+                <h4 class="timeline-title">${news.title}${syntheticBadge}</h4>
                 <p class="timeline-excerpt">${news.excerpt}</p>
                 <div class="timeline-footer">
                     <span class="timeline-category">${news.category}</span>

@@ -60,11 +60,11 @@ function renderCompareUI(container) {
             <div class="compare-row" style="display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 30px;">
                 <div class="compare-chart-container" style="flex: 1; min-width: 320px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9;">
                     <h4 style="color: #1e293b; text-align: center; margin-top: 0; font-size: 1.05rem; font-weight: 700; margin-bottom: 15px;">📊 綜合指標 PK 雷達圖</h4>
-                    <div style="height: 360px; position: relative;"><canvas id="compareRadarChart"></canvas></div>
+                    <div style="height: 360px; position: relative;"><canvas id="compareRadarChart" role="img" aria-label="企業綜合指標多維度 PK 雷達圖，涵蓋媒體曝光、新聞稿、社群聲量與 KOL 合作四大指標"></canvas></div>
                 </div>
                 <div class="compare-chart-container" style="flex: 1; min-width: 320px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9;">
                     <h4 style="color: #1e293b; text-align: center; margin-top: 0; font-size: 1.05rem; font-weight: 700; margin-bottom: 15px;">📈 關鍵聲量數據柱狀比較</h4>
-                    <div style="height: 360px; position: relative;"><canvas id="compareBarChart"></canvas></div>
+                    <div style="height: 360px; position: relative;"><canvas id="compareBarChart" role="img" aria-label="所選企業在媒體曝光則數與社群聲量等指標的柱狀比較圖"></canvas></div>
                 </div>
             </div>
             <div class="compare-table-container" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; overflow-x: auto;">
