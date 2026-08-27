@@ -13,80 +13,82 @@ document.addEventListener('DOMContentLoaded', () => {
     initBackToTop();
 });
 
-// 1. Hash SPA 獨立切頁路由器
+// 1. Hash SPA 獨立切頁路由器 (點選目錄只顯示該項獨立頁面)
 function initHashRouter() {
-    const routeMap = {
-        '#/companies': 'companies',
-        '#/news': 'news',
-        '#/analytics': 'analytics',
-        '#/compare': 'compare',
-        '#/trends': 'trends'
-    };
+    const pages = ['companies', 'news', 'analytics', 'compare', 'trends'];
 
     function handleRouteChange() {
-        const hash = window.location.hash || '#/companies';
-        let targetSectionId = routeMap[hash];
-
-        // 兼容原有的純 ID 寫法（如 #companies）
-        if (!targetSectionId) {
-            const cleanHash = hash.replace('#/', '#');
-            if (cleanHash === '#companies') targetSectionId = 'companies';
-            else if (cleanHash === '#news') targetSectionId = 'news';
-            else if (cleanHash === '#analytics') targetSectionId = 'analytics';
-            else if (cleanHash === '#compare') targetSectionId = 'compare';
-            else if (cleanHash === '#trends') targetSectionId = 'trends';
-            else targetSectionId = 'companies';
-        }
-
-        const allSections = document.querySelectorAll('section.section');
-        const heroSection = document.getElementById('hero');
-
-        allSections.forEach(section => {
-            if (section.id === targetSectionId) {
-                section.style.display = 'block';
-                section.style.opacity = '1';
-                section.style.visibility = 'visible';
-            } else {
-                section.style.display = 'none';
+        let hash = window.location.hash || '#/companies';
+        
+        // 正規化 hash 路徑
+        let targetPage = 'companies';
+        pages.forEach(p => {
+            if (hash.includes(p)) {
+                targetPage = p;
             }
         });
 
-        // 頂部 Hero 區塊只在「公司總覽」或預設頁顯示
+        // 1. 隱藏/顯示區塊
+        const heroSection = document.getElementById('hero');
         if (heroSection) {
-            if (targetSectionId === 'companies') {
-                heroSection.style.display = 'block';
+            if (targetPage === 'companies') {
+                heroSection.style.setProperty('display', 'block', 'important');
             } else {
-                heroSection.style.display = 'none';
+                heroSection.style.setProperty('display', 'none', 'important');
             }
         }
 
-        // 高亮對應的導覽列選單
-        const navLinks = document.querySelectorAll('.navbar-link');
-        navLinks.forEach(link => {
-            const href = link.getAttribute('href');
-            if (href === hash || href === `#${targetSectionId}` || href === `#/${targetSectionId}`) {
+        pages.forEach(pId => {
+            const sec = document.getElementById(pId);
+            if (sec) {
+                if (pId === targetPage) {
+                    sec.style.setProperty('display', 'block', 'important');
+                    sec.style.setProperty('opacity', '1', 'important');
+                    sec.style.setProperty('visibility', 'visible', 'important');
+                } else {
+                    sec.style.setProperty('display', 'none', 'important');
+                }
+            }
+        });
+
+        // 2. 高亮頂部導覽列 active 狀態
+        document.querySelectorAll('.navbar-link').forEach(link => {
+            const href = link.getAttribute('href') || '';
+            if (href.includes(targetPage)) {
                 link.classList.add('active');
             } else {
                 link.classList.remove('active');
             }
         });
 
-        // 切頁後自動回到最頂端
-        window.scrollTo(0, 0);
+        // 3. 頁面回到最頂端
+        window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
-        // 切頁後特定模組觸發 re-draw
-        if (targetSectionId === 'analytics' && typeof initAllChartsNow === 'function') {
-            setTimeout(initAllChartsNow, 100);
+        // 4. 切頁後重新繪製圖表與數據PK表
+        if (targetPage === 'analytics' && typeof initAllChartsNow === 'function') {
+            setTimeout(initAllChartsNow, 80);
         }
-        if (targetSectionId === 'compare' && typeof initCompare === 'function') {
-            setTimeout(() => initCompare('compareContainer'), 150);
+        if (targetPage === 'compare' && typeof initCompare === 'function') {
+            setTimeout(() => initCompare('compareContainer'), 100);
         }
     }
 
-    // 監聽 Hash 改變與初始化
+    // 監聽網址 Hash 變化
     window.addEventListener('hashchange', handleRouteChange);
-    
-    // 如果網址沒有 Hash，預設補上 #/companies
+
+    // 綁定導覽列連結點擊事件
+    document.querySelectorAll('.navbar-link').forEach(link => {
+        link.addEventListener('click', (e) => {
+            const href = link.getAttribute('href');
+            if (href && href.startsWith('#')) {
+                e.preventDefault();
+                window.location.hash = href;
+                handleRouteChange();
+            }
+        });
+    });
+
+    // 初始載入時觸發一次
     if (!window.location.hash) {
         window.history.replaceState(null, '', '#/companies');
     }
