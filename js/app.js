@@ -1,4 +1,5 @@
-// 應用程式主要邏輯
+// 輿情決策台 主應用邏輯 (Dashboard SPA Controller)
+
 document.addEventListener('DOMContentLoaded', () => {
     // 確保資料已載入
     if (typeof COMPANIES === 'undefined' || typeof PRESS_RELEASES === 'undefined') {
@@ -6,88 +7,161 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    initNavbar();
-    renderCompanyCards();
+    initHashRouter();
     initStatsOverview();
+    renderCompanyCards();
+    renderOverviewStream();
     initNewsSection();
-    initBackToTop();
 });
 
-// 1. 導覽列與捲動行為
-function initNavbar() {
-    const navbar = document.getElementById('navbar');
-    const mobileMenuBtn = document.getElementById('navbarToggle');
-    const navMenu = document.getElementById('navbarMenu');
-    const sections = document.querySelectorAll('section');
-    const navItems = document.querySelectorAll('.navbar-link');
+// 1. Hash 路由切換系統 (Hash Router for Dashboard SPA)
+function initHashRouter() {
+    const navItems = document.querySelectorAll('.sys-nav-item');
+    const viewSections = document.querySelectorAll('.view-section');
 
-    // 捲動時改變導覽列樣式與 Scroll spy 狀態
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 30) {
-            navbar?.classList.add('scrolled');
-        } else {
-            navbar?.classList.remove('scrolled');
+    function handleHashChange() {
+        let hash = window.location.hash || '#/overview';
+        let targetView = hash.replace('#/', '');
+
+        // 預設為 overview
+        if (!document.getElementById(`view-${targetView}`)) {
+            targetView = 'overview';
+            window.location.hash = '#/overview';
         }
-        
-        // Scroll spy
-        let current = '';
-        const scrollPosition = window.pageYOffset + 120;
 
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                current = section.getAttribute('id');
+        // 切換 Active View
+        viewSections.forEach(section => {
+            if (section.id === `view-${targetView}`) {
+                section.classList.add('active');
+            } else {
+                section.classList.remove('active');
             }
         });
 
+        // 切換 Nav Item Active 狀態
         navItems.forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('href') === `#${current}`) {
+            const itemKey = item.getAttribute('data-view');
+            if (itemKey === targetView) {
                 item.classList.add('active');
+            } else {
+                item.classList.remove('active');
             }
         });
-    });
 
-    // 行動版選單切換
-    if (mobileMenuBtn && navMenu) {
-        mobileMenuBtn.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
+        // 捲動至頁面頂端
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // 觸發圖表與動畫
+        if (targetView === 'charts' && typeof initAllCharts === 'function') {
+            setTimeout(initAllCharts, 100);
+        }
+        if (targetView === 'compare' && typeof initCompare === 'function') {
+            setTimeout(() => initCompare('compareContainer'), 100);
+        }
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+    handleHashChange(); // 初始載入觸發
+}
+
+// 2. 初始化 4 大 KPI 統計指標數據
+function initStatsOverview() {
+    let totalPR = 0;
+    let totalCoverage = 0;
+    let totalSocial = 0;
+    let totalKol = 0;
+
+    if (typeof PRESS_RELEASES !== 'undefined') {
+        totalPR = PRESS_RELEASES.length;
+    }
+
+    if (typeof MONTHLY_STATS !== 'undefined') {
+        Object.values(MONTHLY_STATS).forEach(companyStats => {
+            companyStats.forEach(stat => {
+                totalCoverage += (stat.mediaCoverage || 0);
+                totalSocial += (stat.socialMentions || 0);
+                totalKol += (stat.kolCollabs || 0);
+            });
         });
     }
 
-    // 點擊目錄連結平滑捲動到對應區塊
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const targetId = this.getAttribute('href');
-            if (!targetId || targetId === '#') return;
-            
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                e.preventDefault();
-                if (navMenu) navMenu.classList.remove('active'); // 關閉行動選單
-                
-                const headerOffset = 75; // 避開固定導覽列高度
-                const elementPosition = targetElement.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-  
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: "smooth"
-                });
-            }
-        });
-    });
+    // 更新 KPI 指標卡片 (數字格式化)
+    const elPR = document.getElementById('kpiPressReleases');
+    const elCoverage = document.getElementById('kpiMediaCoverage');
+    const elSocial = document.getElementById('kpiSocialMentions');
+    const elKol = document.getElementById('kpiKolCollabs');
+
+    if (elPR) elPR.textContent = totalPR.toLocaleString();
+    if (elCoverage) elCoverage.textContent = totalCoverage.toLocaleString();
+    if (elSocial) elSocial.textContent = totalSocial.toLocaleString();
+    if (elKol) elKol.textContent = totalKol.toLocaleString();
 }
 
-// 2. 渲染公司卡片
+// 3. 渲染總覽儀表板觀測清單與熱點新聞流
+function renderOverviewStream() {
+    // 渲染排行榜 Top 5 公司
+    const topListEl = document.getElementById('topCompaniesList');
+    if (topListEl && typeof COMPANIES !== 'undefined') {
+        topListEl.innerHTML = '';
+        
+        // 依照新聞發布與媒體曝光計算總和排序
+        const rankedCompanies = [...COMPANIES].map(comp => {
+            const stats = MONTHLY_STATS[comp.id] || [];
+            const totalCov = stats.reduce((acc, curr) => acc + (curr.mediaCoverage || 0), 0);
+            const totalPRCount = PRESS_RELEASES.filter(pr => pr.companyId === comp.id).length;
+            return { ...comp, totalCov, totalPRCount };
+        }).sort((a, b) => b.totalCov - a.totalCov);
+
+        rankedCompanies.slice(0, 5).forEach((comp, idx) => {
+            const item = document.createElement('div');
+            item.className = 'top-company-item';
+            item.style.setProperty('--item-color', comp.brandColor || comp.color);
+            item.innerHTML = `
+                <div class="top-company-info">
+                    <span class="top-rank-num">0${idx + 1}</span>
+                    <span class="top-company-name">${comp.name}</span>
+                    <span class="top-company-stock">${comp.stock || comp.stockTicker}</span>
+                </div>
+                <div class="top-company-stats">
+                    <div class="top-stat-val">${comp.totalCov.toLocaleString()} <span style="font-size: 0.7rem;">篇</span></div>
+                    <div class="top-stat-lbl">媒體報導曝光聲量</div>
+                </div>
+            `;
+            topListEl.appendChild(item);
+        });
+    }
+
+    // 渲染最新熱點新聞動態流 (前 5 則)
+    const streamEl = document.getElementById('recentNewsStream');
+    if (streamEl && typeof PRESS_RELEASES !== 'undefined') {
+        streamEl.innerHTML = '';
+
+        const sortedPR = [...PRESS_RELEASES].sort((a, b) => new Date(b.date) - new Date(a.date));
+        sortedPR.slice(0, 5).forEach(news => {
+            const item = document.createElement('div');
+            item.className = 'stream-news-item';
+            item.style.setProperty('--item-color', news.companyColor || '#2d5a3f');
+            item.innerHTML = `
+                <div class="stream-news-meta">
+                    <span class="stream-news-comp">${news.companyName}</span>
+                    <span class="stream-news-date">${news.date}</span>
+                </div>
+                <h4 class="stream-news-title">${news.title}</h4>
+                <div class="stream-news-source">媒體來源：${news.source} • 分類：${news.category}</div>
+            `;
+            streamEl.appendChild(item);
+        });
+    }
+}
+
+// 4. 渲染企業品牌卡片 (Companies View)
 function renderCompanyCards() {
     const container = document.getElementById('companyGrid');
     if (!container) return;
 
     container.innerHTML = '';
     
-    COMPANIES.forEach((company, index) => {
+    COMPANIES.forEach((company) => {
         const card = document.createElement('div');
         card.className = 'company-card animate-on-scroll';
         card.style.setProperty('--card-brand-color', company.brandColor || company.color);
@@ -129,7 +203,7 @@ function renderCompanyCards() {
         container.appendChild(card);
     });
 
-    // 綁定詳細資訊彈窗按鈕
+    // 綁定詳細資訊 Modal 按鈕
     document.querySelectorAll('.view-details-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
             const companyId = e.currentTarget.getAttribute('data-id');
@@ -184,58 +258,20 @@ function showCompanyModal(companyId) {
     };
 }
 
-// 3. 初始化數據總覽
-function initStatsOverview() {
-    let totalPR = 0;
-    let totalCoverage = 0;
-    let totalSocial = 0;
-    let totalKol = 0;
-
-    if (typeof PRESS_RELEASES !== 'undefined') {
-        totalPR = PRESS_RELEASES.length;
-    }
-
-    if (typeof MONTHLY_STATS !== 'undefined') {
-        Object.values(MONTHLY_STATS).forEach(companyStats => {
-            companyStats.forEach(stat => {
-                totalCoverage += (stat.mediaCoverage || 0);
-                totalSocial += (stat.socialMentions || 0);
-                totalKol += (stat.kolCollabs || 0);
-            });
-        });
-    }
-
-    const elHeroPR = document.getElementById('totalPressReleases');
-    const elNews = document.getElementById('statTotalNews');
-    const elCoverage = document.getElementById('statTotalCoverage');
-    const elSocial = document.getElementById('statTotalSocial');
-    const elKol = document.getElementById('statTotalKol');
-
-    if (elHeroPR) elHeroPR.setAttribute('data-target', totalPR);
-    if (elNews) elNews.setAttribute('data-target', totalPR);
-    if (elCoverage) elCoverage.setAttribute('data-target', totalCoverage);
-    if (elSocial) elSocial.setAttribute('data-target', totalSocial);
-    if (elKol) elKol.setAttribute('data-target', totalKol);
-}
-
-// 4. 新聞發布區塊與過濾邏輯
+// 5. 新聞發布區塊與過濾邏輯
 let currentNewsPage = 1;
-const NEWS_PER_PAGE = 6;
+const NEWS_PER_PAGE = 8;
 let filteredNews = [];
 
 function initNewsSection() {
-    const container = document.getElementById('news-container');
+    const container = document.getElementById('timelineContainer');
     if (!container) return;
 
-    // 建立過濾器 UI
     setupNewsFilters();
-    
-    // 初始載入
     filteredNews = [...PRESS_RELEASES];
     renderNews();
 
-    // 載入更多按鈕
-    const loadMoreBtn = document.getElementById('load-more-btn');
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', () => {
             currentNewsPage++;
@@ -245,69 +281,64 @@ function initNewsSection() {
 }
 
 function setupNewsFilters() {
-    const filterContainer = document.getElementById('news-filters');
-    if (!filterContainer) return;
+    const togglesContainer = document.getElementById('companyToggles');
+    if (!togglesContainer) return;
 
-    // 公司勾選框
-    let companyFiltersHtml = '<div class="filter-group"><h4>公司</h4><div class="checkbox-group">';
+    togglesContainer.innerHTML = '';
+
     COMPANIES.forEach(comp => {
-        companyFiltersHtml += `
-            <label class="checkbox-label">
-                <input type="checkbox" class="company-filter" value="${comp.id}" checked>
-                <span class="custom-checkbox" style="border-color:${comp.color}"></span>
-                ${comp.name}
-            </label>
-        `;
-    });
-    companyFiltersHtml += '</div></div>';
+        const btn = document.createElement('button');
+        btn.className = 'company-toggle-btn active';
+        btn.setAttribute('data-id', comp.id);
+        btn.style.setProperty('--btn-brand-color', comp.brandColor || comp.color);
+        btn.innerHTML = `<span>✓</span> ${comp.name}`;
 
-    // 類別下拉選單
-    let categoryHtml = '<div class="filter-group"><h4>類別</h4><select id="category-filter"><option value="all">所有類別</option>';
-    CATEGORIES.forEach(cat => {
-        categoryHtml += `<option value="${cat}">${cat}</option>`;
-    });
-    categoryHtml += '</select></div>';
+        btn.addEventListener('click', () => {
+            btn.classList.toggle('active');
+            if (btn.classList.contains('active')) {
+                btn.querySelector('span').textContent = '✓';
+            } else {
+                btn.querySelector('span').textContent = '+';
+            }
+            applyNewsFilters();
+        });
 
-    // 關鍵字搜尋
-    let searchHtml = `
-        <div class="filter-group search-group">
-            <input type="text" id="keyword-search" placeholder="搜尋標題或內容...">
-            <button id="search-btn"><i class="fas fa-search"></i> 搜尋</button>
-        </div>
-    `;
-
-    filterContainer.innerHTML = companyFiltersHtml + categoryHtml + searchHtml;
-
-    // 綁定過濾事件
-    document.querySelectorAll('.company-filter').forEach(cb => {
-        cb.addEventListener('change', applyNewsFilters);
+        togglesContainer.appendChild(btn);
     });
-    document.getElementById('category-filter').addEventListener('change', applyNewsFilters);
-    document.getElementById('search-btn').addEventListener('click', applyNewsFilters);
-    document.getElementById('keyword-search').addEventListener('keyup', (e) => {
-        if (e.key === 'Enter') applyNewsFilters();
-    });
+
+    const categorySelect = document.getElementById('filterCategory');
+    const keywordInput = document.getElementById('filterKeyword');
+    const dateFromInput = document.getElementById('filterDateFrom');
+    const dateToInput = document.getElementById('filterDateTo');
+
+    if (categorySelect) categorySelect.addEventListener('change', applyNewsFilters);
+    if (keywordInput) keywordInput.addEventListener('input', applyNewsFilters);
+    if (dateFromInput) dateFromInput.addEventListener('change', applyNewsFilters);
+    if (dateToInput) dateToInput.addEventListener('change', applyNewsFilters);
 }
 
 function applyNewsFilters() {
-    // 取得選取的公司
-    const selectedCompanies = Array.from(document.querySelectorAll('.company-filter:checked')).map(cb => cb.value);
-    
-    // 取得選取的類別
-    const selectedCategory = document.getElementById('category-filter').value;
-    
-    // 取得搜尋關鍵字
-    const keyword = document.getElementById('keyword-search').value.toLowerCase();
+    const activeCompBtns = document.querySelectorAll('.company-toggle-btn.active');
+    const selectedCompanies = Array.from(activeCompBtns).map(btn => btn.getAttribute('data-id'));
 
-    // 過濾資料
+    const selectedCategory = document.getElementById('filterCategory')?.value || '';
+    const keyword = document.getElementById('filterKeyword')?.value.toLowerCase().trim() || '';
+    const dateFrom = document.getElementById('filterDateFrom')?.value || '';
+    const dateTo = document.getElementById('filterDateTo')?.value || '';
+
     filteredNews = PRESS_RELEASES.filter(news => {
         const matchCompany = selectedCompanies.includes(news.companyId);
-        const matchCategory = selectedCategory === 'all' || news.category === selectedCategory;
-        const matchKeyword = keyword === '' || 
+        const matchCategory = !selectedCategory || news.category === selectedCategory;
+        const matchKeyword = !keyword || 
                              news.title.toLowerCase().includes(keyword) || 
-                             news.excerpt.toLowerCase().includes(keyword);
+                             news.excerpt.toLowerCase().includes(keyword) ||
+                             news.companyName.toLowerCase().includes(keyword);
         
-        return matchCompany && matchCategory && matchKeyword;
+        let matchDate = true;
+        if (dateFrom && news.date < dateFrom) matchDate = false;
+        if (dateTo && news.date > dateTo) matchDate = false;
+
+        return matchCompany && matchCategory && matchKeyword && matchDate;
     });
 
     currentNewsPage = 1;
@@ -315,12 +346,18 @@ function applyNewsFilters() {
 }
 
 function renderNews(append = false) {
-    const container = document.getElementById('news-grid');
-    const loadMoreBtn = document.getElementById('load-more-btn');
+    const container = document.getElementById('timelineContainer');
+    const loadMoreBtn = document.getElementById('timelineLoadMore');
+    const countEl = document.getElementById('filterResultCount');
+
     if (!container) return;
 
     if (!append) {
         container.innerHTML = '';
+    }
+
+    if (countEl) {
+        countEl.textContent = `共 ${filteredNews.length} 則符合條件新聞稿`;
     }
 
     const startIndex = (currentNewsPage - 1) * NEWS_PER_PAGE;
@@ -328,65 +365,41 @@ function renderNews(append = false) {
     const newsToShow = filteredNews.slice(startIndex, endIndex);
 
     if (filteredNews.length === 0) {
-        container.innerHTML = '<div class="no-results">找不到符合條件的新聞稿。</div>';
+        container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">找不到符合條件的公關新聞稿。</div>';
         if (loadMoreBtn) loadMoreBtn.style.display = 'none';
         return;
     }
 
     newsToShow.forEach(news => {
-        const card = document.createElement('div');
-        card.className = 'news-card animate-on-scroll';
-        
-        card.innerHTML = `
-            <div class="news-header">
-                <span class="news-company-badge" style="background-color: ${news.companyColor}20; color: ${news.companyColor}">
-                    ${news.companyName}
-                </span>
-                <span class="news-date">${news.date}</span>
-            </div>
-            <h4 class="news-title">${news.title}</h4>
-            <p class="news-excerpt">${news.excerpt}</p>
-            <div class="news-footer">
-                <span class="news-category">${news.category}</span>
-                <span class="news-source"><i class="fas fa-newspaper"></i> ${news.source}</span>
+        const item = document.createElement('div');
+        item.className = 'timeline-item animate-on-scroll';
+        item.style.setProperty('--item-brand-color', news.companyColor || '#2d5a3f');
+
+        item.innerHTML = `
+            <div class="timeline-dot"></div>
+            <div class="timeline-card">
+                <div class="timeline-card-header">
+                    <span class="timeline-company-badge" style="background: ${news.companyColor}18; color: ${news.companyColor}">
+                        ${news.companyName}
+                    </span>
+                    <span class="timeline-date">${news.date}</span>
+                </div>
+                <h4 class="timeline-title">${news.title}</h4>
+                <p class="timeline-excerpt">${news.excerpt}</p>
+                <div class="timeline-footer">
+                    <span class="timeline-category">${news.category}</span>
+                    <span class="timeline-source">來源：${news.source}</span>
+                </div>
             </div>
         `;
-        container.appendChild(card);
+        container.appendChild(item);
     });
 
-    // 觸發新加入元素的動畫
-    if (typeof initScrollAnimations === 'function') {
-        // 小延遲確保 DOM 更新
-        setTimeout(initScrollAnimations, 50);
-    }
-
-    // 處理載入更多按鈕顯示
     if (loadMoreBtn) {
         if (endIndex >= filteredNews.length) {
             loadMoreBtn.style.display = 'none';
         } else {
-            loadMoreBtn.style.display = 'inline-block';
+            loadMoreBtn.style.display = 'block';
         }
     }
-}
-
-// 5. 回到頂部按鈕
-function initBackToTop() {
-    const btn = document.getElementById('back-to-top');
-    if (!btn) return;
-
-    window.addEventListener('scroll', () => {
-        if (window.scrollY > 300) {
-            btn.classList.add('visible');
-        } else {
-            btn.classList.remove('visible');
-        }
-    });
-
-    btn.addEventListener('click', () => {
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
-        });
-    });
 }
