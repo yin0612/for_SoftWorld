@@ -1,0 +1,89 @@
+# 八家公司主檔。任何程式都不得硬編碼公司資訊，一律讀這個檔。
+- id: soft-world
+  display_name: 智冠科技
+  ticker: "5478"
+  market: TPEx                      # TWSE | TPEx | UNLISTED
+  legal_names:
+    - { name: 智冠科技股份有限公司, from: 1990-01-01 }
+  aliases: [智冠, 智冠科技, 智冠集團, Soft-World]
+  subsidiaries: [MyCard, 藍新金流, 中華網龍]
+  titles: [金庸群俠傳Online, 吞食天地]
+  sources:
+    - { type: press_release, url: "https://www.soft-world.com/News", parser: soft_world, paging: "?page={n}", max_pages: 25 }
+  ir_url: "https://www.soft-world.com/Investors"
+
+- id: softstar
+  display_name: 光聚晶電（原大宇資訊）
+  ticker: "6111"
+  market: TPEx
+  legal_names:
+    - { name: 大宇資訊股份有限公司,       from: 1988-01-01, until: 2026-01-06 }
+    - { name: 光聚晶電聯合股份有限公司,   from: 2026-01-07 }   # 經授商字第11430207330號
+  aliases: [大宇資, 大宇資訊, 光聚晶電, Softstar]
+  exclude_aliases: [大宇紡織]          # 1445 為不同公司，裸詞「大宇」一律不匹配
+  titles: [仙劍奇俠傳, 軒轅劍, 女鬼橋, 曹操不囉嗦, 伊藤潤二狂熱, 魔力寶貝, 咒]
+  sources:
+    - { type: press_release, url: "https://km.softstar.com.tw/topic.aspx?tid={id}", parser: softstar_seq, id_mode: sequential }
+  notes: |
+    法人已更名但遊戲新聞站仍署名「大宇資訊」→ 新舊名必須並存。
+
+- id: gamania
+  display_name: 橘子集團
+  ticker: "6180"
+  market: TPEx
+  legal_names: [{ name: 遊戲橘子數位科技股份有限公司, from: 1995-01-01 }]
+  aliases: [橘子, 遊戲橘子, 橘子集團, Gamania]
+  subsidiaries: [果核數位]
+  titles: [天堂M, 新楓之谷, 波拉西亞戰記]
+  sources:
+    - { type: press_release, url: "https://www.gamania.com/news", parser: gamania_spa, render: api_first }
+
+- id: wanin
+  display_name: 網銀國際
+  ticker: null
+  market: UNLISTED                   # 無 MOPS，前端不得顯示 MOPS 按鈕
+  legal_names: [{ name: 網銀國際股份有限公司, from: 2002-01-01 }]
+  aliases: [網銀, 網銀國際, WANIN]
+  subsidiaries: [閃電狼, 網銀國際閃電狼, 威秀影城]
+  titles: [星城, 星城Online, 游e卡]
+  sources:
+    - { type: press_release, url: "https://www.wanin.tw/News/", parser: wanin, paging: "?page={n}", max_pages: 15 }
+
+- id: wayi
+  display_name: 華義國際
+  ticker: "3086"
+  market: TPEx
+  legal_names: [{ name: 華義國際數位娛樂股份有限公司, from: 1993-01-01 }]
+  aliases: [華義, 華義國際, Wayi]
+  titles: [遊戲大亂鬥, BanaBana, 石器時代]
+  sources: []
+
+- id: userjoy
+  display_name: 宇峻奧汀
+  ticker: "3546"
+  market: TPEx
+  legal_names: [{ name: 宇峻奧汀科技股份有限公司, from: 1995-05-01 }]
+  aliases: [宇峻, 奧汀, 宇峻奧汀, UserJoy]
+  titles: [三國群英傳, 策定九州, 幻世錄, 天使之戀, FFXIV, 最終幻想14]
+  sources:
+    - { type: press_release, url: "https://www.userjoy.com.tw/news/news_02.aspx?n={id:07d}", parser: userjoy_seq, id_mode: sequential }
+    - { type: mops_filing,   url: "https://www.userjoy.com.tw/news/news_03.aspx", parser: userjoy_mops }
+
+- id: x-legend
+  display_name: 傳奇網路
+  ticker: "4994"
+  market: TWSE                       # 上市，非上櫃
+  legal_names: [{ name: 傳奇網路遊戲股份有限公司, from: 2007-01-01 }]
+  aliases: [傳奇, 傳奇網路, X-Legend]
+  titles: [幻想神域, 精靈樂章, 晴空物語, 星界神話, 咻咻史萊姆]
+  sources:
+    - { type: press_release, url: "https://www.x-legend.tw/02news/news_1.php", parser: xlegend, encoding: big5, render: api_first }
+
+- id: taiwei
+  display_name: 泰偉電子
+  ticker: "3064"
+  market: TPEx
+  legal_names: [{ name: 泰偉電子股份有限公司, from: 1994-01-01 }]
+  aliases: [泰偉, 泰偉電子]
+  titles: [叫號叫我]
+  sources: []
