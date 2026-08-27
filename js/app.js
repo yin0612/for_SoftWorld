@@ -64,12 +64,23 @@ function initHashRouter() {
         // 3. 頁面回到最頂端
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
-        // 4. 切頁後重新繪製圖表與數據PK表
-        if (targetPage === 'analytics' && typeof initAllChartsNow === 'function') {
-            setTimeout(initAllChartsNow, 80);
+        // 4. 切頁後重新計算 Canvas 尺寸並強制重繪圖表/PK表
+        if (targetPage === 'analytics') {
+            if (typeof forceResizeAllCharts === 'function') {
+                setTimeout(forceResizeAllCharts, 30);
+                setTimeout(forceResizeAllCharts, 180);
+            } else if (typeof initAllChartsNow === 'function') {
+                setTimeout(initAllChartsNow, 80);
+            }
         }
-        if (targetPage === 'compare' && typeof initCompare === 'function') {
-            setTimeout(() => initCompare('compareContainer'), 100);
+        
+        if (targetPage === 'compare') {
+            if (typeof forceResizeCompareCharts === 'function') {
+                setTimeout(forceResizeCompareCharts, 30);
+                setTimeout(forceResizeCompareCharts, 180);
+            } else if (typeof initCompare === 'function') {
+                setTimeout(() => initCompare('compareContainer'), 100);
+            }
         }
     }
 

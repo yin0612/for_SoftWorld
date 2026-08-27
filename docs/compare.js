@@ -367,6 +367,33 @@ function renderComparisonTable(containerId, selectedCompanies) {
 }
 
 /**
+ * 強制重算尺寸並重繪對比工具圖表 (解決 SPA 切頁 display:none -> block 的畫布空白)
+ */
+function forceResizeCompareCharts() {
+    const container = document.getElementById('compareContainer');
+    if (!container) return;
+
+    if (!container.children || container.children.length === 0) {
+        initCompare('compareContainer');
+    } else if (typeof compareState !== 'undefined' && compareState.selectedCompanyIds) {
+        updateComparison(compareState.selectedCompanyIds);
+    }
+
+    if (typeof Chart !== 'undefined' && compareCharts) {
+        Object.values(compareCharts).forEach(chart => {
+            if (chart) {
+                try {
+                    chart.resize();
+                    chart.update();
+                } catch (e) {
+                    // Ignore transient errors
+                }
+            }
+        });
+    }
+}
+
+/**
  * 匯出比較圖為圖片 (示意)
  */
 function exportComparisonImg() {

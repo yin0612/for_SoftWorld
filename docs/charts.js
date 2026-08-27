@@ -404,6 +404,25 @@ function initAllChartsNow() {
 }
 
 /**
+ * 強制重算尺寸並重繪全站圖表 (解決 SPA 切頁 display:none -> block 的畫布空白)
+ */
+function forceResizeAllCharts() {
+    initAllChartsNow();
+    if (typeof Chart === 'undefined' || !charts) return;
+
+    Object.values(charts).forEach(chart => {
+        if (chart) {
+            try {
+                chart.resize();
+                chart.update();
+            } catch (e) {
+                // Ignore transient errors
+            }
+        }
+    });
+}
+
+/**
  * 懶載入與初始化圖表
  */
 function initAllCharts() {
