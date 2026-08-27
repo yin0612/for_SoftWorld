@@ -1,0 +1,35 @@
+name: 自動定時更新媒體數據
+
+on:
+  schedule:
+    # 每週一 00:00 UTC (台北時間 08:00) 免費自動執行
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+    # 支援在 GitHub 網頁上點擊一鍵手動更新
+
+permissions:
+  contents: write
+
+jobs:
+  auto-update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 檢出專案程式碼
+        uses: actions/checkout@v4
+
+      - name: 設定 Python 環境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 執行數據自動更新腳本
+        run: |
+          python scripts/update_data.py
+
+      - name: 自動提交與推送更新至 GitHub
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "auto: 🤖 GitHub Actions 定時自動更新數據與新聞動態 [skip ci]"
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"
+          branch: main
