@@ -222,31 +222,75 @@ COMPANIES.forEach(company => {
 // 依日期排序新聞稿（由新到舊）
 PRESS_RELEASES.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-// 產生每月統計數據與媒體分佈 (2024-01 到 2026-08)
+// 產生每月統計數據 (2024-01 到 2026-08, 共 32 個月)
 const START_YEAR = 2024;
 const START_MONTH = 1;
 const END_YEAR = 2026;
 const END_MONTH = 8;
 
+const MONTHS_LIST = [];
+for (let y = START_YEAR; y <= END_YEAR; y++) {
+    const maxMonth = (y === END_YEAR) ? END_MONTH : 12;
+    for (let m = (y === START_YEAR ? START_MONTH : 1); m <= maxMonth; m++) {
+        MONTHS_LIST.push(`${y}-${String(m).padStart(2, '0')}`);
+    }
+}
+
+// 8 大公司四大指標權重與特定月份爆發點
+const COMPANY_PROFILES = {
+    'soft-world': { // 智冠科技
+        basePR: 8, baseMedia: 48, baseSocial: 280, baseKol: 4,
+        spikes: { '2024-05': 2.2, '2024-06': 2.7, '2026-08': 2.4 } // 股東改選、王思淳接棒
+    },
+    'softstar': { // 大宇資訊
+        basePR: 5, baseMedia: 32, baseSocial: 220, baseKol: 3,
+        spikes: { '2024-05': 1.9, '2024-09': 2.8, '2026-01': 2.3 } // 女鬼橋、售雙劍IP、光聚晶電更名
+    },
+    'gamania': { // 橘子集團
+        basePR: 7, baseMedia: 52, baseSocial: 420, baseKol: 9,
+        spikes: { '2024-06': 2.5, '2025-01': 1.8, '2026-02': 2.1 } // 波拉西亞戰記、AI商轉元年
+    },
+    'wanin': { // 網銀國際
+        basePR: 6, baseMedia: 40, baseSocial: 350, baseKol: 6,
+        spikes: { '2024-06': 2.9, '2025-07': 1.7, '2026-07': 2.2 } // 12.49億收購威秀、星城更名
+    },
+    'wayi': { // 華義國際
+        basePR: 4, baseMedia: 22, baseSocial: 260, baseKol: 3,
+        spikes: { '2024-11': 1.8, '2025-06': 1.9, '2026-03': 1.7 } // 合資進軍印度、離岸執照
+    },
+    'userjoy': { // 宇峻奧汀
+        basePR: 7, baseMedia: 36, baseSocial: 310, baseKol: 7,
+        spikes: { '2025-01': 2.4, '2025-02': 2.2, '2026-08': 2.0 } // FFXIV繁中版、三國群英傳
+    },
+    'xlegend': { // 傳奇網路
+        basePR: 5, baseMedia: 26, baseSocial: 210, baseKol: 4,
+        spikes: { '2024-03': 1.6, '2025-05': 1.7, '2026-04': 1.6 } // 精靈樂章、咻咻史萊姆
+    },
+    'astro': { // 泰偉電子
+        basePR: 2, baseMedia: 12, baseSocial: 70, baseKol: 1,
+        spikes: { '2024-08': 1.5, '2025-10': 1.6, '2026-05': 1.4 } // 機台與減資
+    }
+};
+
 const channels = ['巴哈姆特', '4Gamers', 'Yahoo新聞', '聯合新聞網', 'ETtoday', '社群媒體', '其他'];
 
 COMPANIES.forEach(company => {
+    const prof = COMPANY_PROFILES[company.id] || { basePR: 4, baseMedia: 20, baseSocial: 150, baseKol: 2, spikes: {} };
     MONTHLY_STATS[company.id] = [];
     
-    for (let y = START_YEAR; y <= END_YEAR; y++) {
-        const maxMonth = (y === END_YEAR) ? END_MONTH : 12;
-        for (let m = (y === START_YEAR ? START_MONTH : 1); m <= maxMonth; m++) {
-            const baseMultiplier = (company.id === 'soft-world' || company.id === 'gamania' || company.id === 'wanin') ? 1.5 : 1;
-            
-            MONTHLY_STATS[company.id].push({
-                month: `${y}-${String(m).padStart(2, '0')}`,
-                pressReleaseCount: Math.floor((Math.random() * 10 + 2) * baseMultiplier),
-                mediaCoverage: Math.floor((Math.random() * 50 + 10) * baseMultiplier),
-                socialMentions: Math.floor((Math.random() * 300 + 50) * baseMultiplier),
-                kolCollabs: Math.floor((Math.random() * 5) * baseMultiplier)
-            });
-        }
-    }
+    MONTHS_LIST.forEach((monthStr, idx) => {
+        const sineWave = Math.sin(idx * 0.45) * 0.15 + 1.0;
+        const spike = prof.spikes[monthStr] || 1.0;
+        const factor = sineWave * spike;
+
+        MONTHLY_STATS[company.id].push({
+            month: monthStr,
+            pressReleaseCount: Math.max(1, Math.round(prof.basePR * factor)),
+            mediaCoverage: Math.max(5, Math.round(prof.baseMedia * factor)),
+            socialMentions: Math.max(20, Math.round(prof.baseSocial * factor)),
+            kolCollabs: Math.max(0, Math.round(prof.baseKol * factor))
+        });
+    });
 
     // 產生媒體分佈比例
     let remaining = 100;
