@@ -102,7 +102,17 @@ const COMPANIES = [
 const SOURCES = ['巴哈姆特', '4Gamers', '聯合新聞網', 'ETtoday', '經濟日報', '自由時報', 'Yahoo新聞', '中時新聞網'];
 const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異動', '產業趨勢', '電競賽事', '技術創新', '社群活動'];
 
-const PRESS_RELEASES = [];
+const PRESS_RELEASES = [
+        {
+            companyId: 'soft-world',
+            companyName: '智冠科技',
+            companyColor: '#e76f51',
+            title: '智冠科技導入生成式 AI 輔助開發流程，有效提升遊戲製作與營運效率',
+            category: '技術創新',
+            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-08-27',
+            source: '巴哈姆特'
+        },];
 const MONTHLY_STATS = {};
 const MEDIA_CHANNELS = {};
 
