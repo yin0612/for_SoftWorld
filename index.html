@@ -49,7 +49,7 @@
                 <li><a href="#/trends" class="navbar-link">趨勢分析</a></li>
             </ul>
 
-            <button class="navbar-toggle" id="navbarToggle" aria-label="選單">
+            <button class="navbar-toggle" id="navbarToggle" aria-label="選單" aria-expanded="false" aria-controls="navbarMenu">
                 <span class="navbar-toggle-bar"></span>
                 <span class="navbar-toggle-bar"></span>
                 <span class="navbar-toggle-bar"></span>
@@ -97,11 +97,11 @@
                     <span class="hero-stat-label">監測新聞稿數量</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-number" data-target="32">32</span>
+                    <span class="hero-stat-number" data-target="32" id="totalMonths">32</span>
                     <span class="hero-stat-label">追蹤歷史月份</span>
                 </div>
                 <div class="hero-stat">
-                    <span class="hero-stat-number" data-target="7">7</span>
+                    <span class="hero-stat-number" data-target="10" id="totalChannels">10</span>
                     <span class="hero-stat-label">核心媒體觀測頻道</span>
                 </div>
             </div>
@@ -268,7 +268,7 @@
                     <span class="chart-card-subtitle">監測區間：2024/01 — 2026/08</span>
                 </div>
                 <div class="chart-card-body">
-                    <canvas id="exposureTrendChart"></canvas>
+                    <canvas id="exposureTrendChart" role="img" aria-label="2024 至 2026 年八家台灣遊戲公司每月媒體報導聲量趨勢折線圖"></canvas>
                 </div>
                 <!-- 趨勢觀測對話框 -->
                 <div class="insight-box">
@@ -291,7 +291,7 @@
                         </select>
                     </div>
                     <div class="chart-card-body">
-                        <canvas id="mediaChannelChart"></canvas>
+                        <canvas id="mediaChannelChart" role="img" aria-label="各遊戲公司在各大媒體通路的曝光百分比圓餅圖"></canvas>
                     </div>
                 </div>
 
@@ -304,7 +304,7 @@
                         </h3>
                     </div>
                     <div class="chart-card-body">
-                        <canvas id="kolRankChart"></canvas>
+                        <canvas id="kolRankChart" role="img" aria-label="八大台灣遊戲企業 KOL 與實況主合作次數排行榜橫向長條圖"></canvas>
                     </div>
                 </div>
             </div>
@@ -318,7 +318,7 @@
                     </h3>
                 </div>
                 <div class="chart-card-body">
-                    <canvas id="pressReleaseChart"></canvas>
+                    <canvas id="pressReleaseChart" role="img" aria-label="八大台灣遊戲企業官方新聞稿發布總總篇數長條圖"></canvas>
                 </div>
             </div>
         </div>
@@ -469,7 +469,7 @@
                         <li><a href="https://www.soft-world.com/News" target="_blank" rel="noopener">智冠科技 新聞專區 ↗</a></li>
                         <li><a href="https://km.softstar.com.tw/list.aspx?cid=2" target="_blank" rel="noopener">大宇資訊 最新消息 ↗</a></li>
                         <li><a href="https://www.gamania.com/news" target="_blank" rel="noopener">橘子集團 新聞中心 ↗</a></li>
-                        <li><a href="http://wanin.tw/News/" target="_blank" rel="noopener">網銀國際 最新消息 ↗</a></li>
+                        <li><a href="https://www.wanin.tw/News/" target="_blank" rel="noopener">網銀國際 最新消息 ↗</a></li>
                         <li><a href="https://www.userjoy.com.tw/news/news_01.aspx" target="_blank" rel="noopener">宇峻奧汀 新聞專區 ↗</a></li>
                         <li><a href="https://www.x-legend.tw/02news/news_1.php#/nl/undefined/undefined" target="_blank" rel="noopener">傳奇網路 官方新聞 ↗</a></li>
                         <li><a href="https://mops.twse.com.tw/mops/#/web/home" target="_blank" rel="noopener" style="color: #48cae4; font-weight: 700;">🏛️ MOPS 公開資訊觀測站 ↗</a></li>
@@ -520,7 +520,6 @@
     <script src="js/data.js"></script>
     <script src="js/animations.js"></script>
     <script src="js/charts.js"></script>
-    <script src="js/timeline.js"></script>
     <script src="js/compare.js"></script>
     <script src="js/app.js"></script>
 </body>

@@ -128,7 +128,7 @@ function initMediaChannelChart(canvasId, companyId) {
     let selectEl = document.getElementById(`${canvasId}-select`);
     if (!selectEl) {
         const selectHtml = `
-            <select id="${canvasId}-select" class="company-selector" style="margin-bottom: 10px; padding: 5px; background: #1a1a24; color: #fff; border: 1px solid #333; border-radius: 4px;">
+            <select id="${canvasId}-select" class="company-selector" style="margin-bottom: 12px; padding: 6px 12px; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
                 ${COMPANIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
             </select>
         `;
@@ -237,28 +237,12 @@ function initKolRankChart(canvasId) {
 
     charts[canvasId] = new Chart(canvas, {
         type: 'bar',
-    // 排序降冪
-    kolData.sort((a, b) => b.total - a.total);
-
-    const brightPalette = {
-        'soft-world': '#e76f51',
-        'softstar': '#2a9d8f',
-        'gamania': '#f4a261',
-        'wanin': '#00b4d8',
-        'wayi': '#9d4edf',
-        'userjoy': '#3a86ff',
-        'xlegend': '#ff70a6',
-        'astro': '#06d6a0'
-    };
-
-    charts[canvasId] = new Chart(canvas, {
-        type: 'bar',
         data: {
             labels: kolData.map(d => d.name),
             datasets: [{
                 label: 'KOL 合作總數',
                 data: kolData.map(d => d.total),
-                backgroundColor: kolData.map(d => brightPalette[d.id] || d.color || '#3a86ff'),
+                backgroundColor: kolData.map(d => d.color || '#3a86ff'),
                 borderRadius: 6,
                 borderSkipped: false
             }]
@@ -303,17 +287,6 @@ function initPressReleaseChart(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
 
-    const brightPalette = {
-        'soft-world': '#e76f51',
-        'softstar': '#2a9d8f',
-        'gamania': '#f4a261',
-        'wanin': '#00b4d8',
-        'wayi': '#9d4edf',
-        'userjoy': '#3a86ff',
-        'xlegend': '#ff70a6',
-        'astro': '#06d6a0'
-    };
-
     // 計算各公司新聞稿總數
     const prData = COMPANIES.map(company => {
         const totalPr = MONTHLY_STATS[company.id].reduce((sum, stat) => sum + stat.pressReleaseCount, 0);
@@ -321,7 +294,7 @@ function initPressReleaseChart(canvasId) {
             id: company.id,
             name: company.name,
             total: totalPr,
-            color: brightPalette[company.id] || company.brandColor || '#3a86ff'
+            color: company.brandColor || company.color || '#3a86ff'
         };
     });
 
@@ -387,7 +360,14 @@ function initPressReleaseChart(canvasId) {
  * 銷毀並重新創建數據分析頁面的 4 大圖表 (解決 SPA 切頁 display:none -> block 畫布壞死)
  */
 function renderAnalyticsCharts() {
-    if (typeof Chart === 'undefined') return;
+    if (typeof Chart === 'undefined') {
+        document.querySelectorAll('#analytics canvas').forEach(c => {
+            if (!c.parentElement.querySelector('.chart-error-msg')) {
+                c.insertAdjacentHTML('afterend', '<p class="chart-error-msg" style="text-align:center;color:#94a3b8;padding:40px;">圖表元件載入失敗，請檢查網路連線後重新整理。</p>');
+            }
+        });
+        return;
+    }
 
     const analyticsSec = document.getElementById('analytics');
     if (analyticsSec && (analyticsSec.offsetWidth === 0 || window.getComputedStyle(analyticsSec).display === 'none')) {
@@ -432,12 +412,20 @@ function renderAnalyticsCharts() {
     }
 }
 
-function initAllChartsNow() {
-    renderAnalyticsCharts();
-}
-
 function forceResizeAllCharts() {
-    renderAnalyticsCharts();
+    const hasCharts = Object.keys(charts).length > 0;
+    if (!hasCharts) {
+        renderAnalyticsCharts();
+    } else {
+        Object.values(charts).forEach(c => {
+            if (c) {
+                try {
+                    c.resize();
+                    c.update('none');
+                } catch (e) {}
+            }
+        });
+    }
 }
 
 /**

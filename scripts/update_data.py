@@ -59,8 +59,6 @@ def update_data_file():
 
     title = news_topics.get(cat, f"{comp[1]}發布最新營運動態新聞稿")
     excerpt = f"{comp[1]}今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。"
-    sources = ["巴哈姆特", "4Gamers", "Yahoo新聞", "聯合新聞網", "ETtoday"]
-    source = random.choice(sources)
 
     new_entry = f"""        {{
             companyId: '{comp[0]}',
@@ -70,7 +68,8 @@ def update_data_file():
             category: '{cat}',
             excerpt: '{excerpt}',
             date: '{date_str}',
-            source: '{source}'
+            source: '系統模擬',
+            synthetic: True
         }},"""
 
     # 尋找 PRESS_RELEASES 陣列起始位置插入

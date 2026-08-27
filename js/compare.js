@@ -16,8 +16,8 @@ function initCompare(containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    // 預設全選
-    compareState.selectedCompanyIds = COMPANIES.map(c => c.id);
+    // 預設選擇 3 家代表性公司，避免全選 8 家疊成一團
+    compareState.selectedCompanyIds = ['soft-world', 'gamania', 'wanin'];
 
     renderCompareUI(container);
     updateComparison(compareState.selectedCompanyIds);
@@ -28,21 +28,30 @@ function initCompare(containerId) {
  */
 function renderCompareUI(container) {
     // 公司選擇器
-    const selectorsHtml = COMPANIES.map(c => `
-        <button class="compare-company-btn active" data-id="${c.id}" 
-                style="background-color: ${c.brandColor}; color: #ffffff; border: 1px solid ${c.brandColor}; padding: 8px 18px; border-radius: 20px; cursor: pointer; margin: 5px; font-weight: 600; font-size: 0.9rem; transition: all 0.25s ease; box-shadow: 0 2px 8px ${c.brandColor}33;">
-            ${c.name}
-        </button>
-    `).join('');
+    const selectorsHtml = COMPANIES.map(c => {
+        const isSelected = compareState.selectedCompanyIds.includes(c.id);
+        const bg = isSelected ? c.brandColor : '#f1f5f9';
+        const color = isSelected ? '#ffffff' : '#64748b';
+        const border = isSelected ? c.brandColor : '#cbd5e1';
+        const shadow = isSelected ? `0 2px 8px ${c.brandColor}33` : 'none';
+        const activeClass = isSelected ? 'active' : '';
+
+        return `
+            <button class="compare-company-btn ${activeClass}" data-id="${c.id}" 
+                    style="background-color: ${bg}; color: ${color}; border: 1px solid ${border}; padding: 8px 18px; border-radius: 20px; cursor: pointer; margin: 5px; font-weight: 600; font-size: 0.9rem; transition: all 0.25s ease; box-shadow: ${shadow};">
+                ${c.name}
+            </button>
+        `;
+    }).join('');
 
     container.innerHTML = `
         <div class="compare-controls" style="margin-bottom: 30px; text-align: center;">
-            <h3 style="color: #1e293b; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700;">選擇要進行對比的遊戲企業 (最少選擇 2 家)</h3>
+            <h3 style="color: #1e293b; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700;">選擇要進行對比的遊戲企業 (選擇 2 至 4 家)</h3>
             <div class="company-selectors" id="compare-company-selectors" style="display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;">
                 ${selectorsHtml}
             </div>
             <div class="compare-actions">
-                <button id="btn-export-img" style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 18px; border-radius: 6px; cursor: pointer; margin: 0 6px; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">📸 下載圖表圖片</button>
+                <button id="btn-export-img" style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 18px; border-radius: 6px; cursor: pointer; margin: 0 6px; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">📸 下載雷達圖圖片</button>
                 <button id="btn-copy-summary" style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 18px; border-radius: 6px; cursor: pointer; margin: 0 6px; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">📋 複製數據摘要</button>
             </div>
         </div>
@@ -85,6 +94,11 @@ function renderCompareUI(container) {
                 e.target.style.borderColor = '#cbd5e1';
                 e.target.style.boxShadow = 'none';
             } else {
+                const MAX_COMPARE = 4;
+                if (compareState.selectedCompanyIds.length >= MAX_COMPARE) {
+                    alert(`雷達圖最多同時比較 ${MAX_COMPARE} 家企業，請先取消一家再選擇。`);
+                    return;
+                }
                 compareState.selectedCompanyIds.push(id);
                 e.target.classList.add('active');
                 e.target.style.backgroundColor = c.brandColor;
@@ -328,43 +342,6 @@ function renderComparisonTable(containerId, selectedCompanies) {
 
     container.innerHTML = tableHtml;
 }
-                    ${statsData.map(d => renderCell(d.stats.prTotal, bestVals.prTotal)).join('')}
-                </tr>
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a0a0b8;">媒體曝光總數</td>
-                    ${statsData.map(d => renderCell(d.stats.mediaTotal, bestVals.mediaTotal)).join('')}
-                </tr>
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a0a0b8;">社群提及總數</td>
-                    ${statsData.map(d => renderCell(d.stats.socialTotal, bestVals.socialTotal)).join('')}
-                </tr>
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a0a0b8;">KOL合作總數</td>
-                    ${statsData.map(d => renderCell(d.stats.kolTotal, bestVals.kolTotal)).join('')}
-                </tr>
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a0a0b8;">月均新聞稿</td>
-                    ${statsData.map(d => `<td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right; color: #ccc;">${(d.stats.prTotal / d.stats.monthsCount).toFixed(1)}</td>`).join('')}
-                </tr>
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a0a0b8;">月均媒體曝光</td>
-                    ${statsData.map(d => `<td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right; color: #ccc;">${(d.stats.mediaTotal / d.stats.monthsCount).toFixed(1)}</td>`).join('')}
-                </tr>
-                <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a0a0b8;">最活躍月份</td>
-                    ${statsData.map(d => {
-                        const maxMonth = MONTHLY_STATS[d.company.id].reduce((prev, current) => 
-                            (prev.mediaCoverage > current.mediaCoverage) ? prev : current
-                        );
-                        return `<td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right; color: #ccc;">${maxMonth.month} (${maxMonth.mediaCoverage}則)</td>`;
-                    }).join('')}
-                </tr>
-            </tbody>
-        </table>
-    `;
-
-    container.innerHTML = tableHtml;
-}
 
 /**
  * 強制重算尺寸並重繪對比工具圖表 (解決 SPA 切頁 display:none -> block 的畫布空白)
@@ -398,10 +375,18 @@ function forceResizeCompareCharts() {
 }
 
 /**
- * 匯出比較圖為圖片 (示意)
+ * 匯出比較雷達圖為 PNG 圖片
  */
 function exportComparisonImg() {
-    alert('此功能需要引入 html2canvas 函式庫，若已引入則可將比較區域匯出為圖片！');
+    const chart = compareCharts['compareRadarChart'];
+    if (!chart) {
+        alert('請先選擇要比較的企業並生成圖表。');
+        return;
+    }
+    const link = document.createElement('a');
+    link.download = `遊戲企業PK雷達圖_${new Date().toISOString().slice(0, 10)}.png`;
+    link.href = chart.toBase64Image('image/png', 1);
+    link.click();
 }
 
 /**

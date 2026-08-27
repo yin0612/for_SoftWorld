@@ -64,25 +64,14 @@ function initHashRouter() {
         // 3. 頁面回到最頂端
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
-        // 4. 切頁後重新計算 Canvas 尺寸並強制重繪圖表/PK表
+        // 4. 切頁後重新計算 Canvas 尺寸與流暢重繪
         requestAnimationFrame(() => {
-            if (targetPage === 'analytics') {
-                if (typeof forceResizeAllCharts === 'function') {
-                    forceResizeAllCharts();
-                    setTimeout(forceResizeAllCharts, 60);
-                    setTimeout(forceResizeAllCharts, 250);
-                }
+            if (targetPage === 'analytics' && typeof forceResizeAllCharts === 'function') {
+                forceResizeAllCharts();
             }
-            
-            if (targetPage === 'compare') {
-                if (typeof forceResizeCompareCharts === 'function') {
-                    forceResizeCompareCharts();
-                    setTimeout(forceResizeCompareCharts, 60);
-                    setTimeout(forceResizeCompareCharts, 250);
-                }
+            if (targetPage === 'compare' && typeof forceResizeCompareCharts === 'function') {
+                forceResizeCompareCharts();
             }
-
-            // 派發視窗 resize 事件觸發 Chart.js 內建防禦
             window.dispatchEvent(new Event('resize'));
         });
     }
@@ -125,14 +114,18 @@ function initNavbar() {
 
     if (mobileMenuBtn && navMenu) {
         mobileMenuBtn.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
+            const isOpen = navMenu.classList.toggle('active');
+            mobileMenuBtn.setAttribute('aria-expanded', String(isOpen));
         });
     }
 
     // 點擊目錄自動關閉行動版選單
     document.querySelectorAll('.navbar-link').forEach(link => {
         link.addEventListener('click', () => {
-            if (navMenu) navMenu.classList.remove('active');
+            if (navMenu) {
+                navMenu.classList.remove('active');
+                if (mobileMenuBtn) mobileMenuBtn.setAttribute('aria-expanded', 'false');
+            }
         });
     });
 }
@@ -338,12 +331,24 @@ function initStatsOverview() {
     const elCoverage = document.getElementById('statTotalCoverage');
     const elSocial = document.getElementById('statTotalSocial');
     const elKol = document.getElementById('statTotalKol');
+    const elMonths = document.getElementById('totalMonths');
+    const elChannels = document.getElementById('totalChannels');
 
     if (elHeroPR) { elHeroPR.textContent = totalPR.toLocaleString(); elHeroPR.setAttribute('data-target', totalPR); }
     if (elNews) { elNews.textContent = totalPR.toLocaleString(); elNews.setAttribute('data-target', totalPR); }
     if (elCoverage) { elCoverage.textContent = totalCoverage.toLocaleString(); elCoverage.setAttribute('data-target', totalCoverage); }
     if (elSocial) { elSocial.textContent = totalSocial.toLocaleString(); elSocial.setAttribute('data-target', totalSocial); }
     if (elKol) { elKol.textContent = totalKol.toLocaleString(); elKol.setAttribute('data-target', totalKol); }
+
+    if (elMonths && typeof MONTHS_LIST !== 'undefined') {
+        elMonths.textContent = MONTHS_LIST.length;
+        elMonths.setAttribute('data-target', MONTHS_LIST.length);
+    }
+    if (elChannels && typeof MEDIA_CHANNELS !== 'undefined' && typeof COMPANIES !== 'undefined' && COMPANIES.length > 0) {
+        const numChannels = Object.keys(MEDIA_CHANNELS[COMPANIES[0].id] || {}).length;
+        elChannels.textContent = numChannels;
+        elChannels.setAttribute('data-target', numChannels);
+    }
 }
 
 // 4. 新聞發布區塊與過濾邏輯
