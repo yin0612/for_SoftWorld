@@ -384,42 +384,60 @@ function initPressReleaseChart(canvasId) {
 }
 
 /**
- * 立即初始化所有圖表，確保 100% 渲染顯示
+ * 銷毀並重新創建數據分析頁面的 4 大圖表 (解決 SPA 切頁 display:none -> block 畫布壞死)
  */
-function initAllChartsNow() {
+function renderAnalyticsCharts() {
     if (typeof Chart === 'undefined') return;
 
-    if (!charts['exposureTrendChart']) {
+    const analyticsSec = document.getElementById('analytics');
+    if (analyticsSec && (analyticsSec.offsetWidth === 0 || window.getComputedStyle(analyticsSec).display === 'none')) {
+        return; // 若頁面處於隱藏狀態，暫不出圖，避免 canvas 尺寸變 0
+    }
+
+    // 1. 8 大企業月度報導趨勢圖
+    if (document.getElementById('exposureTrendChart')) {
+        if (charts['exposureTrendChart']) {
+            try { charts['exposureTrendChart'].destroy(); } catch (e) {}
+            delete charts['exposureTrendChart'];
+        }
         initExposureTrendChart('exposureTrendChart');
     }
-    if (!charts['mediaChannelChart'] && typeof COMPANIES !== 'undefined' && COMPANIES.length > 0) {
-        initMediaChannelChart('mediaChannelChart', COMPANIES[0].id);
+
+    // 2. 媒體曝光通路分佈比例
+    if (document.getElementById('mediaChannelChart') && typeof COMPANIES !== 'undefined' && COMPANIES.length > 0) {
+        if (charts['mediaChannelChart']) {
+            try { charts['mediaChannelChart'].destroy(); } catch (e) {}
+            delete charts['mediaChannelChart'];
+        }
+        const selectedCompanyId = document.getElementById('channelCompanySelect')?.value || COMPANIES[0].id;
+        initMediaChannelChart('mediaChannelChart', selectedCompanyId);
     }
-    if (!charts['kolRankChart']) {
+
+    // 3. KOL 合作宣傳排行榜
+    if (document.getElementById('kolRankChart')) {
+        if (charts['kolRankChart']) {
+            try { charts['kolRankChart'].destroy(); } catch (e) {}
+            delete charts['kolRankChart'];
+        }
         initKolRankChart('kolRankChart');
     }
-    if (!charts['pressReleaseChart']) {
+
+    // 4. 新聞稿發布篇數排行榜
+    if (document.getElementById('pressReleaseChart')) {
+        if (charts['pressReleaseChart']) {
+            try { charts['pressReleaseChart'].destroy(); } catch (e) {}
+            delete charts['pressReleaseChart'];
+        }
         initPressReleaseChart('pressReleaseChart');
     }
 }
 
-/**
- * 強制重算尺寸並重繪全站圖表 (解決 SPA 切頁 display:none -> block 的畫布空白)
- */
-function forceResizeAllCharts() {
-    initAllChartsNow();
-    if (typeof Chart === 'undefined' || !charts) return;
+function initAllChartsNow() {
+    renderAnalyticsCharts();
+}
 
-    Object.values(charts).forEach(chart => {
-        if (chart) {
-            try {
-                chart.resize();
-                chart.update();
-            } catch (e) {
-                // Ignore transient errors
-            }
-        }
-    });
+function forceResizeAllCharts() {
+    renderAnalyticsCharts();
 }
 
 /**

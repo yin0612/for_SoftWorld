@@ -370,26 +370,30 @@ function renderComparisonTable(containerId, selectedCompanies) {
  * 強制重算尺寸並重繪對比工具圖表 (解決 SPA 切頁 display:none -> block 的畫布空白)
  */
 function forceResizeCompareCharts() {
+    const compareSec = document.getElementById('compare');
+    if (compareSec && (compareSec.offsetWidth === 0 || window.getComputedStyle(compareSec).display === 'none')) {
+        return; // 若頁面處於隱藏狀態，暫不出圖
+    }
+
     const container = document.getElementById('compareContainer');
     if (!container) return;
 
     if (!container.children || container.children.length === 0) {
         initCompare('compareContainer');
-    } else if (typeof compareState !== 'undefined' && compareState.selectedCompanyIds) {
-        updateComparison(compareState.selectedCompanyIds);
     }
 
-    if (typeof Chart !== 'undefined' && compareCharts) {
-        Object.values(compareCharts).forEach(chart => {
-            if (chart) {
-                try {
-                    chart.resize();
-                    chart.update();
-                } catch (e) {
-                    // Ignore transient errors
-                }
+    // 強制銷毀舊實例
+    if (typeof compareCharts !== 'undefined') {
+        Object.keys(compareCharts).forEach(key => {
+            if (compareCharts[key]) {
+                try { compareCharts[key].destroy(); } catch (e) {}
+                delete compareCharts[key];
             }
         });
+    }
+
+    if (typeof compareState !== 'undefined' && compareState.selectedCompanyIds) {
+        updateComparison(compareState.selectedCompanyIds);
     }
 }
 

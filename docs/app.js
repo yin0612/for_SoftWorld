@@ -65,23 +65,26 @@ function initHashRouter() {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
         // 4. 切頁後重新計算 Canvas 尺寸並強制重繪圖表/PK表
-        if (targetPage === 'analytics') {
-            if (typeof forceResizeAllCharts === 'function') {
-                setTimeout(forceResizeAllCharts, 30);
-                setTimeout(forceResizeAllCharts, 180);
-            } else if (typeof initAllChartsNow === 'function') {
-                setTimeout(initAllChartsNow, 80);
+        requestAnimationFrame(() => {
+            if (targetPage === 'analytics') {
+                if (typeof forceResizeAllCharts === 'function') {
+                    forceResizeAllCharts();
+                    setTimeout(forceResizeAllCharts, 60);
+                    setTimeout(forceResizeAllCharts, 250);
+                }
             }
-        }
-        
-        if (targetPage === 'compare') {
-            if (typeof forceResizeCompareCharts === 'function') {
-                setTimeout(forceResizeCompareCharts, 30);
-                setTimeout(forceResizeCompareCharts, 180);
-            } else if (typeof initCompare === 'function') {
-                setTimeout(() => initCompare('compareContainer'), 100);
+            
+            if (targetPage === 'compare') {
+                if (typeof forceResizeCompareCharts === 'function') {
+                    forceResizeCompareCharts();
+                    setTimeout(forceResizeCompareCharts, 60);
+                    setTimeout(forceResizeCompareCharts, 250);
+                }
             }
-        }
+
+            // 派發視窗 resize 事件觸發 Chart.js 內建防禦
+            window.dispatchEvent(new Event('resize'));
+        });
     }
 
     // 監聽網址 Hash 變化
