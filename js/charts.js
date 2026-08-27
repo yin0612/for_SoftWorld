@@ -237,13 +237,30 @@ function initKolRankChart(canvasId) {
 
     charts[canvasId] = new Chart(canvas, {
         type: 'bar',
+    // 排序降冪
+    kolData.sort((a, b) => b.total - a.total);
+
+    const brightPalette = {
+        'soft-world': '#e76f51',
+        'softstar': '#2a9d8f',
+        'gamania': '#f4a261',
+        'wanin': '#00b4d8',
+        'wayi': '#9d4edf',
+        'userjoy': '#3a86ff',
+        'xlegend': '#ff70a6',
+        'astro': '#06d6a0'
+    };
+
+    charts[canvasId] = new Chart(canvas, {
+        type: 'bar',
         data: {
             labels: kolData.map(d => d.name),
             datasets: [{
                 label: 'KOL 合作總數',
                 data: kolData.map(d => d.total),
-                backgroundColor: kolData.map(d => d.color),
-                borderRadius: 4
+                backgroundColor: kolData.map(d => brightPalette[d.id] || d.color || '#3a86ff'),
+                borderRadius: 6,
+                borderSkipped: false
             }]
         },
         options: {
@@ -251,13 +268,11 @@ function initKolRankChart(canvasId) {
             responsive: true,
             maintainAspectRatio: false,
             animation: {
-                duration: 2000,
+                duration: 1500,
                 easing: 'easeOutQuart'
             },
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
@@ -269,9 +284,11 @@ function initKolRankChart(canvasId) {
             scales: {
                 x: {
                     beginAtZero: true,
-                    grid: { display: false }
+                    ticks: { color: '#64748b' },
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
                 },
                 y: {
+                    ticks: { color: '#334155', font: { weight: '600' } },
                     grid: { display: false }
                 }
             }
@@ -286,6 +303,17 @@ function initPressReleaseChart(canvasId) {
     const canvas = document.getElementById(canvasId);
     if (!canvas) return;
 
+    const brightPalette = {
+        'soft-world': '#e76f51',
+        'softstar': '#2a9d8f',
+        'gamania': '#f4a261',
+        'wanin': '#00b4d8',
+        'wayi': '#9d4edf',
+        'userjoy': '#3a86ff',
+        'xlegend': '#ff70a6',
+        'astro': '#06d6a0'
+    };
+
     // 計算各公司新聞稿總數
     const prData = COMPANIES.map(company => {
         const totalPr = MONTHLY_STATS[company.id].reduce((sum, stat) => sum + stat.pressReleaseCount, 0);
@@ -293,7 +321,7 @@ function initPressReleaseChart(canvasId) {
             id: company.id,
             name: company.name,
             total: totalPr,
-            color: company.brandColor
+            color: brightPalette[company.id] || company.brandColor || '#3a86ff'
         };
     });
 
@@ -308,31 +336,32 @@ function initPressReleaseChart(canvasId) {
                 label: '新聞稿總數',
                 data: prData.map(d => d.total),
                 backgroundColor: prData.map(d => d.color),
-                borderRadius: 4
+                borderRadius: 6,
+                borderSkipped: false
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.parsed.y} 篇`;
+                            return `${context.parsed.y} 篇新聞稿`;
                         }
                     }
                 }
             },
             scales: {
                 x: {
+                    ticks: { color: '#334155', font: { weight: '600' } },
                     grid: { display: false }
                 },
                 y: {
                     beginAtZero: true,
-                    grid: { display: true }
+                    ticks: { color: '#64748b' },
+                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
                 }
             }
         },
@@ -343,10 +372,10 @@ function initPressReleaseChart(canvasId) {
                 ctx.save();
                 chart.getDatasetMeta(0).data.forEach((datapoint, index) => {
                     const value = data.datasets[0].data[index];
-                    ctx.font = "12px 'Noto Sans TC'";
-                    ctx.fillStyle = '#fff';
+                    ctx.font = "bold 13px 'Noto Sans TC', sans-serif";
+                    ctx.fillStyle = '#2d3748';
                     ctx.textAlign = 'center';
-                    ctx.fillText(value, datapoint.x, datapoint.y - 10);
+                    ctx.fillText(value, datapoint.x, datapoint.y - 8);
                 });
                 ctx.restore();
             }

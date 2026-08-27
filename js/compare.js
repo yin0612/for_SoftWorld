@@ -30,36 +30,36 @@ function renderCompareUI(container) {
     // 公司選擇器
     const selectorsHtml = COMPANIES.map(c => `
         <button class="compare-company-btn active" data-id="${c.id}" 
-                style="background-color: ${c.brandColor}33; color: ${c.brandColor}; border: 1px solid ${c.brandColor}; padding: 8px 16px; border-radius: 20px; cursor: pointer; margin: 5px; transition: all 0.3s ease;">
+                style="background-color: ${c.brandColor}; color: #ffffff; border: 1px solid ${c.brandColor}; padding: 8px 18px; border-radius: 20px; cursor: pointer; margin: 5px; font-weight: 600; font-size: 0.9rem; transition: all 0.25s ease; box-shadow: 0 2px 8px ${c.brandColor}33;">
             ${c.name}
         </button>
     `).join('');
 
     container.innerHTML = `
         <div class="compare-controls" style="margin-bottom: 30px; text-align: center;">
-            <h3 style="color: #fff; margin-bottom: 15px;">選擇要比較的企業 (最少 2 家)</h3>
+            <h3 style="color: #1e293b; margin-bottom: 15px; font-size: 1.1rem; font-weight: 700;">選擇要進行對比的遊戲企業 (最少選擇 2 家)</h3>
             <div class="company-selectors" id="compare-company-selectors" style="display: flex; flex-wrap: wrap; justify-content: center; margin-bottom: 20px;">
                 ${selectorsHtml}
             </div>
             <div class="compare-actions">
-                <button id="btn-export-img" style="background: transparent; border: 1px solid #555; color: #ccc; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin: 0 5px;">下載圖片</button>
-                <button id="btn-copy-summary" style="background: transparent; border: 1px solid #555; color: #ccc; padding: 8px 15px; border-radius: 4px; cursor: pointer; margin: 0 5px;">複製摘要</button>
+                <button id="btn-export-img" style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 18px; border-radius: 6px; cursor: pointer; margin: 0 6px; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">📸 下載圖表圖片</button>
+                <button id="btn-copy-summary" style="background: #ffffff; border: 1px solid #cbd5e1; color: #334155; padding: 8px 18px; border-radius: 6px; cursor: pointer; margin: 0 6px; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">📋 複製數據摘要</button>
             </div>
         </div>
         
-        <div class="compare-dashboard" id="compare-export-area" style="background: #1a1a24; padding: 20px; border-radius: 12px;">
-            <div class="compare-row" style="display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 30px;">
-                <div class="compare-chart-container" style="flex: 1; min-width: 300px; background: #252533; padding: 20px; border-radius: 8px;">
-                    <h4 style="color: #fff; text-align: center; margin-top: 0;">綜合指標雷達圖</h4>
-                    <div style="height: 350px; position: relative;"><canvas id="compareRadarChart"></canvas></div>
+        <div class="compare-dashboard" id="compare-export-area" style="background: #ffffff; padding: 24px; border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+            <div class="compare-row" style="display: flex; flex-wrap: wrap; gap: 24px; margin-bottom: 30px;">
+                <div class="compare-chart-container" style="flex: 1; min-width: 320px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                    <h4 style="color: #1e293b; text-align: center; margin-top: 0; font-size: 1.05rem; font-weight: 700; margin-bottom: 15px;">📊 綜合指標 PK 雷達圖</h4>
+                    <div style="height: 360px; position: relative;"><canvas id="compareRadarChart"></canvas></div>
                 </div>
-                <div class="compare-chart-container" style="flex: 1; min-width: 300px; background: #252533; padding: 20px; border-radius: 8px;">
-                    <h4 style="color: #fff; text-align: center; margin-top: 0;">關鍵數據比較</h4>
-                    <div style="height: 350px; position: relative;"><canvas id="compareBarChart"></canvas></div>
+                <div class="compare-chart-container" style="flex: 1; min-width: 320px; background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9;">
+                    <h4 style="color: #1e293b; text-align: center; margin-top: 0; font-size: 1.05rem; font-weight: 700; margin-bottom: 15px;">📈 關鍵聲量數據柱狀比較</h4>
+                    <div style="height: 360px; position: relative;"><canvas id="compareBarChart"></canvas></div>
                 </div>
             </div>
-            <div class="compare-table-container" style="background: #252533; padding: 20px; border-radius: 8px; overflow-x: auto;">
-                <h4 style="color: #fff; margin-top: 0; margin-bottom: 15px;">詳細數據對照表</h4>
+            <div class="compare-table-container" style="background: #f8fafc; padding: 20px; border-radius: 12px; border: 1px solid #f1f5f9; overflow-x: auto;">
+                <h4 style="color: #1e293b; margin-top: 0; margin-bottom: 16px; font-size: 1.05rem; font-weight: 700;">📋 詳細數據對照分析表</h4>
                 <div class="table-responsive" id="compareTableContainer"></div>
             </div>
         </div>
@@ -67,10 +67,6 @@ function renderCompareUI(container) {
 
     // 綁定事件
     document.querySelectorAll('.compare-company-btn').forEach(btn => {
-        // 設定 active 狀態樣式
-        btn.style.backgroundColor = btn.dataset.active ? COMPANIES.find(c=>c.id === btn.dataset.id).brandColor : COMPANIES.find(c=>c.id === btn.dataset.id).brandColor + '33';
-        btn.style.color = btn.dataset.active ? '#fff' : COMPANIES.find(c=>c.id === btn.dataset.id).brandColor;
-
         btn.addEventListener('click', (e) => {
             const id = e.target.dataset.id;
             const idx = compareState.selectedCompanyIds.indexOf(id);
@@ -84,21 +80,20 @@ function renderCompareUI(container) {
                 }
                 compareState.selectedCompanyIds.splice(idx, 1);
                 e.target.classList.remove('active');
-                e.target.style.backgroundColor = c.brandColor + '33';
-                e.target.style.color = c.brandColor;
+                e.target.style.backgroundColor = '#f1f5f9';
+                e.target.style.color = '#64748b';
+                e.target.style.borderColor = '#cbd5e1';
+                e.target.style.boxShadow = 'none';
             } else {
                 compareState.selectedCompanyIds.push(id);
                 e.target.classList.add('active');
                 e.target.style.backgroundColor = c.brandColor;
-                e.target.style.color = '#fff';
+                e.target.style.color = '#ffffff';
+                e.target.style.borderColor = c.brandColor;
+                e.target.style.boxShadow = `0 2px 8px ${c.brandColor}33`;
             }
             updateComparison(compareState.selectedCompanyIds);
         });
-        
-        // 初始化全部為 active 狀態
-        const c = COMPANIES.find(comp => comp.id === btn.dataset.id);
-        btn.style.backgroundColor = c.brandColor;
-        btn.style.color = '#fff';
     });
 
     document.getElementById('btn-export-img').addEventListener('click', exportComparisonImg);
@@ -138,7 +133,7 @@ function getCompanyAggregatedStats(companyId) {
 }
 
 /**
- * 繪製雷達圖
+ * 繪製雷達圖 (優雅亮色)
  */
 function renderRadarChart(canvasId, selectedCompanies) {
     const canvas = document.getElementById(canvasId);
@@ -168,11 +163,11 @@ function renderRadarChart(canvasId, selectedCompanies) {
             normalize(d.stats.kolTotal, maxKol),
             normalize(d.stats.growthRate, maxGrowth)
         ],
-        backgroundColor: d.company.brandColor + '33', // 0.2 opacity
+        backgroundColor: d.company.brandColor + '20', // 半透明美麗彩亮填色
         borderColor: d.company.brandColor,
         pointBackgroundColor: d.company.brandColor,
-        pointBorderColor: '#fff',
-        pointHoverBackgroundColor: '#fff',
+        pointBorderColor: '#ffffff',
+        pointHoverBackgroundColor: '#ffffff',
         pointHoverBorderColor: d.company.brandColor,
         borderWidth: 2
     }));
@@ -190,11 +185,17 @@ function renderRadarChart(canvasId, selectedCompanies) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#334155', font: { size: 12, family: "'Noto Sans TC', sans-serif" } }
+                    }
+                },
                 scales: {
                     r: {
-                        angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
-                        grid: { color: 'rgba(255, 255, 255, 0.1)' },
-                        pointLabels: { color: '#e2e8f0', font: { size: 12, family: "'Noto Sans TC', sans-serif" } },
+                        angleLines: { color: 'rgba(0, 0, 0, 0.08)' },
+                        grid: { color: 'rgba(0, 0, 0, 0.06)' },
+                        pointLabels: { color: '#334155', font: { size: 12, weight: '700', family: "'Noto Sans TC', sans-serif" } },
                         ticks: { display: false, min: 0, max: 100 }
                     }
                 },
@@ -253,11 +254,21 @@ function renderComparisonBarChart(canvasId, selectedCompanies) {
                 responsive: true,
                 maintainAspectRatio: false,
                 plugins: {
-                    legend: { position: 'bottom' }
+                    legend: {
+                        position: 'bottom',
+                        labels: { color: '#334155', font: { size: 12, family: "'Noto Sans TC', sans-serif" } }
+                    }
                 },
                 scales: {
-                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' } },
-                    x: { grid: { display: false } }
+                    y: {
+                        beginAtZero: true,
+                        ticks: { color: '#64748b' },
+                        grid: { color: 'rgba(0, 0, 0, 0.05)' }
+                    },
+                    x: {
+                        ticks: { color: '#334155', font: { weight: '600' } },
+                        grid: { display: false }
+                    }
                 }
             }
         });
@@ -265,7 +276,7 @@ function renderComparisonBarChart(canvasId, selectedCompanies) {
 }
 
 /**
- * 渲染對照表
+ * 渲染對照表 (亮色質感)
  */
 function renderComparisonTable(containerId, selectedCompanies) {
     const container = document.getElementById(containerId);
@@ -283,20 +294,40 @@ function renderComparisonTable(containerId, selectedCompanies) {
 
     const renderCell = (val, bestVal) => {
         const isBest = val === bestVal && val > 0;
-        return `<td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); text-align: right; ${isBest ? 'color: #ffb703; font-weight: bold;' : 'color: #ccc;'}">${val.toLocaleString()}${isBest ? ' ★' : ''}</td>`;
+        return `<td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; text-align: right; ${isBest ? 'color: #d97706; font-weight: 700; background: #fffbeb;' : 'color: #334155;'}">${val.toLocaleString()}${isBest ? ' 👑' : ''}</td>`;
     };
 
     let tableHtml = `
-        <table style="width: 100%; border-collapse: collapse; min-width: 600px;">
+        <table style="width: 100%; border-collapse: collapse; min-width: 600px; font-size: 0.95rem;">
             <thead>
-                <tr>
-                    <th style="padding: 12px; text-align: left; color: #a0a0b8; border-bottom: 1px solid rgba(255,255,255,0.1);">比較項目</th>
-                    ${selectedCompanies.map(c => `<th style="padding: 12px; text-align: right; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); border-top: 3px solid ${c.brandColor}">${c.name}</th>`).join('')}
+                <tr style="background: #f1f5f9;">
+                    <th style="padding: 12px 16px; text-align: left; color: #475569; border-bottom: 2px solid #e2e8f0;">比較指標 / 企業</th>
+                    ${selectedCompanies.map(c => `<th style="padding: 12px 16px; text-align: right; color: ${c.brandColor}; border-bottom: 2px solid ${c.brandColor}; font-weight: 700;">${c.name}</th>`).join('')}
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a0a0b8;">新聞稿總數</td>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; color: #475569; font-weight: 600;">📰 新聞稿總發布數</td>
+                    ${statsData.map(d => renderCell(d.stats.prTotal, bestVals.prTotal)).join('')}
+                </tr>
+                <tr>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; color: #475569; font-weight: 600;">📺 媒體報導總篇數</td>
+                    ${statsData.map(d => renderCell(d.stats.mediaTotal, bestVals.mediaTotal)).join('')}
+                </tr>
+                <tr>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; color: #475569; font-weight: 600;">💬 社群網路聲量提及</td>
+                    ${statsData.map(d => renderCell(d.stats.socialTotal, bestVals.socialTotal)).join('')}
+                </tr>
+                <tr>
+                    <td style="padding: 12px 16px; border-bottom: 1px solid #f1f5f9; color: #475569; font-weight: 600;">🤝 KOL 實況主合作數</td>
+                    ${statsData.map(d => renderCell(d.stats.kolTotal, bestVals.kolTotal)).join('')}
+                </tr>
+            </tbody>
+        </table>
+    `;
+
+    container.innerHTML = tableHtml;
+}
                     ${statsData.map(d => renderCell(d.stats.prTotal, bestVals.prTotal)).join('')}
                 </tr>
                 <tr>
