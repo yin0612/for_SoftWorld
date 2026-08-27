@@ -97,6 +97,14 @@ function renderCompanyCards() {
         const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
         const newsText = company.latestNews || company.recentNews || '2024-2026 營運與公關動態彙整中';
         
+        // 判斷新聞來源按鈕
+        let newsBtnHtml = '';
+        if (company.newsUrl) {
+            newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="前往 ${company.name} 官方新聞專區">📰 官方新聞 ↗</a>`;
+        } else {
+            newsBtnHtml = `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="color: #2d5a3f; border-color: #2d5a3f; background: #eaf3ed;" title="公開資訊觀測站 MOPS 快捷鍵">🏛️ MOPS觀測站 ↗</a>`;
+        }
+
         card.innerHTML = `
             <div class="company-card-header">
                 <div>
@@ -117,10 +125,11 @@ function renderCompanyCards() {
                 <span style="font-weight: 700; color: ${company.brandColor || company.color}; display: block; margin-bottom: 2px;">2024-2026 重大動態：</span>
                 <span style="color: #475569; line-height: 1.5; display: block;">${newsText}</span>
             </div>
-            <div class="company-card-footer">
+            <div class="company-card-footer" style="flex-wrap: wrap;">
                 <a href="${company.website || company.officialWebsite}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
-                    官方網站 ↗
+                    官網 ↗
                 </a>
+                ${newsBtnHtml}
                 <button class="btn btn-primary btn-sm view-details-btn" data-id="${company.id}">
                     完整剖析
                 </button>
@@ -151,6 +160,11 @@ function showCompanyModal(companyId) {
     const productsList = company.products || company.keyProducts || [];
     const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
 
+    let newsBtnHtml = '';
+    if (company.newsUrl) {
+        newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">📰 官方新聞發布專區 ↗</a>`;
+    }
+
     modalBody.innerHTML = `
         <div style="margin-bottom: 20px;">
             <span class="section-tag" style="background: ${company.brandColor}15; color: ${company.brandColor}">${company.stock || company.stockTicker}</span>
@@ -169,7 +183,9 @@ function showCompanyModal(companyId) {
             <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 4px;">近期關鍵動態</h4>
             <p style="font-size: 0.9rem; color: var(--text-primary);">${company.latestNews || company.recentNews || '資料彙整中'}</p>
         </div>
-        <div style="text-align: right;">
+        <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+            <a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">🏛️ MOPS 公開資訊觀測站 ↗</a>
+            ${newsBtnHtml}
             <a href="${company.website || company.officialWebsite}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">前往官方網站 ↗</a>
         </div>
     `;

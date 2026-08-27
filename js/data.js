@@ -1,4 +1,6 @@
 // 台灣遊戲公司基本資料
+const MOPS_HOME_URL = 'https://mops.twse.com.tw/mops/#/web/home';
+
 const COMPANIES = [
     {
         id: 'soft-world',
@@ -7,6 +9,8 @@ const COMPANIES = [
         stock: 'TPEx 5478',
         founded: 1983,
         website: 'https://soft-world.com',
+        newsUrl: 'https://www.soft-world.com/News',
+        mopsUrl: MOPS_HOME_URL,
         color: '#e63946',
         products: ['MyCard點數平台', '藍新金流', '金庸群俠傳Online', '吞食天地'],
         description: '台灣歷史最悠久的一站式數位遊戲與周邊整合服務大廠。旗下擁有中華網龍、遊戲新幹線及藍新科技。',
@@ -19,6 +23,8 @@ const COMPANIES = [
         stock: 'TPEx 6111 (光聚)',
         founded: 1988,
         website: 'https://www.softstar.com.tw',
+        newsUrl: 'https://km.softstar.com.tw/list.aspx?cid=2',
+        mopsUrl: MOPS_HOME_URL,
         color: '#457b9d',
         products: ['女鬼橋系列', '咒', '大富翁系列'],
         description: '曾以「仙劍」與「軒轅劍」名震華人遊戲圈。2026年母公司更名「光聚晶電聯合」轉型半導體/重電控股。',
@@ -31,6 +37,8 @@ const COMPANIES = [
         stock: 'TPEx 6180',
         founded: 1995,
         website: 'https://www.gamania.com',
+        newsUrl: 'https://www.gamania.com/news',
+        mopsUrl: MOPS_HOME_URL,
         color: '#f77f00',
         products: ['天堂M', '新楓之谷', '波拉西亞戰記', '橘子支付', 'Vyin AI'],
         description: '台灣代表性數位娛樂集團，整合遊戲、支付、電商、資安與AI企業解決方案。',
@@ -43,6 +51,8 @@ const COMPANIES = [
         stock: '未上市',
         founded: 2009,
         website: 'https://www.wanin.tw',
+        newsUrl: 'http://wanin.tw/News/',
+        mopsUrl: MOPS_HOME_URL,
         color: '#2ec4b6',
         products: ['星城', '遊e卡', '閃電狼', '威秀影城'],
         description: '台灣休閒娛樂遊戲霸主與泛娛樂巨頭，建構跨虛實的泛娛樂生態圈。',
@@ -55,6 +65,8 @@ const COMPANIES = [
         stock: 'TPEx 3086',
         founded: 1993,
         website: 'https://www.wayi.net',
+        newsUrl: null, // 無官方專屬新聞頁，顯示 MOPS 快捷鍵
+        mopsUrl: MOPS_HOME_URL,
         color: '#9b5de5',
         products: ['遊戲大亂鬥社群', 'BanaBana', '石器時代（經典）'],
         description: '台灣老牌遊戲營運商，現隸屬網銀國際體系，轉型社群經營與海外B2B博弈技術。',
@@ -67,9 +79,11 @@ const COMPANIES = [
         stock: 'TPEx 3546',
         founded: 1995,
         website: 'https://www.userjoy.com.tw',
+        newsUrl: 'https://www.userjoy.com.tw/news/news_01.aspx',
+        mopsUrl: MOPS_HOME_URL,
         color: '#00b4d8',
         products: ['三國群英傳系列', 'FFXIV繁中版', '幻想三國誌', '拉斯維加斯娛樂城'],
-        description: '台灣少數兼具強大自研能力與長青IP的上櫃遊戲公司，貫徹「一次研發，全球授權」策略。',
+        description: '台灣少數兼具強大自研能力與長青IP的上櫃遊戲公司，貫徹「一次研發，官方授權」策略。',
         latestNews: '2026年Q1營收創歷史新高5.19億元。推出《三國群英傳：策定九州》及UE5新作。'
     },
     {
@@ -79,6 +93,8 @@ const COMPANIES = [
         stock: 'TWSE 4994',
         founded: 2002,
         website: 'https://www.x-legend.tw',
+        newsUrl: 'https://www.x-legend.tw/02news/news_1.php#/nl/undefined/undefined',
+        mopsUrl: MOPS_HOME_URL,
         color: '#e76f51',
         products: ['精靈樂章：ORIGIN', '幻想神域', '晴空物語', '咻咻史萊姆'],
         description: '以自研日系動漫風格MMORPG聞名的台灣遊戲研發及全球發行商。',
@@ -91,6 +107,8 @@ const COMPANIES = [
         stock: 'TPEx 3064',
         founded: 2000,
         website: 'https://www.astrocorp.com.tw',
+        newsUrl: null, // 無官方專屬新聞頁，顯示 MOPS 快捷鍵
+        mopsUrl: MOPS_HOME_URL,
         color: '#06d6a0',
         products: ['商用博弈遊戲機台', '網路博弈軟體系統', '叫號叫我智慧系統'],
         description: '台灣首家掛牌上櫃的博弈概念股，專注商用博弈軟硬體及系統整合。',
