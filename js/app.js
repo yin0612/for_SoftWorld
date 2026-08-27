@@ -1,5 +1,3 @@
-// 應用程式主要邏輯
-
 document.addEventListener('DOMContentLoaded', () => {
     // 確保資料已載入
     if (typeof COMPANIES === 'undefined' || typeof PRESS_RELEASES === 'undefined') {
@@ -12,6 +10,14 @@ document.addEventListener('DOMContentLoaded', () => {
     initStatsOverview();
     initNewsSection();
     initBackToTop();
+
+    // 觸發全站圖表與比對工具預先繪製
+    if (typeof initAllChartsNow === 'function') {
+        setTimeout(initAllChartsNow, 150);
+    }
+    if (typeof initCompare === 'function') {
+        setTimeout(() => initCompare('compareContainer'), 300);
+    }
 });
 
 // 1. 導覽列與捲動行為
@@ -90,7 +96,7 @@ function renderCompanyCards() {
     
     COMPANIES.forEach((company) => {
         const card = document.createElement('div');
-        card.className = 'company-card animate-on-scroll';
+        card.className = 'company-card animate-on-scroll is-visible';
         card.style.setProperty('--card-brand-color', company.brandColor || company.color);
         
         const productsList = company.products || company.keyProducts || [];
@@ -283,11 +289,11 @@ function initStatsOverview() {
     const elSocial = document.getElementById('statTotalSocial');
     const elKol = document.getElementById('statTotalKol');
 
-    if (elHeroPR) elHeroPR.setAttribute('data-target', totalPR);
-    if (elNews) elNews.setAttribute('data-target', totalPR);
-    if (elCoverage) elCoverage.setAttribute('data-target', totalCoverage);
-    if (elSocial) elSocial.setAttribute('data-target', totalSocial);
-    if (elKol) elKol.setAttribute('data-target', totalKol);
+    if (elHeroPR) { elHeroPR.textContent = totalPR.toLocaleString(); elHeroPR.setAttribute('data-target', totalPR); }
+    if (elNews) { elNews.textContent = totalPR.toLocaleString(); elNews.setAttribute('data-target', totalPR); }
+    if (elCoverage) { elCoverage.textContent = totalCoverage.toLocaleString(); elCoverage.setAttribute('data-target', totalCoverage); }
+    if (elSocial) { elSocial.textContent = totalSocial.toLocaleString(); elSocial.setAttribute('data-target', totalSocial); }
+    if (elKol) { elKol.textContent = totalKol.toLocaleString(); elKol.setAttribute('data-target', totalKol); }
 }
 
 // 4. 新聞發布區塊與過濾邏輯

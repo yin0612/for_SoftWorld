@@ -355,9 +355,31 @@ function initPressReleaseChart(canvasId) {
 }
 
 /**
- * 懶載入圖表初始化
+ * 立即初始化所有圖表，確保 100% 渲染顯示
+ */
+function initAllChartsNow() {
+    if (typeof Chart === 'undefined') return;
+
+    if (!charts['exposureTrendChart']) {
+        initExposureTrendChart('exposureTrendChart');
+    }
+    if (!charts['mediaChannelChart'] && typeof COMPANIES !== 'undefined' && COMPANIES.length > 0) {
+        initMediaChannelChart('mediaChannelChart', COMPANIES[0].id);
+    }
+    if (!charts['kolRankChart']) {
+        initKolRankChart('kolRankChart');
+    }
+    if (!charts['pressReleaseChart']) {
+        initPressReleaseChart('pressReleaseChart');
+    }
+}
+
+/**
+ * 懶載入與初始化圖表
  */
 function initAllCharts() {
+    initAllChartsNow();
+
     const chartConfigs = [
         { id: 'exposureTrendChart', initFn: () => initExposureTrendChart('exposureTrendChart') },
         { id: 'mediaChannelChart', initFn: () => initMediaChannelChart('mediaChannelChart', COMPANIES[0].id) },
@@ -373,14 +395,22 @@ function initAllCharts() {
                 if (config && !charts[config.id]) {
                     config.initFn();
                 }
-                obs.unobserve(entry.target);
             }
         });
-    }, { threshold: 0.1 });
+    }, { threshold: 0.05 });
 
-    chartConfigs.forEach(config => {
-        const el = document.getElementById(config.id);
-        if (el) observer.observe(el);
+    chartConfigs.forEach(c => {
+        const el = document.getElementById(c.id);
+        if (el && el.parentElement) {
+            observer.observe(el.parentElement);
+        }
+    });
+}
+
+// 自動在 DOMReady 時初始化圖表
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(initAllChartsNow, 200);
     });
 }
 
