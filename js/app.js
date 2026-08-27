@@ -1,4 +1,4 @@
-// 輿情決策台 主應用邏輯 (Dashboard SPA Controller)
+// 應用程式主要邏輯
 
 document.addEventListener('DOMContentLoaded', () => {
     // 確保資料已載入
@@ -7,154 +7,81 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    initHashRouter();
-    initStatsOverview();
+    initNavbar();
     renderCompanyCards();
-    renderOverviewStream();
+    initStatsOverview();
     initNewsSection();
+    initBackToTop();
 });
 
-// 1. Hash 路由切換系統 (Hash Router for Dashboard SPA)
-function initHashRouter() {
-    const navItems = document.querySelectorAll('.sys-nav-item');
-    const viewSections = document.querySelectorAll('.view-section');
+// 1. 導覽列與捲動行為
+function initNavbar() {
+    const navbar = document.getElementById('navbar');
+    const mobileMenuBtn = document.getElementById('navbarToggle');
+    const navMenu = document.getElementById('navbarMenu');
+    const sections = document.querySelectorAll('section');
+    const navItems = document.querySelectorAll('.navbar-link');
 
-    function handleHashChange() {
-        let hash = window.location.hash || '#/overview';
-        let targetView = hash.replace('#/', '');
-
-        // 預設為 overview
-        if (!document.getElementById(`view-${targetView}`)) {
-            targetView = 'overview';
-            window.location.hash = '#/overview';
+    // 捲動時改變導覽列樣式與 Scroll spy 狀態
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 30) {
+            navbar?.classList.add('scrolled');
+        } else {
+            navbar?.classList.remove('scrolled');
         }
-
-        // 切換 Active View
-        viewSections.forEach(section => {
-            if (section.id === `view-${targetView}`) {
-                section.classList.add('active');
-            } else {
-                section.classList.remove('active');
-            }
-        });
-
-        // 切換 Nav Item Active 狀態
-        navItems.forEach(item => {
-            const itemKey = item.getAttribute('data-view');
-            if (itemKey === targetView) {
-                item.classList.add('active');
-            } else {
-                item.classList.remove('active');
-            }
-        });
-
-        // 捲動至頁面頂端
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-
-        // 觸發圖表與動畫
-        if (targetView === 'charts' && typeof initAllCharts === 'function') {
-            setTimeout(initAllCharts, 100);
-        }
-        if (targetView === 'compare' && typeof initCompare === 'function') {
-            setTimeout(() => initCompare('compareContainer'), 100);
-        }
-    }
-
-    window.addEventListener('hashchange', handleHashChange);
-    handleHashChange(); // 初始載入觸發
-}
-
-// 2. 初始化 4 大 KPI 統計指標數據
-function initStatsOverview() {
-    let totalPR = 0;
-    let totalCoverage = 0;
-    let totalSocial = 0;
-    let totalKol = 0;
-
-    if (typeof PRESS_RELEASES !== 'undefined') {
-        totalPR = PRESS_RELEASES.length;
-    }
-
-    if (typeof MONTHLY_STATS !== 'undefined') {
-        Object.values(MONTHLY_STATS).forEach(companyStats => {
-            companyStats.forEach(stat => {
-                totalCoverage += (stat.mediaCoverage || 0);
-                totalSocial += (stat.socialMentions || 0);
-                totalKol += (stat.kolCollabs || 0);
-            });
-        });
-    }
-
-    // 更新 KPI 指標卡片 (數字格式化)
-    const elPR = document.getElementById('kpiPressReleases');
-    const elCoverage = document.getElementById('kpiMediaCoverage');
-    const elSocial = document.getElementById('kpiSocialMentions');
-    const elKol = document.getElementById('kpiKolCollabs');
-
-    if (elPR) elPR.textContent = totalPR.toLocaleString();
-    if (elCoverage) elCoverage.textContent = totalCoverage.toLocaleString();
-    if (elSocial) elSocial.textContent = totalSocial.toLocaleString();
-    if (elKol) elKol.textContent = totalKol.toLocaleString();
-}
-
-// 3. 渲染總覽儀表板觀測清單與熱點新聞流
-function renderOverviewStream() {
-    // 渲染排行榜 Top 5 公司
-    const topListEl = document.getElementById('topCompaniesList');
-    if (topListEl && typeof COMPANIES !== 'undefined') {
-        topListEl.innerHTML = '';
         
-        // 依照新聞發布與媒體曝光計算總和排序
-        const rankedCompanies = [...COMPANIES].map(comp => {
-            const stats = MONTHLY_STATS[comp.id] || [];
-            const totalCov = stats.reduce((acc, curr) => acc + (curr.mediaCoverage || 0), 0);
-            const totalPRCount = PRESS_RELEASES.filter(pr => pr.companyId === comp.id).length;
-            return { ...comp, totalCov, totalPRCount };
-        }).sort((a, b) => b.totalCov - a.totalCov);
+        // Scroll spy
+        let current = '';
+        const scrollPosition = window.pageYOffset + 120;
 
-        rankedCompanies.slice(0, 5).forEach((comp, idx) => {
-            const item = document.createElement('div');
-            item.className = 'top-company-item';
-            item.style.setProperty('--item-color', comp.brandColor || comp.color);
-            item.innerHTML = `
-                <div class="top-company-info">
-                    <span class="top-rank-num">0${idx + 1}</span>
-                    <span class="top-company-name">${comp.name}</span>
-                    <span class="top-company-stock">${comp.stock || comp.stockTicker}</span>
-                </div>
-                <div class="top-company-stats">
-                    <div class="top-stat-val">${comp.totalCov.toLocaleString()} <span style="font-size: 0.7rem;">篇</span></div>
-                    <div class="top-stat-lbl">媒體報導曝光聲量</div>
-                </div>
-            `;
-            topListEl.appendChild(item);
+        sections.forEach(section => {
+            const sectionTop = section.offsetTop;
+            const sectionHeight = section.offsetHeight;
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                current = section.getAttribute('id');
+            }
+        });
+
+        navItems.forEach(item => {
+            item.classList.remove('active');
+            if (item.getAttribute('href') === `#${current}`) {
+                item.classList.add('active');
+            }
+        });
+    });
+
+    // 行動版選單切換
+    if (mobileMenuBtn && navMenu) {
+        mobileMenuBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
         });
     }
 
-    // 渲染最新熱點新聞動態流 (前 5 則)
-    const streamEl = document.getElementById('recentNewsStream');
-    if (streamEl && typeof PRESS_RELEASES !== 'undefined') {
-        streamEl.innerHTML = '';
-
-        const sortedPR = [...PRESS_RELEASES].sort((a, b) => new Date(b.date) - new Date(a.date));
-        sortedPR.slice(0, 5).forEach(news => {
-            const item = document.createElement('div');
-            item.className = 'stream-news-item';
-            item.style.setProperty('--item-color', news.companyColor || '#2d5a3f');
-            item.innerHTML = `
-                <div class="stream-news-meta">
-                    <span class="stream-news-comp">${news.companyName}</span>
-                    <span class="stream-news-date">${news.date}</span>
-                </div>
-                <h4 class="stream-news-title">${news.title}</h4>
-                <div class="stream-news-source">媒體來源：${news.source} • 分類：${news.category}</div>
-            `;
-            streamEl.appendChild(item);
+    // 點擊目錄連結平滑捲動到對應區塊
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            const targetId = this.getAttribute('href');
+            if (!targetId || targetId === '#') return;
+            
+            const targetElement = document.querySelector(targetId);
+            if (targetElement) {
+                e.preventDefault();
+                if (navMenu) navMenu.classList.remove('active'); // 關閉行動選單
+                
+                const headerOffset = 75; // 避開固定導覽列高度
+                const elementPosition = targetElement.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+  
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+            }
         });
-    }
+    });
 }
 
-// 4. 渲染企業品牌卡片 (Companies View)
+// 2. 渲染公司卡片
 function renderCompanyCards() {
     const container = document.getElementById('companyGrid');
     if (!container) return;
@@ -258,7 +185,41 @@ function showCompanyModal(companyId) {
     };
 }
 
-// 5. 新聞發布區塊與過濾邏輯
+// 3. 初始化數據總覽 (計算 4 大指標全站數據)
+function initStatsOverview() {
+    let totalPR = 0;
+    let totalCoverage = 0;
+    let totalSocial = 0;
+    let totalKol = 0;
+
+    if (typeof PRESS_RELEASES !== 'undefined') {
+        totalPR = PRESS_RELEASES.length;
+    }
+
+    if (typeof MONTHLY_STATS !== 'undefined') {
+        Object.values(MONTHLY_STATS).forEach(companyStats => {
+            companyStats.forEach(stat => {
+                totalCoverage += (stat.mediaCoverage || 0);
+                totalSocial += (stat.socialMentions || 0);
+                totalKol += (stat.kolCollabs || 0);
+            });
+        });
+    }
+
+    const elHeroPR = document.getElementById('totalPressReleases');
+    const elNews = document.getElementById('statTotalNews');
+    const elCoverage = document.getElementById('statTotalCoverage');
+    const elSocial = document.getElementById('statTotalSocial');
+    const elKol = document.getElementById('statTotalKol');
+
+    if (elHeroPR) elHeroPR.setAttribute('data-target', totalPR);
+    if (elNews) elNews.setAttribute('data-target', totalPR);
+    if (elCoverage) elCoverage.setAttribute('data-target', totalCoverage);
+    if (elSocial) elSocial.setAttribute('data-target', totalSocial);
+    if (elKol) elKol.setAttribute('data-target', totalKol);
+}
+
+// 4. 新聞發布區塊與過濾邏輯
 let currentNewsPage = 1;
 const NEWS_PER_PAGE = 8;
 let filteredNews = [];
@@ -402,4 +363,25 @@ function renderNews(append = false) {
             loadMoreBtn.style.display = 'block';
         }
     }
+}
+
+// 5. 回到頂部按鈕
+function initBackToTop() {
+    const btn = document.getElementById('back-to-top');
+    if (!btn) return;
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            btn.classList.add('visible');
+        } else {
+            btn.classList.remove('visible');
+        }
+    });
+
+    btn.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
 }
