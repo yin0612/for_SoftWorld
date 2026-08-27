@@ -1,69 +1,81 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
 
+/* ==========================================================================
+   設計系統與全域樣式 (日系清新風格 Japanese Light & Fresh Style)
+   ========================================================================== */
+
 :root {
-  /* 基礎顏色 Base Colors */
-  --color-bg-primary: #0a0a1a;
-  --color-bg-secondary: #12122a;
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #a0a0b8;
-  --color-text-muted: #6c6c89;
+  /* 基礎色彩 Palette - 溫柔日系淺色調 */
+  --bg-primary: #f8f9fa;        /* 淡和紙白/輕柔灰白 */
+  --bg-secondary: #ffffff;      /* 純白卡片背景 */
+  --bg-tertiary: #f1f4f6;       /* 淺灰襯底 */
+  --bg-glass: rgba(255, 255, 255, 0.85);
 
-  /* 霓虹色系 Neon Colors */
-  --neon-blue: #00d4ff;
-  --neon-purple: #7b2ff7;
-  --neon-green: #00ff88;
-  --neon-pink: #ff0066;
-  --neon-orange: #ff8800;
+  /* 文字顏色 */
+  --text-primary: #2b303a;      /* 深炭灰 (替代純黑，更具日系質感) */
+  --text-secondary: #5a6578;    /* 溫柔中灰 */
+  --text-muted: #8c98a8;        /* 淡灰 */
+  --text-light: #ffffff;
 
-  /* 公司品牌顏色 Company Brand Colors */
-  --brand-zhiguan: #e63946; /* 智冠科技 */
-  --brand-dayu: #457b9d; /* 大宇資訊 */
-  --brand-gamania: #f77f00; /* 橘子 */
-  --brand-wanin: #2ec4b6; /* 網銀國際 */
-  --brand-wayi: #9b5de5; /* 華義國際 */
-  --brand-userjoy: #00b4d8; /* 宇峻奧汀 */
-  --brand-xlegend: #e76f51; /* 傳奇網路 */
-  --brand-astrocorp: #06d6a0; /* 泰偉電子 */
+  /* 清新主題強調色 */
+  --primary: #4a7c59;           /* 抹茶綠/薄荷綠 */
+  --primary-light: #eef5f0;
+  --secondary: #5b92e5;         /* 空氣藍/晴空藍 */
+  --secondary-light: #edf4fc;
+  --accent: #f4a261;            /* 溫暖杏橙 */
+  --accent-pink: #f48fb1;       /* 櫻花粉 */
+  --border-color: #e5e9f0;      /* 淡雅邊框色 */
+  --border-hover: #cbd5e1;
 
-  /* 排版 Typography */
-  --font-sans: 'Inter', 'Noto Sans TC', sans-serif;
-  
-  --text-h1: 3.5rem;
-  --text-h2: 2.5rem;
-  --text-h3: 1.75rem;
-  --text-h4: 1.25rem;
-  --text-body: 1rem;
-  --text-small: 0.875rem;
+  /* 公司品牌專屬色 (日系莫蘭迪柔和版) */
+  --color-softworld: #e76f51;   /* 智冠 - 珊瑚紅 */
+  --color-softstar: #4a7c59;    /* 大宇 - 抹茶綠 */
+  --color-gamania: #f4a261;     /* 橘子 - 杏柑橘 */
+  --color-wanin: #48cae4;       /* 網銀 - 蔚藍 */
+  --color-wayi: #9d4edf;        /* 華義 - 紫羅蘭 */
+  --color-userjoy: #3a86ff;     /* 宇峻 - 晴空藍 */
+  --color-xlegend: #ff70a6;     /* 傳奇 - 櫻花粉 */
+  --color-astro: #2a9d8f;       /* 泰偉 - 翡翠綠 */
 
-  /* 間距 Spacing */
-  --space-xs: 0.25rem;
-  --space-sm: 0.5rem;
-  --space-md: 1rem;
-  --space-lg: 1.5rem;
-  --space-xl: 2rem;
-  --space-2xl: 3rem;
-  --space-3xl: 4rem;
+  /* 字體系統 */
+  --font-family-base: 'Noto Sans TC', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.35rem;
+  --font-size-2xl: 1.75rem;
+  --font-size-3xl: 2.25rem;
+  --font-size-4xl: 3rem;
 
-  /* 圓角 Border Radius */
-  --radius-sm: 0.5rem;
-  --radius-md: 1rem;
-  --radius-lg: 1.5rem;
+  /* 間距尺規 */
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+  --spacing-3xl: 4.5rem;
+
+  /* 邊角圓弧 */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
   --radius-full: 9999px;
 
-  /* 陰影 Box Shadows */
-  --shadow-neon-blue: 0 0 10px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.3);
-  --shadow-neon-purple: 0 0 10px rgba(123, 47, 247, 0.5), 0 0 20px rgba(123, 47, 247, 0.3);
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  /* 柔和日系陰影 */
+  --shadow-sm: 0 2px 8px rgba(140, 152, 168, 0.08);
+  --shadow-md: 0 6px 20px rgba(140, 152, 168, 0.12);
+  --shadow-lg: 0 12px 32px rgba(140, 152, 168, 0.16);
+  --shadow-hover: 0 14px 36px rgba(74, 124, 89, 0.15);
 
-  /* 其他 Utilities */
-  --glass-bg: rgba(18, 18, 42, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.1);
-  --transition-fast: 0.2s ease;
-  --transition-normal: 0.3s ease;
-  --transition-slow: 0.5s ease;
+  /* 轉場 */
+  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* 基礎重置 Reset */
+/* Base Reset */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -73,80 +85,53 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  text-size-adjust: 100%;
 }
 
 body {
-  font-family: var(--font-sans);
-  background-color: var(--color-bg-primary);
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(123, 47, 247, 0.08), transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(0, 212, 255, 0.08), transparent 25%);
-  background-attachment: fixed;
-  color: var(--color-text-primary);
-  line-height: 1.6;
+  font-family: var(--font-family-base);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.65;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-/* 自訂捲軸 Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-bg-primary);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-bg-secondary);
-  border-radius: var(--radius-full);
-  border: 1px solid var(--glass-border);
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--neon-purple);
-}
-
-/* 選取文字 Selection */
-::selection {
-  background-color: var(--neon-purple);
-  color: #fff;
-}
-
-/* 排版基礎 Typography Base */
-h1, h2, h3, h4, h5, h6 {
-  font-weight: 700;
-  line-height: 1.2;
-  margin-bottom: var(--space-md);
-  letter-spacing: 0.02em;
-}
-
-h1 { font-size: var(--text-h1); }
-h2 { font-size: var(--text-h2); }
-h3 { font-size: var(--text-h3); }
-h4 { font-size: var(--text-h4); }
-
-p {
-  margin-bottom: var(--space-md);
-  color: var(--color-text-secondary);
 }
 
 a {
-  color: var(--neon-blue);
+  color: inherit;
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
-a:hover {
-  color: var(--neon-purple);
+ul, ol {
+  list-style: none;
 }
 
-/* 佈局 Layout */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Layout Containers */
 .container {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1280px;
   margin: 0 auto;
   padding: 0 var(--space-xl);
 }

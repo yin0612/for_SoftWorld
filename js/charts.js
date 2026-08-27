@@ -1,18 +1,19 @@
 /**
  * 圖表模組 (Charts Module)
- * 使用 Chart.js v4 繪製，深色主題，螢光配色。
+ * 使用 Chart.js v4 繪製，日系清新風格，莫蘭迪配色。
  * 依賴：全域資料變數來自 js/data.js (COMPANIES, MONTHLY_STATS, MEDIA_CHANNELS, PRESS_RELEASES)
  */
 
-Chart.defaults.color = '#a0a0b8';
-Chart.defaults.font.family = "'Noto Sans TC', 'Inter', sans-serif";
-Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
-Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-Chart.defaults.plugins.tooltip.titleColor = '#fff';
-Chart.defaults.plugins.tooltip.bodyColor = '#ccc';
-Chart.defaults.plugins.tooltip.padding = 10;
-Chart.defaults.plugins.tooltip.cornerRadius = 8;
-Chart.defaults.plugins.tooltip.displayColors = true;
+// 設定 Chart.js 日系明亮清新主題預設值
+if (typeof Chart !== 'undefined') {
+    Chart.defaults.color = '#5a6578';
+    Chart.defaults.font.family = "'Noto Sans TC', 'Inter', sans-serif";
+    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(43, 48, 58, 0.9)';
+    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    Chart.defaults.scale.grid.color = 'rgba(229, 233, 240, 0.7)';
+}
 
 const charts = {};
 

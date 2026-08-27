@@ -15,26 +15,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 1. 導覽列與捲動行為
 function initNavbar() {
-    const navbar = document.querySelector('.navbar');
-    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-    const navLinks = document.querySelector('.nav-links');
+    const navbar = document.getElementById('navbar');
+    const mobileMenuBtn = document.getElementById('navbarToggle');
+    const navMenu = document.getElementById('navbarMenu');
     const sections = document.querySelectorAll('section');
-    const navItems = document.querySelectorAll('.nav-link');
+    const navItems = document.querySelectorAll('.navbar-link');
 
-    // 捲動時改變導覽列背景透明度
+    // 捲動時改變導覽列樣式與 Scroll spy 狀態
     window.addEventListener('scroll', () => {
-        if (window.scrollY > 50) {
-            navbar.classList.add('scrolled');
+        if (window.scrollY > 30) {
+            navbar?.classList.add('scrolled');
         } else {
-            navbar.classList.remove('scrolled');
+            navbar?.classList.remove('scrolled');
         }
         
         // Scroll spy
         let current = '';
+        const scrollPosition = window.pageYOffset + 120;
+
         sections.forEach(section => {
             const sectionTop = section.offsetTop;
-            const sectionHeight = section.clientHeight;
-            if (pageYOffset >= (sectionTop - sectionHeight / 3)) {
+            const sectionHeight = section.offsetHeight;
+            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
                 current = section.getAttribute('id');
             }
         });
@@ -48,23 +50,24 @@ function initNavbar() {
     });
 
     // 行動版選單切換
-    if (mobileMenuBtn) {
+    if (mobileMenuBtn && navMenu) {
         mobileMenuBtn.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
+            navMenu.classList.toggle('active');
         });
     }
 
-    // 點擊連結平滑捲動
+    // 點擊目錄連結平滑捲動到對應區塊
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            navLinks.classList.remove('active'); // 關閉手機選單
             const targetId = this.getAttribute('href');
-            if (targetId === '#') return;
+            if (!targetId || targetId === '#') return;
             
             const targetElement = document.querySelector(targetId);
             if (targetElement) {
-                const headerOffset = 80;
+                e.preventDefault();
+                if (navMenu) navMenu.classList.remove('active'); // 關閉行動選單
+                
+                const headerOffset = 75; // 避開固定導覽列高度
                 const elementPosition = targetElement.getBoundingClientRect().top;
                 const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
   
@@ -79,78 +82,133 @@ function initNavbar() {
 
 // 2. 渲染公司卡片
 function renderCompanyCards() {
-    const container = document.getElementById('company-cards-container');
+    const container = document.getElementById('companyGrid');
     if (!container) return;
 
     container.innerHTML = '';
     
     COMPANIES.forEach((company, index) => {
         const card = document.createElement('div');
-        card.className = 'company-card animate-on-scroll stagger-item';
-        card.style.borderTopColor = company.color;
+        card.className = 'company-card animate-on-scroll';
+        card.style.setProperty('--card-brand-color', company.brandColor || company.color);
         
-        const tagsHtml = company.products.map(p => `<span class="product-tag">${p}</span>`).join('');
+        const productsList = company.products || company.keyProducts || [];
+        const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
         
         card.innerHTML = `
-            <div class="company-header">
-                <div class="company-title">
-                    <h3 style="color: ${company.color}">${company.name}</h3>
-                    <span class="stock-badge">${company.stock}</span>
+            <div class="company-card-header">
+                <div>
+                    <h3 class="company-name" style="color: ${company.brandColor || company.color}">${company.name}</h3>
+                    <div class="company-meta">
+                        <span>成立 ${company.founded || company.foundingYear} 年</span>
+                    </div>
                 </div>
-                <p class="en-name">${company.enName}</p>
+                <span class="company-stock">${company.stock || company.stockTicker}</span>
             </div>
-            <div class="company-body">
-                <div class="info-row">
-                    <span class="info-label">成立年份</span>
-                    <span class="info-value">${company.founded}</span>
-                </div>
-                <p class="company-desc">${company.description}</p>
-                <div class="products-container">
-                    ${tagsHtml}
-                </div>
-                <div class="latest-news">
-                    <strong>最新動態：</strong>
-                    <p>${company.latestNews}</p>
-                </div>
+            <p class="company-desc">${company.description || company.desc}</p>
+            <div class="company-tags">
+                ${tagsHtml}
             </div>
-            <div class="company-footer">
-                <a href="${company.website}" target="_blank" class="btn-outline" style="border-color: ${company.color}; color: ${company.color}">官方網站</a>
-                <button class="btn-primary view-details-btn" data-id="${company.id}" style="background-color: ${company.color}">詳細數據</button>
+            <div class="company-card-footer">
+                <a href="${company.website || company.officialWebsite}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
+                    官網
+                </a>
+                <button class="btn btn-primary btn-sm view-details-btn" data-id="${company.id}">
+                    詳細資訊
+                </button>
             </div>
         `;
         
         container.appendChild(card);
     });
 
-    // 綁定詳細數據按鈕事件 (此處僅示意，實際可連結至Modal或展開內容)
+    // 綁定詳細資訊彈窗按鈕
     document.querySelectorAll('.view-details-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
-            const companyId = e.target.getAttribute('data-id');
-            const comp = COMPANIES.find(c => c.id === companyId);
-            alert(`載入 ${comp.name} 詳細分析數據模組... (功能擴充點)`);
+            const companyId = e.currentTarget.getAttribute('data-id');
+            showCompanyModal(companyId);
         });
     });
 }
 
+// 彈出公司詳細資訊 Modal
+function showCompanyModal(companyId) {
+    const modal = document.getElementById('companyModal');
+    const modalBody = document.getElementById('modalBody');
+    if (!modal || !modalBody) return;
+
+    const company = COMPANIES.find(c => c.id === companyId);
+    if (!company) return;
+
+    const productsList = company.products || company.keyProducts || [];
+    const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
+
+    modalBody.innerHTML = `
+        <div style="margin-bottom: 20px;">
+            <span class="section-tag" style="background: ${company.brandColor}15; color: ${company.brandColor}">${company.stock || company.stockTicker}</span>
+            <h2 style="font-size: 1.8rem; color: ${company.brandColor}; margin-top: 8px;">${company.name}</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">${company.enName || company.englishName || ''}</p>
+        </div>
+        <div style="margin-bottom: 16px;">
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">公司簡介</h4>
+            <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">${company.description || company.desc}</p>
+        </div>
+        <div style="margin-bottom: 16px;">
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">主要代表作品</h4>
+            <div class="company-tags">${tagsHtml}</div>
+        </div>
+        <div style="margin-bottom: 20px; background: var(--bg-tertiary); padding: 14px; border-radius: var(--radius-sm);">
+            <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 4px;">近期關鍵動態</h4>
+            <p style="font-size: 0.9rem; color: var(--text-primary);">${company.latestNews || company.recentNews || '資料彙整中'}</p>
+        </div>
+        <div style="text-align: right;">
+            <a href="${company.website || company.officialWebsite}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">前往官方網站 ↗</a>
+        </div>
+    `;
+
+    modal.classList.add('active');
+
+    const closeBtn = document.getElementById('modalClose');
+    if (closeBtn) {
+        closeBtn.onclick = () => modal.classList.remove('active');
+    }
+    modal.onclick = (e) => {
+        if (e.target === modal) modal.classList.remove('active');
+    };
+}
+
 // 3. 初始化數據總覽
 function initStatsOverview() {
-    const totalCompanies = COMPANIES.length;
-    const totalPressReleases = PRESS_RELEASES.length;
-    let totalMediaCoverage = 0;
+    let totalPR = 0;
+    let totalCoverage = 0;
+    let totalSocial = 0;
+    let totalKol = 0;
 
-    Object.values(MONTHLY_STATS).forEach(companyStats => {
-        companyStats.forEach(stat => {
-            totalMediaCoverage += stat.mediaCoverage;
+    if (typeof PRESS_RELEASES !== 'undefined') {
+        totalPR = PRESS_RELEASES.length;
+    }
+
+    if (typeof MONTHLY_STATS !== 'undefined') {
+        Object.values(MONTHLY_STATS).forEach(companyStats => {
+            companyStats.forEach(stat => {
+                totalCoverage += (stat.mediaCoverage || 0);
+                totalSocial += (stat.socialMentions || 0);
+                totalKol += (stat.kolCollabs || 0);
+            });
         });
-    });
+    }
 
-    const elCompanies = document.getElementById('stat-total-companies');
-    const elPR = document.getElementById('stat-total-pr');
-    const elMedia = document.getElementById('stat-total-media');
+    const elHeroPR = document.getElementById('totalPressReleases');
+    const elNews = document.getElementById('statTotalNews');
+    const elCoverage = document.getElementById('statTotalCoverage');
+    const elSocial = document.getElementById('statTotalSocial');
+    const elKol = document.getElementById('statTotalKol');
 
-    if (elCompanies) elCompanies.setAttribute('data-target', totalCompanies);
-    if (elPR) elPR.setAttribute('data-target', totalPressReleases);
-    if (elMedia) elMedia.setAttribute('data-target', totalMediaCoverage);
+    if (elHeroPR) elHeroPR.setAttribute('data-target', totalPR);
+    if (elNews) elNews.setAttribute('data-target', totalPR);
+    if (elCoverage) elCoverage.setAttribute('data-target', totalCoverage);
+    if (elSocial) elSocial.setAttribute('data-target', totalSocial);
+    if (elKol) elKol.setAttribute('data-target', totalKol);
 }
 
 // 4. 新聞發布區塊與過濾邏輯

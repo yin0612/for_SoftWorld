@@ -73,110 +73,60 @@ function animateValue(obj, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-// 3. Hero 區塊粒子背景
+// 3. 創生日系質感漂浮圓粒背景
 function initParticles() {
-    const container = document.querySelector('.hero-particles');
+    const container = document.getElementById('heroParticles');
     if (!container) return;
 
     const canvas = document.createElement('canvas');
-    container.appendChild(canvas);
     const ctx = canvas.getContext('2d');
-    
-    let width, height;
-    let particles = [];
-    const colors = ['#00b4d8', '#9b5de5', '#2ec4b6', '#f72585'];
+    container.appendChild(canvas);
 
-    function resize() {
-        width = container.clientWidth;
-        height = container.clientHeight;
-        canvas.width = width;
-        canvas.height = height;
+    let width = canvas.width = container.offsetWidth || window.innerWidth;
+    let height = canvas.height = container.offsetHeight || window.innerHeight;
+
+    const particles = [];
+    const particleCount = 45;
+    const colors = ['rgba(74, 124, 89, 0.25)', 'rgba(91, 146, 229, 0.25)', 'rgba(244, 162, 97, 0.25)'];
+
+    for (let i = 0; i < particleCount; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            radius: Math.random() * 3 + 1.5,
+            color: colors[Math.floor(Math.random() * colors.length)],
+            speedY: Math.random() * 0.4 + 0.1,
+            speedX: (Math.random() - 0.5) * 0.2
+        });
     }
-
-    window.addEventListener('resize', resize);
-    resize();
-
-    class Particle {
-        constructor() {
-            this.x = Math.random() * width;
-            this.y = Math.random() * height;
-            this.size = Math.random() * 2 + 1;
-            this.speedX = (Math.random() - 0.5) * 0.5;
-            this.speedY = Math.random() * -1 - 0.5; // 向上移動
-            this.color = colors[Math.floor(Math.random() * colors.length)];
-            this.opacity = Math.random() * 0.5 + 0.1;
-        }
-
-        update() {
-            this.x += this.speedX;
-            this.y += this.speedY;
-
-            if (this.y < 0) {
-                this.y = height;
-                this.x = Math.random() * width;
-            }
-            if (this.x > width) this.x = 0;
-            if (this.x < 0) this.x = width;
-        }
-
-        draw() {
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-            ctx.fillStyle = this.color;
-            ctx.globalAlpha = this.opacity;
-            ctx.fill();
-        }
-    }
-
-    function createParticles() {
-        particles = [];
-        const numParticles = Math.min(Math.floor(window.innerWidth / 15), 100);
-        for (let i = 0; i < numParticles; i++) {
-            particles.push(new Particle());
-        }
-    }
-
-    createParticles();
-
-    function drawLines() {
-        for (let i = 0; i < particles.length; i++) {
-            for (let j = i + 1; j < particles.length; j++) {
-                const dx = particles[i].x - particles[j].x;
-                const dy = particles[i].y - particles[j].y;
-                const distance = Math.sqrt(dx * dx + dy * dy);
-
-                if (distance < 120) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = particles[i].color;
-                    ctx.globalAlpha = (120 - distance) / 120 * 0.2;
-                    ctx.lineWidth = 0.5;
-                    ctx.moveTo(particles[i].x, particles[i].y);
-                    ctx.lineTo(particles[j].x, particles[j].y);
-                    ctx.stroke();
-                }
-            }
-        }
-    }
-
-    let isVisible = true;
-    document.addEventListener('visibilitychange', () => {
-        isVisible = !document.hidden;
-    });
 
     function animate() {
-        if (isVisible) {
-            ctx.clearRect(0, 0, width, height);
-            
-            for (let i = 0; i < particles.length; i++) {
-                particles[i].update();
-                particles[i].draw();
+        ctx.clearRect(0, 0, width, height);
+
+        particles.forEach(p => {
+            p.y -= p.speedY;
+            p.x += p.speedX;
+
+            if (p.y < -10) {
+                p.y = height + 10;
+                p.x = Math.random() * width;
             }
-            drawLines();
-        }
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+            ctx.fillStyle = p.color;
+            ctx.fill();
+        });
+
         requestAnimationFrame(animate);
     }
 
     animate();
+
+    window.addEventListener('resize', () => {
+        width = canvas.width = container.offsetWidth || window.innerWidth;
+        height = canvas.height = container.offsetHeight || window.innerHeight;
+    });
 
     // 4. Parallax 視差效果
     window.addEventListener('scroll', () => {
