@@ -1,0 +1,75 @@
+# 觀測媒體來源配置清單 (Media Sources Configuration)
+
+# 一、具備官方 RSS Feed 的財經與科技媒體
+rss_sources:
+  - id: money_udn_realtime
+    name: 經濟日報 - 即時財經新聞
+    rss_url: https://money.udn.com/rssfeed/news/1001/5641?ch=money
+    website: https://money.udn.com
+    category: 財經產經
+
+  - id: money_udn_industry
+    name: 經濟日報 - 產經與國際
+    rss_url: https://money.udn.com/rssfeed/news/1001/5588?ch=money
+    website: https://money.udn.com
+    category: 產經與國際
+
+  - id: cw_featured
+    name: 天下雜誌 - 精選專題文章
+    rss_url: https://www.cw.com.tw/RSS/cw_content.xml
+    website: https://www.cw.com.tw
+    category: 深度專題
+
+  - id: cw_global
+    name: 天下雜誌 - 全球與宏觀政經
+    rss_url: https://www.cw.com.tw/RSS/global.xml
+    website: https://www.cw.com.tw
+    category: 全球政經
+
+  - id: bnext
+    name: 數位時代 Business Next - 科技產業與新創
+    rss_url: https://www.bnext.com.tw/rss
+    website: https://www.bnext.com.tw
+    category: 科技新創
+
+  - id: cnyes
+    name: 鉅亨網 Anue - 財經即時頭條
+    rss_url: https://news.cnyes.com/rss/news
+    website: https://news.cnyes.com
+    category: 股市財經
+
+  - id: gamer_gnn
+    name: 巴哈姆特 GNN 新聞
+    website: https://gnn.gamer.com.tw
+    category: 遊戲娛樂
+
+  - id: four_gamers
+    name: 4Gamers 遊戲時尚媒體
+    website: https://www.4gamers.com.tw
+    category: 遊戲社群
+
+  - id: yahoo_finance
+    name: Yahoo 股市財經
+    website: https://tw.stock.yahoo.com
+    category: 證券財經
+
+  - id: ettoday_game
+    name: ETtoday 遊戲雲
+    website: https://game.ettoday.net
+    category: 遊戲雲新聞
+
+# 二、未公開官方 RSS 媒體與備援機制
+fallback_sources:
+  - id: ctee
+    name: 工商時報
+    website: https://ctee.com.tw
+    solution: Feedly / Inoreader 網址爬取與 RSSHub 路由
+
+  - id: businesstoday
+    name: 今周刊
+    website: https://www.businesstoday.com.tw
+    solution: Feedly 轉接與 Google News 自訂 RSS
+
+  - id: google_news_gaming
+    name: Google 新聞 - 台灣遊戲產業專區
+    solution: Google News 主題 RSS 聚合追蹤
