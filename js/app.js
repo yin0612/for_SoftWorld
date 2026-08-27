@@ -5,84 +5,118 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
 
-    initNavbar();
     renderCompanyCards();
     initStatsOverview();
     initNewsSection();
+    initNavbar();
+    initHashRouter();
     initBackToTop();
-
-    // 觸發全站圖表與比對工具預先繪製
-    if (typeof initAllChartsNow === 'function') {
-        setTimeout(initAllChartsNow, 150);
-    }
-    if (typeof initCompare === 'function') {
-        setTimeout(() => initCompare('compareContainer'), 300);
-    }
 });
 
-// 1. 導覽列與捲動行為
+// 1. Hash SPA 獨立切頁路由器
+function initHashRouter() {
+    const routeMap = {
+        '#/companies': 'companies',
+        '#/news': 'news',
+        '#/analytics': 'analytics',
+        '#/compare': 'compare',
+        '#/trends': 'trends'
+    };
+
+    function handleRouteChange() {
+        const hash = window.location.hash || '#/companies';
+        let targetSectionId = routeMap[hash];
+
+        // 兼容原有的純 ID 寫法（如 #companies）
+        if (!targetSectionId) {
+            const cleanHash = hash.replace('#/', '#');
+            if (cleanHash === '#companies') targetSectionId = 'companies';
+            else if (cleanHash === '#news') targetSectionId = 'news';
+            else if (cleanHash === '#analytics') targetSectionId = 'analytics';
+            else if (cleanHash === '#compare') targetSectionId = 'compare';
+            else if (cleanHash === '#trends') targetSectionId = 'trends';
+            else targetSectionId = 'companies';
+        }
+
+        const allSections = document.querySelectorAll('section.section');
+        const heroSection = document.getElementById('hero');
+
+        allSections.forEach(section => {
+            if (section.id === targetSectionId) {
+                section.style.display = 'block';
+                section.style.opacity = '1';
+                section.style.visibility = 'visible';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+
+        // 頂部 Hero 區塊只在「公司總覽」或預設頁顯示
+        if (heroSection) {
+            if (targetSectionId === 'companies') {
+                heroSection.style.display = 'block';
+            } else {
+                heroSection.style.display = 'none';
+            }
+        }
+
+        // 高亮對應的導覽列選單
+        const navLinks = document.querySelectorAll('.navbar-link');
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href === hash || href === `#${targetSectionId}` || href === `#/${targetSectionId}`) {
+                link.classList.add('active');
+            } else {
+                link.classList.remove('active');
+            }
+        });
+
+        // 切頁後自動回到最頂端
+        window.scrollTo(0, 0);
+
+        // 切頁後特定模組觸發 re-draw
+        if (targetSectionId === 'analytics' && typeof initAllChartsNow === 'function') {
+            setTimeout(initAllChartsNow, 100);
+        }
+        if (targetSectionId === 'compare' && typeof initCompare === 'function') {
+            setTimeout(() => initCompare('compareContainer'), 150);
+        }
+    }
+
+    // 監聽 Hash 改變與初始化
+    window.addEventListener('hashchange', handleRouteChange);
+    
+    // 如果網址沒有 Hash，預設補上 #/companies
+    if (!window.location.hash) {
+        window.history.replaceState(null, '', '#/companies');
+    }
+    handleRouteChange();
+}
+
+// 導覽列與點擊行為
 function initNavbar() {
     const navbar = document.getElementById('navbar');
     const mobileMenuBtn = document.getElementById('navbarToggle');
     const navMenu = document.getElementById('navbarMenu');
-    const sections = document.querySelectorAll('section');
-    const navItems = document.querySelectorAll('.navbar-link');
 
-    // 捲動時改變導覽列樣式與 Scroll spy 狀態
     window.addEventListener('scroll', () => {
         if (window.scrollY > 30) {
             navbar?.classList.add('scrolled');
         } else {
             navbar?.classList.remove('scrolled');
         }
-        
-        // Scroll spy
-        let current = '';
-        const scrollPosition = window.pageYOffset + 120;
-
-        sections.forEach(section => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
-                current = section.getAttribute('id');
-            }
-        });
-
-        navItems.forEach(item => {
-            item.classList.remove('active');
-            if (item.getAttribute('href') === `#${current}`) {
-                item.classList.add('active');
-            }
-        });
     });
 
-    // 行動版選單切換
     if (mobileMenuBtn && navMenu) {
         mobileMenuBtn.addEventListener('click', () => {
             navMenu.classList.toggle('active');
         });
     }
 
-    // 點擊目錄連結平滑捲動到對應區塊
-    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-        anchor.addEventListener('click', function (e) {
-            const targetId = this.getAttribute('href');
-            if (!targetId || targetId === '#') return;
-            
-            const targetElement = document.querySelector(targetId);
-            if (targetElement) {
-                e.preventDefault();
-                if (navMenu) navMenu.classList.remove('active'); // 關閉行動選單
-                
-                const headerOffset = 75; // 避開固定導覽列高度
-                const elementPosition = targetElement.getBoundingClientRect().top;
-                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-  
-                window.scrollTo({
-                    top: offsetPosition,
-                    behavior: "smooth"
-                });
-            }
+    // 點擊目錄自動關閉行動版選單
+    document.querySelectorAll('.navbar-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (navMenu) navMenu.classList.remove('active');
         });
     });
 }
