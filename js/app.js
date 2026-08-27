@@ -94,27 +94,34 @@ function renderCompanyCards() {
         
         const productsList = company.products || company.keyProducts || [];
         const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
+        const newsText = company.latestNews || company.recentNews || '2024-2026 營運與公關動態彙整中';
         
         card.innerHTML = `
             <div class="company-card-header">
                 <div>
                     <h3 class="company-name" style="color: ${company.brandColor || company.color}">${company.name}</h3>
                     <div class="company-meta">
+                        <span>${company.enName || company.englishName || ''}</span> • 
                         <span>成立 ${company.founded || company.foundingYear} 年</span>
                     </div>
                 </div>
                 <span class="company-stock">${company.stock || company.stockTicker}</span>
             </div>
             <p class="company-desc">${company.description || company.desc}</p>
-            <div class="company-tags">
-                ${tagsHtml}
+            <div style="margin-bottom: var(--spacing-sm);">
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">核心代表作品：</div>
+                <div class="company-tags">${tagsHtml}</div>
+            </div>
+            <div style="background: #f8faf9; border-left: 3px solid ${company.brandColor || company.color}; padding: 10px 12px; border-radius: 4px; font-size: 0.8rem; margin-bottom: var(--spacing-md);">
+                <span style="font-weight: 700; color: ${company.brandColor || company.color}; display: block; margin-bottom: 2px;">2024-2026 重大動態：</span>
+                <span style="color: #475569; line-height: 1.5; display: block;">${newsText}</span>
             </div>
             <div class="company-card-footer">
                 <a href="${company.website || company.officialWebsite}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
-                    官網
+                    官方網站 ↗
                 </a>
                 <button class="btn btn-primary btn-sm view-details-btn" data-id="${company.id}">
-                    詳細資訊
+                    完整剖析
                 </button>
             </div>
         `;

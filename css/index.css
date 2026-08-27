@@ -128,6 +128,31 @@ img {
   background: #94a3b8;
 }
 
+.text-gradient {
+  background: linear-gradient(135deg, #1e2530 0%, #2d5a3f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 數據解讀/觀測洞察對話框 Insight Box */
+.insight-box {
+  margin-top: var(--spacing-lg);
+  background: #f4f8f5;
+  border-left: 4px solid #2d5a3f;
+  border-radius: var(--radius-sm);
+  padding: 14px 18px;
+  font-size: var(--font-size-sm);
+  color: #334155;
+  line-height: 1.65;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+}
+
+.insight-box strong {
+  color: #2d5a3f;
+  display: inline-block;
+  margin-right: 4px;
+}
+
 /* Layout Containers */
 .container {
   width: 100%;
