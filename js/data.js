@@ -122,6 +122,16 @@ const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異�
 
 const PRESS_RELEASES = [
         {
+            companyId: 'wayi',
+            companyName: '華義國際',
+            companyColor: '#9d4edf',
+            title: '華義國際擴大海外市場佈局，攜手國際合作夥伴深化技術與發行合作',
+            category: '策略合作',
+            excerpt: '華義國際今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-08-27',
+            source: '4Gamers'
+        },
+        {
             companyId: 'soft-world',
             companyName: '智冠科技',
             companyColor: '#e76f51',

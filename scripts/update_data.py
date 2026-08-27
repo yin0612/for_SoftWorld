@@ -77,10 +77,15 @@ def update_data_file():
     if 'const PRESS_RELEASES = [' in content:
         content = content.replace('const PRESS_RELEASES = [', f'const PRESS_RELEASES = [\n{new_entry}')
 
+    DOCS_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'docs', 'js', 'data.js')
     with open(DATA_FILE_PATH, 'w', encoding='utf-8') as f:
         f.write(content)
 
-    print(f"Data file updated successfully. New press release added for {comp[1]} on {date_str}.")
+    if os.path.exists(os.path.dirname(DOCS_DATA_PATH)):
+        with open(DOCS_DATA_PATH, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+    print(f"Data file updated successfully for both js/data.js and docs/js/data.js. New press release added for {comp[1]} on {date_str}.")
 
 if __name__ == '__main__':
     update_data_file()
