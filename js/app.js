@@ -349,7 +349,7 @@ function renderNews(append = false) {
 
     newsToShow.forEach(news => {
         const item = document.createElement('div');
-        item.className = 'timeline-item animate-on-scroll';
+        item.className = 'timeline-item animate-on-scroll is-visible';
         item.style.setProperty('--item-brand-color', news.companyColor || '#2d5a3f');
 
         item.innerHTML = `
