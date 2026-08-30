@@ -602,6 +602,10 @@ function renderNews(append = false) {
             ? '<span style="background:#fef3c7;color:#92400e;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">🤖 模擬資料</span>'
             : '';
 
+        const targetUrl = (news.url && news.url.startsWith('http')) 
+            ? news.url 
+            : (typeof getMediaSearchUrl === 'function' ? getMediaSearchUrl(news.source, news.companyName) : '#');
+
         item.innerHTML = `
             <div class="timeline-dot"></div>
             <div class="timeline-card">
@@ -611,11 +615,18 @@ function renderNews(append = false) {
                     </span>
                     <span class="timeline-date">${news.date}</span>
                 </div>
-                <h4 class="timeline-title">${news.title}${syntheticBadge}</h4>
+                <h4 class="timeline-title">
+                    <a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.color='${news.companyColor}'" onmouseout="this.style.color='inherit'">
+                        ${news.title} <span style="font-size:0.85rem;">↗</span>
+                    </a>
+                    ${syntheticBadge}
+                </h4>
                 <p class="timeline-excerpt">${news.excerpt}</p>
                 <div class="timeline-footer">
                     <span class="timeline-category">${news.category}</span>
-                    <span class="timeline-source">來源：${news.source}</span>
+                    <a href="${targetUrl}" target="_blank" rel="noopener" class="timeline-source" style="color: var(--primary); text-decoration: underline; font-weight: 600;">
+                        來源：${news.source} ↗
+                    </a>
                 </div>
             </div>
         `;

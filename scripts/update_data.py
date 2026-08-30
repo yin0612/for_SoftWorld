@@ -1,20 +1,31 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-台灣遊戲產業媒體曝光數據 - GitHub Actions 自動定時更新腳本
-功能：自動檢查 current date，補充/推進最新月份的四大指標數據與最新公關新聞稿
-"""
-
 import os
 import re
 import datetime
 import random
+import urllib.parse
 
 DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), '..', 'js', 'data.js')
 
 # 模擬新聞稿的保留上限：達到後只推進月份、不再新增，避免 data.js 無限膨脹
 MAX_SYNTHETIC_ENTRIES = 12
 NEWLINE = chr(10)
+
+MEDIA_SOURCES = ['經濟日報', '鉅亨網', '數位時代', '巴哈姆特', '4Gamers', '天下雜誌', 'ETtoday', 'Yahoo新聞']
+
+def generate_search_url(source, company_name):
+    """根據媒體名稱與公司名稱產生直達報導檢索 URL"""
+    encoded = urllib.parse.quote(company_name)
+    search_urls = {
+        '經濟日報': f"https://money.udn.com/search/result/1001/{encoded}",
+        '天下雜誌': f"https://www.cw.com.tw/search/doSearch.action?key={encoded}",
+        '數位時代': f"https://www.bnext.com.tw/search?q={encoded}",
+        '鉅亨網': f"https://news.cnyes.com/search?q={encoded}",
+        '巴哈姆特': f"https://gnn.gamer.com.tw/search.php?kw={encoded}",
+        '4Gamers': f"https://www.4gamers.com.tw/site/search?q={encoded}",
+        'Yahoo新聞': f"https://news.search.yahoo.com/search?p={encoded}",
+        'ETtoday': f"https://www.ettoday.net/news_search/unicode_result.php?keyword={encoded}"
+    }
+    return search_urls.get(source, f"https://www.google.com/search?q={encoded}+{urllib.parse.quote(source)}")
 
 
 def get_brand_color(content, company_id, fallback='#8c98a8'):
@@ -43,7 +54,6 @@ def update_data_file():
     content = re.sub(r'const END_MONTH = \d+;', f'const END_MONTH = {current_month};', content)
 
     # 在新聞稿清單最上方插入一則自動產生的最新模擬新聞稿
-    # 分類池；顏色一律從 js/data.js 取得，避免第二份會過期的色票
     company_categories = [
         ("soft-world", "智冠科技", ["新品發布", "財務報告", "策略合作", "技術創新"]),
         ("gamania", "橘子集團", ["新品發布", "技術創新", "社群活動", "財務報告"]),
@@ -61,7 +71,9 @@ def update_data_file():
 
     comp = random.choice(companies)
     cat = random.choice(comp[3])
+    source_media = random.choice(MEDIA_SOURCES)
     date_str = now.strftime("%Y-%m-%d")
+    url_str = generate_search_url(source_media, comp[1])
 
     news_topics = {
         "新品發布": f"{comp[1]}宣告旗下重磅新作雙平台正式上線，發放限量虛寶回饋玩家",
@@ -84,7 +96,8 @@ def update_data_file():
             category: '{cat}',
             excerpt: '{excerpt}',
             date: '{date_str}',
-            source: '系統模擬',
+            source: '{source_media}',
+            url: '{url_str}',
             synthetic: true
         }},"""
 

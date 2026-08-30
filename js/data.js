@@ -125,7 +125,19 @@ COMPANIES.forEach(c => {
 const SOURCES = ['巴哈姆特', '4Gamers', '經濟日報', '天下雜誌', '數位時代', '鉅亨網', '聯合新聞網', 'ETtoday', 'Yahoo新聞', '工商時報'];
 const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異動', '產業趨勢', '電競賽事', '技術創新', '社群活動'];
 
-const PRESS_RELEASES = [];
+const PRESS_RELEASES = [
+        {
+            companyId: 'softstar',
+            companyName: '大宇資訊',
+            companyColor: '#4a7c59',
+            title: '大宇資訊公佈最新營運財報，受惠於旺季效應，單月營收表現亮眼',
+            category: '財務報告',
+            excerpt: '大宇資訊今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-08-30',
+            source: '經濟日報',
+            url: 'https://money.udn.com/search/result/1001/%E5%A4%A7%E5%AE%87%E8%B3%87%E8%A8%8A',
+            synthetic: true
+        },];
 const MONTHLY_STATS = {};
 const MEDIA_CHANNELS = {};
 
