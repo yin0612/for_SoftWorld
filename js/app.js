@@ -65,14 +65,18 @@ function initHashRouter() {
         window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
         // 4. 切頁後重新計算 Canvas 尺寸與流暢重繪
+        // 用雙層 RAF 確保瀏覽器已完成 display:block 的佈局後才渲染圖表
+        // （單層 RAF 在 display 剛設完後 offsetWidth 仍可能為 0）
         requestAnimationFrame(() => {
-            if (targetPage === 'analytics' && typeof forceResizeAllCharts === 'function') {
-                forceResizeAllCharts();
-            }
-            if (targetPage === 'compare' && typeof forceResizeCompareCharts === 'function') {
-                forceResizeCompareCharts();
-            }
-            window.dispatchEvent(new Event('resize'));
+            requestAnimationFrame(() => {
+                if (targetPage === 'analytics' && typeof forceResizeAllCharts === 'function') {
+                    forceResizeAllCharts();
+                }
+                if (targetPage === 'compare' && typeof forceResizeCompareCharts === 'function') {
+                    forceResizeCompareCharts();
+                }
+                window.dispatchEvent(new Event('resize'));
+            });
         });
     }
 

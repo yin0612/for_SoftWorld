@@ -372,9 +372,10 @@ function renderAnalyticsCharts() {
         return;
     }
 
+    // 僅在 display 明確為 none 時跳過（不用 offsetWidth，以免與切頁的 display:block 競速）
     const analyticsSec = document.getElementById('analytics');
-    if (analyticsSec && (analyticsSec.offsetWidth === 0 || window.getComputedStyle(analyticsSec).display === 'none')) {
-        return; // 若頁面處於隱藏狀態，暫不出圖，避免 canvas 尺寸變 0
+    if (analyticsSec && window.getComputedStyle(analyticsSec).display === 'none') {
+        return;
     }
 
     // 1. 8 大企業月度報導趨勢圖
@@ -415,10 +416,19 @@ function renderAnalyticsCharts() {
     }
 }
 
+/**
+ * initAllChartsNow — 定義缺失的函式（之前 DOMContentLoaded 呼叫它時拋出 ReferenceError）
+ * 初始載入時 analytics 區塊是隱藏的，圖表由使用者切頁後透過 forceResizeAllCharts 建立。
+ */
+function initAllChartsNow() {
+    // 初始載入時 analytics 為 display:none，跳過以避免 canvas 寬度=0
+    // 實際的圖表初始化由 handleRouteChange → forceResizeAllCharts 觸發
+}
+
 function forceResizeAllCharts() {
     const hasCharts = Object.keys(charts).length > 0;
     if (!hasCharts) {
-        renderAnalyticsCharts();
+        renderAnalyticsCharts();        // 第一次進入：建立所有圖表
     } else {
         Object.values(charts).forEach(c => {
             if (c) {

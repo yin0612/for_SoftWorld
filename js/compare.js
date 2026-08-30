@@ -347,9 +347,10 @@ function renderComparisonTable(containerId, selectedCompanies) {
  * 強制重算尺寸並重繪對比工具圖表 (解決 SPA 切頁 display:none -> block 的畫布空白)
  */
 function forceResizeCompareCharts() {
+    // 僅在 display 明確為 none 時跳過（不用 offsetWidth，以免與切頁的 display:block 競速）
     const compareSec = document.getElementById('compare');
-    if (compareSec && (compareSec.offsetWidth === 0 || window.getComputedStyle(compareSec).display === 'none')) {
-        return; // 若頁面處於隱藏狀態，暫不出圖
+    if (compareSec && window.getComputedStyle(compareSec).display === 'none') {
+        return;
     }
 
     const container = document.getElementById('compareContainer');
