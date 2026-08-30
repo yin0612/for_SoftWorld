@@ -360,7 +360,31 @@ function initPressReleaseChart(canvasId) {
 }
 
 /**
- * 銷毀並重新創建數據分析頁面的 4 大圖表 (解決 SPA 切頁 display:none -> block 畫布壞死)
+ * freshCanvas — 以全新 canvas 元素取代舊的，清除 Chart.js 殘留的 width/height 屬性
+ * Chart.js 在 display:none 的容器中初始化時會把 canvas 設成 0x0，
+ * 用新元素替換才能確保下一次建立時尺寸正確。
+ */
+function freshCanvas(canvasId) {
+    const old = document.getElementById(canvasId);
+    if (!old) return null;
+    const parent = old.parentElement;
+    if (!parent) return old;
+
+    const neo = document.createElement('canvas');
+    neo.id = canvasId;
+    // 複製除 width/height 以外的所有屬性（保留 role, aria-label）
+    Array.from(old.attributes).forEach(attr => {
+        if (attr.name !== 'width' && attr.name !== 'height') {
+            neo.setAttribute(attr.name, attr.value);
+        }
+    });
+    parent.replaceChild(neo, old);
+    return neo;
+}
+
+/**
+ * 銷毀並重新創建數據分析頁面的 4 大圖表
+ * 強制重建策略：移除所有 display 守衛，確保每次切頁都能渲染。
  */
 function renderAnalyticsCharts() {
     if (typeof Chart === 'undefined') {
@@ -372,18 +396,13 @@ function renderAnalyticsCharts() {
         return;
     }
 
-    // 僅在 display 明確為 none 時跳過（不用 offsetWidth，以免與切頁的 display:block 競速）
-    const analyticsSec = document.getElementById('analytics');
-    if (analyticsSec && window.getComputedStyle(analyticsSec).display === 'none') {
-        return;
-    }
-
     // 1. 8 大企業月度報導趨勢圖
     if (document.getElementById('exposureTrendChart')) {
         if (charts['exposureTrendChart']) {
             try { charts['exposureTrendChart'].destroy(); } catch (e) {}
             delete charts['exposureTrendChart'];
         }
+        freshCanvas('exposureTrendChart');
         initExposureTrendChart('exposureTrendChart');
     }
 
@@ -393,6 +412,7 @@ function renderAnalyticsCharts() {
             try { charts['mediaChannelChart'].destroy(); } catch (e) {}
             delete charts['mediaChannelChart'];
         }
+        freshCanvas('mediaChannelChart');
         const selectedCompanyId = document.getElementById('channelCompanySelect')?.value || COMPANIES[0].id;
         initMediaChannelChart('mediaChannelChart', selectedCompanyId);
     }
@@ -403,6 +423,7 @@ function renderAnalyticsCharts() {
             try { charts['kolRankChart'].destroy(); } catch (e) {}
             delete charts['kolRankChart'];
         }
+        freshCanvas('kolRankChart');
         initKolRankChart('kolRankChart');
     }
 
@@ -412,74 +433,34 @@ function renderAnalyticsCharts() {
             try { charts['pressReleaseChart'].destroy(); } catch (e) {}
             delete charts['pressReleaseChart'];
         }
+        freshCanvas('pressReleaseChart');
         initPressReleaseChart('pressReleaseChart');
     }
+
+    // 給 Chart.js 一個 resize 信號，確保自適應尺寸正確
+    setTimeout(() => {
+        Object.values(charts).forEach(c => {
+            if (c) try { c.resize(); } catch (e) {}
+        });
+    }, 50);
 }
 
 /**
  * initAllChartsNow — 定義缺失的函式（之前 DOMContentLoaded 呼叫它時拋出 ReferenceError）
- * 初始載入時 analytics 區塊是隱藏的，圖表由使用者切頁後透過 forceResizeAllCharts 建立。
+ * 不主動初始化：圖表由使用者切頁後透過 renderAnalyticsCharts 按需建立。
  */
 function initAllChartsNow() {
-    // 初始載入時 analytics 為 display:none，跳過以避免 canvas 寬度=0
-    // 實際的圖表初始化由 handleRouteChange → forceResizeAllCharts 觸發
-}
-
-function forceResizeAllCharts() {
-    const hasCharts = Object.keys(charts).length > 0;
-    if (!hasCharts) {
-        renderAnalyticsCharts();        // 第一次進入：建立所有圖表
-    } else {
-        Object.values(charts).forEach(c => {
-            if (c) {
-                try {
-                    c.resize();
-                    c.update('none');
-                } catch (e) {}
-            }
-        });
-    }
+    // no-op：charts 由路由切換觸發，不在頁面載入時初始化
 }
 
 /**
- * 懶載入與初始化圖表
+ * forceResizeAllCharts — 切頁時由路由呼叫
+ * 無論已有無圖表，一律重新渲染，確保尺寸正確。
  */
-function initAllCharts() {
-    initAllChartsNow();
-
-    const chartConfigs = [
-        { id: 'exposureTrendChart', initFn: () => initExposureTrendChart('exposureTrendChart') },
-        { id: 'mediaChannelChart', initFn: () => initMediaChannelChart('mediaChannelChart', COMPANIES[0].id) },
-        { id: 'kolRankChart', initFn: () => initKolRankChart('kolRankChart') },
-        { id: 'pressReleaseChart', initFn: () => initPressReleaseChart('pressReleaseChart') }
-    ];
-
-    const observer = new IntersectionObserver((entries, obs) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                const targetId = entry.target.id;
-                const config = chartConfigs.find(c => targetId.includes(c.id) || c.id.includes(targetId));
-                if (config && !charts[config.id]) {
-                    config.initFn();
-                }
-            }
-        });
-    }, { threshold: 0.05 });
-
-    chartConfigs.forEach(c => {
-        const el = document.getElementById(c.id);
-        if (el && el.parentElement) {
-            observer.observe(el.parentElement);
-        }
-    });
-}
-
-// 自動在 DOMReady 時初始化圖表
-if (typeof document !== 'undefined') {
-    document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(initAllChartsNow, 200);
-    });
+function forceResizeAllCharts() {
+    renderAnalyticsCharts();
 }
 
 // 匯出供 app.js 呼叫
-window.initAllCharts = initAllCharts;
+window.initAllCharts = function() {};      // 保留介面，不再需要 IntersectionObserver
+window.renderAnalyticsCharts = renderAnalyticsCharts;

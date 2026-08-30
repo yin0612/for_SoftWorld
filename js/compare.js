@@ -347,32 +347,20 @@ function renderComparisonTable(containerId, selectedCompanies) {
  * 強制重算尺寸並重繪對比工具圖表 (解決 SPA 切頁 display:none -> block 的畫布空白)
  */
 function forceResizeCompareCharts() {
-    // 僅在 display 明確為 none 時跳過（不用 offsetWidth，以免與切頁的 display:block 競速）
-    const compareSec = document.getElementById('compare');
-    if (compareSec && window.getComputedStyle(compareSec).display === 'none') {
-        return;
-    }
-
     const container = document.getElementById('compareContainer');
     if (!container) return;
 
-    if (!container.children || container.children.length === 0) {
-        initCompare('compareContainer');
-    }
+    // 強制完整重建（包含 UI + 圖表），確保切頁後 canvas 正確
+    // 清空 container，讓 initCompare 重新繪製
+    Object.keys(compareCharts).forEach(key => {
+        if (compareCharts[key]) {
+            try { compareCharts[key].destroy(); } catch (e) {}
+            delete compareCharts[key];
+        }
+    });
 
-    // 強制銷毀舊實例
-    if (typeof compareCharts !== 'undefined') {
-        Object.keys(compareCharts).forEach(key => {
-            if (compareCharts[key]) {
-                try { compareCharts[key].destroy(); } catch (e) {}
-                delete compareCharts[key];
-            }
-        });
-    }
-
-    if (typeof compareState !== 'undefined' && compareState.selectedCompanyIds) {
-        updateComparison(compareState.selectedCompanyIds);
-    }
+    // 重新渲染整個 Compare UI 與圖表
+    initCompare('compareContainer');
 }
 
 /**
