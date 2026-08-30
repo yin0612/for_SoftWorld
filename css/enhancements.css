@@ -1,0 +1,466 @@
+/* ==========================================================================
+   功能強化樣式 (Enhancements)
+   沿用 index.css 既有的設計 token，不覆寫任何既有元件樣式
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   跳至主要內容（鍵盤使用者）
+   -------------------------------------------------------------------------- */
+
+.skip-link {
+  position: absolute;
+  left: var(--spacing-md);
+  top: -100px;
+  z-index: 2000;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  background: var(--primary);
+  color: var(--text-light);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+  transition: top var(--transition-fast);
+}
+
+.skip-link:focus {
+  top: var(--spacing-md);
+}
+
+/* --------------------------------------------------------------------------
+   洞察摘要卡
+   -------------------------------------------------------------------------- */
+
+.insights-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.insight-card {
+  position: relative;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-top: 3px solid var(--insight-color, var(--primary));
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.insight-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.insight-card-top {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-sm);
+}
+
+.insight-card-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+
+.insight-card-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.insight-card-company {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--insight-color, var(--text-primary));
+  margin-bottom: 2px;
+}
+
+.insight-card-value {
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+  margin-bottom: var(--spacing-xs);
+}
+
+.insight-card-note {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+/* --------------------------------------------------------------------------
+   趨勢圖年度區間切換
+   -------------------------------------------------------------------------- */
+
+.year-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-xs);
+  margin-bottom: var(--spacing-lg);
+}
+
+.year-chip {
+  padding: 5px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-full);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.year-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.year-chip.is-active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--text-light);
+}
+
+/* --------------------------------------------------------------------------
+   圖表工具列與數據表
+   -------------------------------------------------------------------------- */
+
+.chart-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px dashed var(--border-color);
+}
+
+.chart-tool-btn,
+.compare-action-btn {
+  padding: 6px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.chart-tool-btn:hover,
+.compare-action-btn:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+  background: var(--primary-light);
+}
+
+.chart-data-table {
+  margin-top: var(--spacing-md);
+}
+
+.chart-data-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.chart-data-grid {
+  width: 100%;
+  min-width: 520px;
+  border-collapse: collapse;
+  font-size: var(--font-size-xs);
+  background: var(--bg-secondary);
+}
+
+.chart-data-grid th,
+.chart-data-grid td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.chart-data-grid thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-weight: 700;
+}
+
+.chart-data-grid tbody th {
+  text-align: left;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.chart-data-grid tbody tr:last-child th,
+.chart-data-grid tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.chart-data-empty {
+  padding: var(--spacing-lg);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: var(--font-size-sm);
+}
+
+/* --------------------------------------------------------------------------
+   資料說明 / 方法論
+   -------------------------------------------------------------------------- */
+
+.method-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.method-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.method-card h3 {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-sm);
+}
+
+.method-card p,
+.method-card li {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  line-height: 1.7;
+}
+
+.method-card ul {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.method-card li::before {
+  content: "▪";
+  color: var(--primary);
+  margin-right: 8px;
+}
+
+.method-figure {
+  font-weight: 700;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.method-notice {
+  border: 1px solid #f0d9a8;
+  border-left: 4px solid var(--accent);
+  background: #fffaf0;
+  border-radius: var(--radius-sm);
+  padding: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.method-notice h3 {
+  font-size: var(--font-size-md);
+  font-weight: 700;
+  color: #92400e;
+  margin-bottom: var(--spacing-sm);
+}
+
+.method-notice p {
+  font-size: var(--font-size-sm);
+  color: #7a5216;
+  line-height: 1.75;
+}
+
+.method-notice p + p {
+  margin-top: var(--spacing-sm);
+}
+
+
+.method-cite {
+  background: var(--bg-tertiary);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-xs);
+  line-height: 1.7;
+  word-break: break-all;
+  margin: var(--spacing-sm) 0;
+}
+
+.method-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+}
+
+.method-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: var(--font-size-sm);
+}
+
+.method-table th,
+.method-table td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border-color);
+  text-align: left;
+  vertical-align: top;
+}
+
+.method-table thead th {
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.method-table tbody tr:last-child th,
+.method-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.method-tag {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.method-tag-real {
+  background: #e4f1e9;
+  color: #2f6b4a;
+}
+
+.method-tag-model {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+/* --------------------------------------------------------------------------
+   列印樣式（論文附錄／講義用）
+   -------------------------------------------------------------------------- */
+
+@media print {
+  .navbar,
+  .hero-particles,
+  .hero-scroll-indicator,
+  .filter-bar,
+  .chart-tools,
+  .year-filter,
+  .timeline-load-more,
+  .back-to-top,
+  .skip-link,
+  .compare-actions {
+    display: none !important;
+  }
+
+  /* 列印時把所有分頁一次攤開，不受 SPA 路由隱藏影響 */
+  #hero,
+  #companies,
+  #news,
+  #analytics,
+  #compare,
+  #trends,
+  #methodology {
+    display: block !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    page-break-inside: avoid;
+  }
+
+  body {
+    background: #ffffff;
+    color: #000000;
+    font-size: 11pt;
+  }
+
+  .section {
+    padding: 12pt 0;
+  }
+
+  .chart-card,
+  .company-card,
+  .insight-card,
+  .method-card {
+    border: 1px solid #cccccc;
+    box-shadow: none;
+    page-break-inside: avoid;
+  }
+
+  .chart-data-table {
+    display: block !important;
+  }
+
+  a[href^="http"]::after {
+    content: " (" attr(href) ")";
+    font-size: 9pt;
+    color: #555555;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   減少動態效果偏好
+   -------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .insight-card,
+  .year-chip,
+  .chart-tool-btn,
+  .compare-action-btn,
+  .skip-link {
+    transition: none;
+  }
+  .insight-card:hover {
+    transform: none;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   行動裝置
+   -------------------------------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .insights-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+  }
+  .insight-card {
+    padding: var(--spacing-md);
+  }
+  .insight-card-value {
+    font-size: var(--font-size-xl);
+  }
+  .chart-tools {
+    flex-direction: column;
+  }
+  .chart-tool-btn,
+  .compare-action-btn {
+    width: 100%;
+  }
+}

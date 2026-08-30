@@ -12,6 +12,17 @@ import random
 
 DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), '..', 'js', 'data.js')
 
+# 模擬新聞稿的保留上限：達到後只推進月份、不再新增，避免 data.js 無限膨脹
+MAX_SYNTHETIC_ENTRIES = 12
+NEWLINE = chr(10)
+
+
+def get_brand_color(content, company_id, fallback='#8c98a8'):
+    """從 js/data.js 讀取該公司的品牌色，維持單一色票來源。"""
+    m = re.search(r"id:\s*'" + re.escape(company_id) + r"'.*?color:\s*'(#[0-9a-fA-F]{6})'",
+                  content, re.S)
+    return m.group(1) if m else fallback
+
 def update_data_file():
     if not os.path.exists(DATA_FILE_PATH):
         print(f"Error: {DATA_FILE_PATH} not found.")
@@ -32,15 +43,20 @@ def update_data_file():
     content = re.sub(r'const END_MONTH = \d+;', f'const END_MONTH = {current_month};', content)
 
     # 在新聞稿清單最上方插入一則自動產生的最新模擬新聞稿
+    # 分類池；顏色一律從 js/data.js 取得，避免第二份會過期的色票
+    company_categories = [
+        ("soft-world", "智冠科技", ["新品發布", "財務報告", "策略合作", "技術創新"]),
+        ("gamania", "橘子集團", ["新品發布", "技術創新", "社群活動", "財務報告"]),
+        ("wanin", "網銀國際", ["策略合作", "產業趨勢", "電競賽事", "社群活動"]),
+        ("userjoy", "宇峻奧汀", ["新品發布", "財務報告", "技術創新", "社群活動"]),
+        ("softstar", "大宇資訊", ["產業趨勢", "財務報告", "新品發布", "策略合作"]),
+        ("xlegend", "傳奇網路", ["新品發布", "技術創新", "財務報告", "社群活動"]),
+        ("wayi", "華義國際", ["策略合作", "電競賽事", "財務報告", "技術創新"]),
+        ("astro", "泰偉電子", ["財務報告", "策略合作", "技術創新", "產業趨勢"])
+    ]
     companies = [
-        ("soft-world", "智冠科技", "#e76f51", ["新品發布", "財務報告", "策略合作", "技術創新"]),
-        ("gamania", "橘子集團", "#f4a261", ["新品發布", "技術創新", "社群活動", "財務報告"]),
-        ("wanin", "網銀國際", "#48cae4", ["策略合作", "產業趨勢", "電競賽事", "社群活動"]),
-        ("userjoy", "宇峻奧汀", "#3a86ff", ["新品發布", "財務報告", "技術創新", "社群活動"]),
-        ("softstar", "大宇資訊", "#4a7c59", ["產業趨勢", "財務報告", "新品發布", "策略合作"]),
-        ("xlegend", "傳奇網路", "#ff70a6", ["新品發布", "技術創新", "財務報告", "社群活動"]),
-        ("wayi", "華義國際", "#9d4edf", ["策略合作", "電競賽事", "財務報告", "技術創新"]),
-        ("astro", "泰偉電子", "#2a9d8f", ["財務報告", "策略合作", "技術創新", "產業趨勢"])
+        (cid, name, get_brand_color(content, cid), cats)
+        for cid, name, cats in company_categories
     ]
 
     comp = random.choice(companies)
@@ -72,19 +88,25 @@ def update_data_file():
             synthetic: true
         }},"""
 
-    # 尋找 PRESS_RELEASES 陣列起始位置插入
-    if 'const PRESS_RELEASES = [' in content:
-        content = content.replace('const PRESS_RELEASES = [', f'const PRESS_RELEASES = [\n{new_entry}')
+    # 達到保留上限就不再新增，只保留已推進的月份範圍
+    existing = content.count('synthetic: true')
+    if existing >= MAX_SYNTHETIC_ENTRIES:
+        with open(DATA_FILE_PATH, 'w', encoding='utf-8') as f:
+            f.write(content)
+        print("Month range advanced to %s. Synthetic entries at cap (%d/%d); no new entry added."
+              % (current_month_str, existing, MAX_SYNTHETIC_ENTRIES))
+        return
 
-    DOCS_DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'docs', 'js', 'data.js')
+    if 'const PRESS_RELEASES = [' in content:
+        content = content.replace('const PRESS_RELEASES = [',
+                                  'const PRESS_RELEASES = [' + NEWLINE + new_entry)
+
     with open(DATA_FILE_PATH, 'w', encoding='utf-8') as f:
         f.write(content)
 
-    if os.path.exists(os.path.dirname(DOCS_DATA_PATH)):
-        with open(DOCS_DATA_PATH, 'w', encoding='utf-8') as f:
-            f.write(content)
+    print("js/data.js updated. Synthetic press release added for %s on %s (%d/%d)."
+          % (comp[1], date_str, existing + 1, MAX_SYNTHETIC_ENTRIES))
 
-    print(f"Data file updated successfully for both js/data.js and docs/js/data.js. New press release added for {comp[1]} on {date_str}.")
 
 if __name__ == '__main__':
     update_data_file()

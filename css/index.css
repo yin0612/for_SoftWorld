@@ -158,11 +158,11 @@ img {
   width: 100%;
   max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--space-xl);
+  padding: 0 var(--spacing-xl);
 }
 
 section {
-  padding: var(--space-3xl) 0;
+  padding: var(--spacing-3xl) 0;
 }
 
 /* 實用類別 Utility Classes */
@@ -171,16 +171,16 @@ section {
 .text-right { text-align: right; }
 
 .mb-0 { margin-bottom: 0 !important; }
-.mb-sm { margin-bottom: var(--space-sm) !important; }
-.mb-md { margin-bottom: var(--space-md) !important; }
-.mb-lg { margin-bottom: var(--space-lg) !important; }
-.mb-xl { margin-bottom: var(--space-xl) !important; }
+.mb-sm { margin-bottom: var(--spacing-sm) !important; }
+.mb-md { margin-bottom: var(--spacing-md) !important; }
+.mb-lg { margin-bottom: var(--spacing-lg) !important; }
+.mb-xl { margin-bottom: var(--spacing-xl) !important; }
 
 .mt-0 { margin-top: 0 !important; }
-.mt-sm { margin-top: var(--space-sm) !important; }
-.mt-md { margin-top: var(--space-md) !important; }
-.mt-lg { margin-top: var(--space-lg) !important; }
-.mt-xl { margin-top: var(--space-xl) !important; }
+.mt-sm { margin-top: var(--spacing-sm) !important; }
+.mt-md { margin-top: var(--spacing-md) !important; }
+.mt-lg { margin-top: var(--spacing-lg) !important; }
+.mt-xl { margin-top: var(--spacing-xl) !important; }
 
 .d-flex { display: flex; }
 .align-center { align-items: center; }
@@ -195,15 +195,15 @@ section {
 @media (max-width: 1024px) {
   h1 { font-size: 3rem; }
   h2 { font-size: 2.25rem; }
-  .container { padding: 0 var(--space-lg); }
+  .container { padding: 0 var(--spacing-lg); }
 }
 
 @media (max-width: 768px) {
   html { font-size: 14px; }
   h1 { font-size: 2.5rem; }
   h2 { font-size: 2rem; }
-  section { padding: var(--space-2xl) 0; }
-  .container { padding: 0 var(--space-md); }
+  section { padding: var(--spacing-2xl) 0; }
+  .container { padding: 0 var(--spacing-md); }
 }
 
 @media (max-width: 640px) {

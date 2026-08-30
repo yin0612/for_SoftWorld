@@ -20,17 +20,21 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
+            integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt"
+            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/index.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/animations.css">
+    <link rel="stylesheet" href="css/enhancements.css">
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
 </head>
 <body>
+    <a class="skip-link" href="#/companies" id="skipToContent">跳至主要內容</a>
     <!-- ======================================
          導覽列 Navigation Bar
     ====================================== -->
@@ -47,6 +51,7 @@
                 <li><a href="#/analytics" class="navbar-link">數據分析</a></li>
                 <li><a href="#/compare" class="navbar-link">對比工具</a></li>
                 <li><a href="#/trends" class="navbar-link">趨勢分析</a></li>
+                <li><a href="#/methodology" class="navbar-link">資料說明</a></li>
             </ul>
 
             <button class="navbar-toggle" id="navbarToggle" aria-label="選單" aria-expanded="false" aria-controls="navbarMenu">
@@ -258,6 +263,9 @@
                 <p class="section-subtitle">透過多維度圖表分析各家遊戲企業在媒體報導、社群討論與 KOL 合作上的行銷力道</p>
             </div>
 
+            <!-- 自動洞察摘要（由 enhancements.js 依實際數據計算） -->
+            <div class="insights-grid animate-on-scroll" id="analyticsInsights"></div>
+
             <!-- 曝光量趨勢圖 -->
             <div class="chart-card animate-on-scroll" id="chartTrendCard">
                 <div class="chart-card-header">
@@ -265,8 +273,9 @@
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                         8 大企業 月度媒體報導曝光量趨勢
                     </h3>
-                    <span class="chart-card-subtitle">監測區間：2024/01 — 2026/08</span>
+                    <span class="chart-card-subtitle" id="trendRangeLabel">監測區間：2024/01 — 2026/08</span>
                 </div>
+                <div class="year-filter" id="trendYearFilter" role="group" aria-label="趨勢圖年度區間"></div>
                 <div class="chart-card-body">
                     <canvas id="exposureTrendChart" role="img" aria-label="2024 至 2026 年八家台灣遊戲公司每月媒體報導聲量趨勢折線圖"></canvas>
                 </div>
@@ -439,6 +448,136 @@
     </section>
 
     <!-- ======================================
+         資料說明與方法論 Methodology
+    ====================================== -->
+    <section class="section section-alt" id="methodology">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">DATA &amp; METHODOLOGY</span>
+                <h2 class="section-title">資料來源與<span class="text-gradient">方法論說明</span></h2>
+                <p class="section-subtitle">本站每一個數字的來源、定義與限制，供引用與查核使用</p>
+            </div>
+
+            <div class="method-notice animate-on-scroll">
+                <h3>⚠️ 資料性質聲明</h3>
+                <p>本站為<strong>媒體曝光比較方法的展示與教學平台</strong>，並非商業或官方統計服務。頁面上的資料分為兩類，請務必分開理解：</p>
+                <p><strong>一、公司基本資料與重大事件</strong>（公司簡介、代表作品、2024–2026 重大動態、新聞稿標題與發布日期）為人工整理自公開資訊，可對照官方新聞頁與公開資訊觀測站查核。</p>
+                <p><strong>二、月度量化指標</strong>（媒體報導篇數、社群聲量、KOL 合作數、媒體通路佔比）為<strong>依產業特性參數建模產生的模擬數據</strong>，用於示範比較方法與視覺化呈現，<strong>不得作為各公司實際媒體聲量的量測結果引用</strong>。</p>
+            </div>
+
+            <div class="method-grid animate-on-scroll">
+                <div class="method-card">
+                    <h3>📐 監測範圍</h3>
+                    <ul>
+                        <li>觀測企業：<span class="method-figure" id="methodCompanies">8</span> 家台灣遊戲上市櫃／指標企業</li>
+                        <li>時間跨度：<span class="method-figure" id="methodMonths">32</span> 個月</li>
+                        <li>資料區間：<span class="method-figure" id="methodRange">2024-01 — 2026-08</span></li>
+                        <li>媒體通路：<span class="method-figure" id="methodChannels">10</span> 個觀測頻道</li>
+                    </ul>
+                </div>
+                <div class="method-card">
+                    <h3>📰 新聞稿資料</h3>
+                    <ul>
+                        <li>總筆數：<span class="method-figure" id="methodPressTotal">30</span> 則</li>
+                        <li>人工整理（可查核）：<span class="method-figure" id="methodCurated">30</span> 則</li>
+                        <li>系統模擬（標示徽章）：<span class="method-figure" id="methodSynthetic">0</span> 則</li>
+                        <li>每則皆標註分類、來源媒體與發布日期</li>
+                    </ul>
+                </div>
+                <div class="method-card">
+                    <h3>🔄 更新機制</h3>
+                    <ul>
+                        <li>由 GitHub Actions 每週一自動推進監測月份</li>
+                        <li>自動產生的項目一律標示「🤖 模擬資料」且來源記為「系統模擬」</li>
+                        <li>模擬項目設有 12 筆上限，避免資料無限膨脹</li>
+                        <li>人工資料以 commit 方式維護，可完整追溯修改歷程</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="method-table-wrap animate-on-scroll">
+                <table class="method-table">
+                    <caption class="sr-only">四項核心指標的定義、單位與資料性質</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">指標</th>
+                            <th scope="col">定義</th>
+                            <th scope="col">單位</th>
+                            <th scope="col">資料性質</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th scope="row">新聞稿發布數</th>
+                            <td>企業主動對外發布的官方公關訊息數量</td>
+                            <td>篇／月</td>
+                            <td><span class="method-tag method-tag-model">模型產生</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">媒體報導篇數</th>
+                            <td>觀測媒體對該企業的報導則數，含轉載</td>
+                            <td>則／月</td>
+                            <td><span class="method-tag method-tag-model">模型產生</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">社群網路聲量</th>
+                            <td>社群平台與論壇提及該企業或旗下產品的次數</td>
+                            <td>次／月</td>
+                            <td><span class="method-tag method-tag-model">模型產生</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">KOL 合作數</th>
+                            <td>與實況主、網紅進行的宣傳合作檔次</td>
+                            <td>次／月</td>
+                            <td><span class="method-tag method-tag-model">模型產生</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">公司基本資料</th>
+                            <td>成立年份、股票代號、代表作品、重大動態</td>
+                            <td>—</td>
+                            <td><span class="method-tag method-tag-real">公開資訊</span></td>
+                        </tr>
+                        <tr>
+                            <th scope="row">新聞稿標題與日期</th>
+                            <td>實際發生之事件標題、發布日期與報導媒體</td>
+                            <td>—</td>
+                            <td><span class="method-tag method-tag-real">公開資訊</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="method-grid animate-on-scroll" style="margin-top: var(--spacing-2xl);">
+                <div class="method-card">
+                    <h3>🧮 模擬數據怎麼產生</h3>
+                    <p>每家公司設定四項基準值（basePR、baseMedia、baseSocial、baseKol），再乘上兩個係數：</p>
+                    <ul>
+                        <li><strong>週期項</strong>：以正弦波模擬產業淡旺季，振幅約 ±15%</li>
+                        <li><strong>事件項</strong>：在該公司實際發生重大事件的月份（如併購、新作上線、經營權改選）套用 1.4–2.9 倍的聲量高峰</li>
+                    </ul>
+                    <p>計算過程<strong>不含亂數</strong>，因此任何人在任何時間開啟本站，看到的數字都完全相同、可重現、可比對。</p>
+                </div>
+                <div class="method-card">
+                    <h3>⚖️ 已知限制</h3>
+                    <ul>
+                        <li>量化指標為模型輸出，不等同真實媒體監測結果</li>
+                        <li>媒體通路佔比為各公司設定之固定分佈，非逐則統計</li>
+                        <li>未涵蓋非上市櫃的中小型遊戲公司與獨立開發者</li>
+                        <li>未區分正面／負面報導傾向（無情緒分析）</li>
+                        <li>社群聲量未區分自然討論與付費行銷內容</li>
+                    </ul>
+                </div>
+                <div class="method-card">
+                    <h3>📎 引用方式</h3>
+                    <p>若於報告或論文中引用本站圖表，建議標註為：</p>
+                    <p class="method-cite">台灣遊戲公司新聞稿與媒體曝光比較平台（示範用模擬數據），https://yin0612.github.io/for_SoftWorld/</p>
+                    <p>各圖表下方可展開「數據表」或匯出 CSV，取得完整底層數字。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ======================================
          頁尾 Footer
     ====================================== -->
     <footer class="footer">
@@ -461,6 +600,7 @@
                         <li><a href="#analytics">數據分析</a></li>
                         <li><a href="#compare">對比工具</a></li>
                         <li><a href="#trends">趨勢分析</a></li>
+                        <li><a href="#methodology">資料說明</a></li>
                     </ul>
                 </div>
                 <div class="footer-links-group">
@@ -522,5 +662,6 @@
     <script src="js/charts.js"></script>
     <script src="js/compare.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/enhancements.js"></script>
 </body>
 </html>

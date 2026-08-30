@@ -34,12 +34,20 @@ function initExposureTrendChart(canvasId) {
 
     // 取得所有月份標籤 (假設所有公司的月份區間相同)
     const firstCompanyId = COMPANIES[0].id;
-    const months = MONTHLY_STATS[firstCompanyId].map(stat => stat.month);
+    const allMonths = MONTHLY_STATS[firstCompanyId].map(stat => stat.month);
+
+    // 年度區間篩選：window.TREND_YEAR 由 enhancements.js 的年度切換鈕設定
+    const yearFilter = (typeof window !== 'undefined' && window.TREND_YEAR) || 'all';
+    const kept = allMonths
+        .map((m, i) => ({ m, i }))
+        .filter(o => yearFilter === 'all' || o.m.startsWith(yearFilter));
+    const months = kept.map(o => o.m);
+    const monthIndexes = kept.map(o => o.i);
 
     const pointStyles = ['circle', 'triangle', 'rect', 'star', 'cross', 'rectRot', 'crossRot', 'dash'];
 
     const datasets = COMPANIES.map((company, idx) => {
-        const data = MONTHLY_STATS[company.id].map(stat => stat.mediaCoverage);
+        const data = monthIndexes.map(i => MONTHLY_STATS[company.id][i].mediaCoverage);
         return {
             label: company.name,
             data: data,

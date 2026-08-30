@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 1. Hash SPA 獨立切頁路由器 (點選目錄只顯示該項獨立頁面)
 function initHashRouter() {
-    const pages = ['companies', 'news', 'analytics', 'compare', 'trends'];
+    const pages = ['companies', 'news', 'analytics', 'compare', 'trends', 'methodology'];
 
     function handleRouteChange() {
         let hash = window.location.hash || '#/companies';
