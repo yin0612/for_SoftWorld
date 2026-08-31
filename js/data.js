@@ -127,6 +127,18 @@ const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異�
 
 const PRESS_RELEASES = [
         {
+            companyId: 'gamania',
+            companyName: '橘子集團',
+            companyColor: '#f4a261',
+            title: '橘子集團公佈最新營運財報，受惠於旺季效應，單月營收表現亮眼',
+            category: '財務報告',
+            excerpt: '橘子集團今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-08-31',
+            source: '4Gamers',
+            url: 'https://www.4gamers.com.tw/site/search?q=%E6%A9%98%E5%AD%90%E9%9B%86%E5%9C%98',
+            synthetic: true
+        },
+        {
             companyId: 'softstar',
             companyName: '大宇資訊',
             companyColor: '#4a7c59',
