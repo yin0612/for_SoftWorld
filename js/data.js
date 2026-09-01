@@ -127,6 +127,18 @@ const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異�
 
 const PRESS_RELEASES = [
         {
+            companyId: 'soft-world',
+            companyName: '智冠科技',
+            companyColor: '#e76f51',
+            title: '智冠科技宣告旗下重磅新作雙平台正式上線，發放限量虛寶回饋玩家',
+            category: '新品發布',
+            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-01',
+            source: '鉅亨網',
+            url: 'https://news.cnyes.com/search?q=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
+            synthetic: true
+        },
+        {
             companyId: 'gamania',
             companyName: '橘子集團',
             companyColor: '#f4a261',
@@ -262,7 +274,7 @@ function loadSources(companyId, month) {
 const START_YEAR = 2024;
 const START_MONTH = 1;
 const END_YEAR = 2026;
-const END_MONTH = 8;
+const END_MONTH = 9;
 
 const MONTHS_LIST = [];
 for (let y = START_YEAR; y <= END_YEAR; y++) {
