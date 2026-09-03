@@ -130,6 +130,18 @@ const PRESS_RELEASES = [
             companyId: 'soft-world',
             companyName: '智冠科技',
             companyColor: '#e76f51',
+            title: '智冠科技擴大海外市場佈局，攜手國際合作夥伴深化技術與發行合作',
+            category: '策略合作',
+            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-03',
+            source: '鉅亨網',
+            url: 'https://news.cnyes.com/search?q=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
+            synthetic: true
+        },
+        {
+            companyId: 'soft-world',
+            companyName: '智冠科技',
+            companyColor: '#e76f51',
             title: '智冠科技公佈最新營運財報，受惠於旺季效應，單月營收表現亮眼',
             category: '財務報告',
             excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
