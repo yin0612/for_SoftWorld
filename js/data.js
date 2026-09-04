@@ -127,6 +127,18 @@ const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異�
 
 const PRESS_RELEASES = [
         {
+            companyId: 'userjoy',
+            companyName: '宇峻奧汀',
+            companyColor: '#3a86ff',
+            title: '宇峻奧汀舉辦玩家線下交流見面會，吸引數百位熱情玩家到場參與',
+            category: '社群活動',
+            excerpt: '宇峻奧汀今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-04',
+            source: '巴哈姆特',
+            url: 'https://gnn.gamer.com.tw/search.php?kw=%E5%AE%87%E5%B3%BB%E5%A5%A7%E6%B1%80',
+            synthetic: true
+        },
+        {
             companyId: 'soft-world',
             companyName: '智冠科技',
             companyColor: '#e76f51',
