@@ -127,6 +127,18 @@ const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異�
 
 const PRESS_RELEASES = [
         {
+            companyId: 'wanin',
+            companyName: '網銀國際',
+            companyColor: '#48cae4',
+            title: '網銀國際舉辦玩家線下交流見面會，吸引數百位熱情玩家到場參與',
+            category: '社群活動',
+            excerpt: '網銀國際今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-05',
+            source: '4Gamers',
+            url: 'https://www.4gamers.com.tw/site/search?q=%E7%B6%B2%E9%8A%80%E5%9C%8B%E9%9A%9B',
+            synthetic: true
+        },
+        {
             companyId: 'userjoy',
             companyName: '宇峻奧汀',
             companyColor: '#3a86ff',
