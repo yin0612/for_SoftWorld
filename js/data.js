@@ -130,6 +130,18 @@ const PRESS_RELEASES = [
             companyId: 'astro',
             companyName: '泰偉電子',
             companyColor: '#2a9d8f',
+            title: '泰偉電子導入生成式 AI 輔助開發流程，有效提升遊戲製作與營運效率',
+            category: '技術創新',
+            excerpt: '泰偉電子今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-08',
+            source: '數位時代',
+            url: 'https://www.bnext.com.tw/search?q=%E6%B3%B0%E5%81%89%E9%9B%BB%E5%AD%90',
+            synthetic: true
+        },
+        {
+            companyId: 'astro',
+            companyName: '泰偉電子',
+            companyColor: '#2a9d8f',
             title: '泰偉電子擴大海外市場佈局，攜手國際合作夥伴深化技術與發行合作',
             category: '策略合作',
             excerpt: '泰偉電子今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
