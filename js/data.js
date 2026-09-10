@@ -127,6 +127,18 @@ const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異�
 
 const PRESS_RELEASES = [
         {
+            companyId: 'xlegend',
+            companyName: '傳奇網路',
+            companyColor: '#ff70a6',
+            title: '傳奇網路宣告旗下重磅新作雙平台正式上線，發放限量虛寶回饋玩家',
+            category: '新品發布',
+            excerpt: '傳奇網路今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-10',
+            source: '鉅亨網',
+            url: 'https://news.cnyes.com/search?q=%E5%82%B3%E5%A5%87%E7%B6%B2%E8%B7%AF',
+            synthetic: true
+        },
+        {
             companyId: 'soft-world',
             companyName: '智冠科技',
             companyColor: '#e76f51',
