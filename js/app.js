@@ -704,21 +704,6 @@ function applyNewsFilters() {
     renderNews(false);
 }
 
-function renderNews(append = false) {
-    const container = document.getElementById('timelineContainer');
-    const loadMoreBtn = document.getElementById('timelineLoadMore');
-    const countEl = document.getElementById('filterResultCount');
-
-    if (!container) return;
-
-    if (!append) {
-        container.innerHTML = '';
-    }
-
-    if (countEl) {
-        countEl.textContent = `共 ${filteredNews.length} 則符合條件新聞稿`;
-    }
-
 function highlightKeyword(text, keyword) {
     if (!text || !keyword) return text;
     const cleanKw = keyword.trim();
