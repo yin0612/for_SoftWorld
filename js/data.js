@@ -125,6 +125,110 @@ COMPANIES.forEach(c => {
 const SOURCES = ['巴哈姆特', '4Gamers', '經濟日報', '天下雜誌', '數位時代', '鉅亨網', '聯合新聞網', 'ETtoday', 'Yahoo新聞', '工商時報'];
 const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異動', '產業趨勢', '電競賽事', '技術創新', '社群活動'];
 
+// ============================================================
+// 擴充媒體分組清單（來源：關鍵字及媒體清單.7z，2024/10/15-16版）
+// 新增台灣遊戲媒體、台灣財經媒體、中港媒體、國際外媒四大分組
+// ============================================================
+const SOURCES_EXTENDED = {
+    // 一、台灣遊戲與科技媒體（來自 SOFTWD_關鍵字清單20241015.xlsx 媒體Sheet TW欄）
+    tw_game: [
+        'iThome', 'Game LIFE', '電獺少女', 'PC home', 'T客邦',
+        'Mobile01', 'SOGI手機王', 'NiceGame遊戲中心', '卡卡洛普', '遊戲基地',
+        '2000FUN', '4Gamers電競賽事平臺', 'HiNet', 'Xfastest Media',
+        '3C滔客', 'MoneyDJ理財網', 'Wow!NEWS', '妞新聞', '草根影響力新視野'
+    ],
+    // 二、台灣財經與綜合媒體（來自監測媒體清單20241016-智冠.xlsx TW媒Sheet）
+    tw_finance: [
+        '自由時報電子報', '聯合新聞網', '中國時報', '工商時報', '經濟日報',
+        '天下雜誌', '遠見雜誌', '數位時代', '商業週刊', '今周刊',
+        '鉅亨網', 'Yahoo新聞', '科技新報', '三立新聞網', 'TVBS新聞網',
+        '東森電視網', '年代新聞', '民視新聞網', '風傳媒', '鏡傳媒',
+        '報橘', '上報', '信傳媒', '理財週刊', '財訊',
+        '旺報', '太平洋日報', '中華日報', '台灣時報', '壹蘋新聞網',
+        '今日新聞NOWnews', '人間福報', 'Line Today', '新浪網(台灣)',
+        'MSN台灣', 'ETtoday', 'yam蕃薯藤', 'Money錢', '卡優新聞網',
+        'Smart智富月刊', '萬寶週刊', '非凡新聞網', '壹電視', '中天電視網',
+        '台視全球資訊網', '民眾日報', '銘報即時新聞', '台灣醒報', '勁報'
+    ],
+    // 三、中港媒體（來自 SOFTWD_關鍵字清單20241015.xlsx CN/HK媒體 + 監測媒體清單CNHK媒體Sheet）
+    cnhk: [
+        '07073遊戲網', '17173.com', '3DMGame', '3iGAME', '52pk遊戲網',
+        'Akira Club', '電玩巴士', 'QQ遊戲資訊', 'A9VG電玩部落', 'GAMELOOK',
+        '遊民星空', '游久網', 'VJ Games', 'GAMEAPPS', 'MTGAMER',
+        '香港01', '明報', '星島日報', 'UNWIRE.HK', 'GREAT GAME',
+        '東方日報', 'IT168', '中國經濟網', '央視網', '人民網',
+        '環球網', '中國新聞網', '中國日報', '艾瑞網', '新浪遊戲',
+        '驅動中國', 'SPILL', 'ZDNet Asia', '265g', '游迅網'
+    ],
+    // 四、國際財經外媒（來自 20大財經外媒清單.xlsx + 100大財經外媒清單.xlsx）
+    international: [
+        'Forbes', 'Bloomberg', 'Wall Street Journal', 'The Economist', 'Reuters',
+        'CNBC', 'TechCrunch', 'Business Insider', 'Fortune', 'Financial Times',
+        'Fintech Global', 'The Fintech Times', 'Fintech Futures', 'Finextra',
+        'Payments Dive', 'Payments Journal', 'CoinDesk', 'Cointelegraph', 'Decrypt',
+        'NASDAQ', 'NYSE', 'London Stock Exchange', 'HKEX',
+        'IMF', 'World Bank', 'Federal Reserve', 'ECB', 'BIS',
+        'SEC', 'Goldman Sachs', 'Deloitte', 'Gartner', 'Morningstar',
+        'Investopedia', 'Benzinga', 'Seeking Alpha', "Barron's",
+        'The Next Web', 'GlobeNewswire', 'Financial Post', 'CryptoPotato'
+    ]
+};
+
+// 智冠監測關鍵字清單（來源：SOFTWD_關鍵字清單20241015.xlsx，2024/10/15版）
+const MONITORING_KEYWORDS = {
+    // 智冠集團核心關鍵字
+    soft_world_primary: [
+        '智冠', '智冠科技', '智冠集團', '中華網龍', '網龍',
+        'MyCard', '藍新科技', '藍新金流', 'NewebPay', 'ezPay',
+        '簡單付', '簡單行動支付', 'ezAIO', '歐付寶', 'OPay'
+    ],
+    // 智冠遊戲名稱關鍵字
+    soft_world_games: [
+        '遊戲+金庸群俠傳', '遊戲+吞食天地', '遊戲+吞食天地2',
+        '遊戲+威龍線上', '遊戲+星際擴散', '遊戲+天地劫',
+        '遊戲+炎龍騎士團', '遊戲+MCL電子競技', '遊戲+FOWGAMES',
+        '遊戲+GFi賦能平台', '遊戲+TRAHA天選者', '遊戲+中華英雄',
+        '遊戲+天子傳奇', '遊戲+黃易群俠傳', '遊戲+武林群俠傳'
+    ],
+    // IP 授權關鍵字
+    soft_world_ip: [
+        'IP+吞食天地', 'IP+武林群俠傳', 'IP+黃易', 'IP+炎龍騎士團',
+        'IP授權+吞食天地', 'ip+戀愛盒子', 'ip+飄流幻境'
+    ],
+    // 競業廠商關鍵字
+    competitors: [
+        '遊戲橘子', '樂利數位', '有閑數位', '大宇資', '大宇資訊',
+        '昱泉', '華義', '鈊象', '宇峻奧汀', '茂為歐買尬',
+        '紅心辣椒', '傳奇網路', '網石', '弘煜', '真好玩',
+        '9Splay', '唯數娛樂', '天剛資訊', '創業家兄弟', '91APP',
+        '網銀國際', 'Wanin', '地心引力', 'GameSword劍聖遊戲'
+    ],
+    // 產業趨勢關鍵字
+    industry_trends: [
+        '遊戲+VR', '遊戲+AR', '遊戲+LBS', '遊戲+HTML5', '遊戲+H5',
+        '遊戲+XBOX', '遊戲+SWITCH', '遊戲+PS4', '遊戲+PS5',
+        '遊戲+Steam平台', '遊戲+主機遊戲', '遊戲+電競聯賽',
+        '遊戲+電競賽事', '遊戲+暴雪', '遊戲+Blizzard',
+        '遊戲+絕地求生', '遊戲+PUBG', '遊戲+元宇宙',
+        '遊戲+NFT', '遊戲+GameFi', '遊戲+區塊鏈'
+    ],
+    // 市場產值關鍵字
+    market_value: [
+        '產值+網路遊戲', '產值+線上遊戲', '產值+手機遊戲',
+        '產值+Mobile Game', '產值+PC game', '產值+元宇宙',
+        '產值+區塊鏈', '產值+NFT遊戲', '產值+GameFi',
+        '趨勢+線上遊戲', '趨勢+手遊', '趨勢+電腦遊戲',
+        '趨勢+雲端遊戲', '市場+網路遊戲', '市場+手機遊戲'
+    ],
+    // 詐騙/支付負向排除關鍵字（用於過濾藍新金流不相關報導）
+    newebpay_fraud_exclusion: [
+        '詐騙+第三方支付', '詐騙+電子支付', '詐騙+行動支付',
+        '詐騙+Apple Pay', '詐騙+Samsung Pay', '詐騙+Google Pay',
+        '詐騙+支付寶', '詐騙+Alipay', '詐騙+微信支付',
+        '詐騙+悠遊卡', '詐騙+一卡通', '詐騙+虛擬貨幣'
+    ]
+};
+
 const PRESS_RELEASES = [
         {
             companyId: 'xlegend',

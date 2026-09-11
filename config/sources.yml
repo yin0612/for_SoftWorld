@@ -73,3 +73,1206 @@ fallback_sources:
   - id: google_news_gaming
     name: Google 新聞 - 台灣遊戲產業專區
     solution: Google News 主題 RSS 聚合追蹤
+
+# ============================================================
+# 三、台灣遊戲與科技媒體清單
+# (來源：SOFTWD_關鍵字清單20241015.xlsx 媒體Sheet + 監測媒體清單20241016-智冠.xlsx)
+# ============================================================
+tw_game_media:
+  - id: ithome
+    name: iThome
+    website: https://www.ithome.com.tw
+    category: 科技媒體
+
+  - id: udn
+    name: 聯合新聞網
+    website: https://www.udn.com
+    category: 綜合新聞
+
+  - id: game_life
+    name: Game LIFE
+    website: https://www.gamelife.com.tw
+    category: 遊戲娛樂
+
+  - id: taiwan_times
+    name: 台灣時報
+    website: https://www.twtimes.com.tw
+    category: 綜合新聞
+
+  - id: appledaily_tw
+    name: 壹蘋新聞網
+    website: https://tw.nextapple.com
+    category: 綜合新聞
+
+  - id: chinadaily_tw
+    name: 中華日報
+    website: https://www.cdns.com.tw
+    category: 綜合新聞
+
+  - id: cw
+    name: 遠見雜誌
+    website: https://www.gvm.com.tw
+    category: 深度財經
+
+  - id: nownews
+    name: 今日新聞網 NOWnews
+    website: https://www.nownews.com
+    category: 綜合新聞
+
+  - id: electdaily
+    name: 電獺少女
+    website: https://electdaily.com.tw
+    category: 科技娛樂
+
+  - id: pchome_news
+    name: PC home
+    website: https://news.pchome.com.tw
+    category: 科技媒體
+
+  - id: ltn
+    name: 自由時報電子報
+    website: https://www.ltn.com.tw
+    category: 綜合新聞
+
+  - id: bnextmag
+    name: 數位時代
+    website: https://www.bnext.com.tw
+    category: 科技新創
+
+  - id: cmoney
+    name: 信傳媒
+    website: https://www.cmoney.tw/notes/
+    category: 財經媒體
+
+  - id: moneyweekly
+    name: 理財週刊
+    website: https://www.moneyweekly.com.tw
+    category: 財經媒體
+
+  - id: etv
+    name: 英文台北時報 Taipei Times
+    website: https://www.taipeitimes.com
+    category: 英文新聞
+
+  - id: etv_news
+    name: 東森電視網
+    website: https://www.ettoday.net
+    category: 綜合新聞
+
+  - id: udnfin
+    name: 聯合理財網
+    website: https://money.udn.com
+    category: 財經媒體
+
+  - id: yam
+    name: yam蕃薯藤
+    website: https://yam.com
+    category: 入口媒體
+
+  - id: ctee_main
+    name: 工商時報
+    website: https://ctee.com.tw
+    category: 財經媒體
+
+  - id: taipacific
+    name: 太平洋日報
+    website: https://www.pacific.net.tw
+    category: 綜合新聞
+
+  - id: setn
+    name: 三立新聞網
+    website: https://www.setn.com
+    category: 電視新聞
+
+  - id: ftvnews
+    name: 非凡新聞網
+    website: https://www.ustv.com.tw
+    category: 電視新聞
+
+  - id: techbang
+    name: T客邦
+    website: https://www.techbang.com
+    category: 科技媒體
+
+  - id: mirrormedia
+    name: 鏡傳媒
+    website: https://www.mirrormedia.mg
+    category: 深度媒體
+
+  - id: want
+    name: 旺報
+    website: https://www.chinatimes.com/newspapers/wantdailynews
+    category: 綜合新聞
+
+  - id: era_news
+    name: 年代新聞
+    website: https://www.eranews.com.tw
+    category: 電視新聞
+
+  - id: tvbs_news
+    name: TVBS新聞網
+    website: https://news.tvbs.com.tw
+    category: 電視新聞
+
+  - id: businessweekly
+    name: 商業週刊
+    website: https://www.businessweekly.com.tw
+    category: 財經媒體
+
+  - id: people_news
+    name: 民眾日報
+    website: https://www.people-news.com
+    category: 綜合新聞
+
+  - id: mobile01
+    name: Mobile01
+    website: https://www.mobile01.com
+    category: 科技社群
+
+  - id: money_double
+    name: 萬寶週刊
+    website: https://www.wantrich.com.tw
+    category: 財經媒體
+
+  - id: ctd
+    name: 財訊
+    website: https://www.wealth.com.tw
+    category: 財經媒體
+
+  - id: eeindustry
+    name: 電電時代
+    website: https://www.mem.com.tw
+    category: 科技媒體
+
+  - id: ttv_global
+    name: 台視全球資訊網
+    website: https://www.ttv.com.tw
+    category: 電視新聞
+
+  - id: stnn
+    name: 台灣新生報
+    website: https://www.tssdnews.com.tw
+    category: 綜合新聞
+
+  - id: storm
+    name: 風傳媒
+    website: https://www.storm.mg
+    category: 深度媒體
+
+  - id: ftv_biz
+    name: 非凡商業周刊
+    website: https://www.ustv.com.tw
+    category: 財經媒體
+
+  - id: moneymag
+    name: Money錢
+    website: https://www.moneynet.com.tw
+    category: 財經媒體
+
+  - id: sina_tw
+    name: 新浪網(臺灣)
+    website: https://tw.sina.com
+    category: 入口媒體
+
+  - id: carou
+    name: 卡優新聞網
+    website: https://www.cardu.com.tw
+    category: 財經媒體
+
+  - id: chinatimes
+    name: 中國時報
+    website: https://www.chinatimes.com
+    category: 綜合新聞
+
+  - id: gamer_bahamut
+    name: 巴哈姆特電玩資訊站
+    website: https://www.gamer.com.tw
+    category: 遊戲娛樂
+
+  - id: bizweekly
+    name: 今周刊
+    website: https://www.businesstoday.com.tw
+    category: 財經媒體
+
+  - id: grassroot
+    name: 草根影響力新視野
+    website: https://www.grinews.com
+    category: 媒體評論
+
+  - id: udn_money
+    name: 經濟日報(臺灣)
+    website: https://money.udn.com
+    category: 財經產經
+
+  - id: linetoday
+    name: Line Today
+    website: https://today.line.me/tw
+    category: 入口媒體
+
+  - id: sogi_phone
+    name: SOGI 手機王
+    website: https://www.sogi.com.tw
+    category: 科技媒體
+
+  - id: newscloud
+    name: 新聞雲
+    website: https://www.ettoday.net/news_search/
+    category: 綜合新聞
+
+  - id: smartmag
+    name: Smart自學網
+    website: https://smart.businessweekly.com.tw
+    category: 財經媒體
+
+  - id: hinet
+    name: HiNet
+    website: https://times.hinet.net
+    category: 電信媒體
+
+  - id: niunews
+    name: 妞新聞
+    website: https://www.niusnews.com
+    category: 生活娛樂
+
+  - id: kakalook
+    name: 卡卡洛普
+    website: https://www.koc.com.tw
+    category: 遊戲娛樂
+
+  - id: nicegame
+    name: NiceGame遊戲中心
+    website: https://www.nicegame.com.tw
+    category: 遊戲娛樂
+
+  - id: mingjing
+    name: 銘報即時新聞
+    website: http://mol.mcu.edu.tw
+    category: 綜合新聞
+
+  - id: 3ctalk
+    name: 3C滔客
+    website: https://3ctalk.net
+    category: 科技媒體
+
+  - id: moneydj
+    name: MoneyDJ 理財網
+    website: https://www.moneydj.com
+    category: 財經媒體
+
+  - id: xfastest
+    name: Xfastest Media
+    website: https://www.xfastest.com
+    category: 科技媒體
+
+  - id: ftv_news
+    name: 民視新聞網
+    website: https://news.ftv.com.tw
+    category: 電視新聞
+
+  - id: gamebase
+    name: 遊戲基地
+    website: https://www.gamebase.com.tw
+    category: 遊戲娛樂
+
+  - id: wownews
+    name: Wow!NEWS
+    website: https://www.wownews.com.tw
+    category: 綜合新聞
+
+  - id: msn_tw
+    name: MSN台灣
+    website: https://www.msn.com/zh-tw
+    category: 入口媒體
+
+  - id: report_orange
+    name: 報橘
+    website: https://buzzorange.com
+    category: 媒體評論
+
+  - id: upmedia
+    name: 上報
+    website: https://www.upmedia.mg
+    category: 深度媒體
+
+  - id: technews
+    name: 科技新報網 TechNews
+    website: https://technews.tw
+    category: 科技媒體
+
+  - id: zaobao
+    name: 財訊快報
+    website: https://www.wealth.com.tw
+    category: 財經媒體
+
+  - id: smartrich
+    name: Smart智富月刊
+    website: https://smart.businessweekly.com.tw
+    category: 財經媒體
+
+  - id: 4gamers_esports
+    name: 4Gamers電競賽事平臺
+    website: https://www.4gamers.com.tw
+    category: 電競媒體
+
+  - id: ctv_news
+    name: 中天電視網
+    website: https://www.ctitv.com.tw
+    category: 電視新聞
+
+  - id: econ_daily
+    name: 大成報(台灣)
+    website: https://www.cdns.com.tw
+    category: 綜合新聞
+
+  - id: twnewstimes
+    name: 台灣醒報
+    website: https://anntw.com
+    category: 綜合新聞
+
+  - id: jingo
+    name: 勁報
+    website: https://www.jingo.com.tw
+    category: 綜合新聞
+
+  - id: newsweek_tw
+    name: 今週刊
+    website: https://www.businesstoday.com.tw
+    category: 財經媒體
+
+  - id: onetv
+    name: 壹電視
+    website: https://www.nexttv.com.tw
+    category: 電視新聞
+
+  - id: morefun
+    name: 更生日報
+    website: https://www.ksnews.com.tw
+    category: 綜合新聞
+
+  - id: kakalup2
+    name: 卡卡洛普
+    website: https://www.koc.com.tw
+    category: 遊戲娛樂
+
+  - id: 2000fun
+    name: 2000FUN
+    website: https://www.2000fun.com
+    category: 遊戲娛樂
+
+  - id: techbang_tw
+    name: T客邦
+    website: https://www.techbang.com
+    category: 科技媒體
+
+# ============================================================
+# 四、中港媒體清單
+# (來源：SOFTWD_關鍵字清單20241015.xlsx CN/HK媒體 + 監測媒體清單20241016-智冠.xlsx CNHK媒體)
+# ============================================================
+cnhk_media:
+  - id: 07073
+    name: 07073遊戲網
+    website: https://www.07073.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: 17173
+    name: 17173.com
+    website: https://www.17173.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: 3dmgame
+    name: 3DMGame
+    website: https://www.3dmgame.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: 3igame
+    name: 3iGAME
+    website: https://www.3igame.com
+    category: 遊戲娛樂
+    region: Hong Kong
+
+  - id: 52pk
+    name: 52pk遊戲網
+    website: https://www.52pk.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: akira_club
+    name: Akira Club
+    website: https://www.akiraclub.com
+    category: 遊戲娛樂
+    region: Hong Kong
+
+  - id: tgbus
+    name: 電玩巴士網
+    website: https://www.tgbus.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: chinagame
+    name: 通信產業網
+    website: https://www.ccidnet.com
+    category: 科技媒體
+    region: China
+
+  - id: cntv
+    name: 央視網
+    website: https://www.cntv.cn
+    category: 電視媒體
+    region: China
+
+  - id: ce
+    name: 中國經濟網
+    website: https://www.ce.cn
+    category: 財經媒體
+    region: China
+
+  - id: bitweek
+    name: 比特網
+    website: https://www.chinabyte.com
+    category: 科技媒體
+    region: China
+
+  - id: chinadaily_cn
+    name: 中國日報中文網
+    website: https://cn.chinadaily.com.cn
+    category: 綜合新聞
+    region: China
+
+  - id: chinanet_game
+    name: 中華網遊戲
+    website: https://game.china.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: chinanews
+    name: 中國新聞網
+    website: https://www.chinanews.com
+    category: 綜合新聞
+    region: China
+
+  - id: taiwan_cn
+    name: 中國台灣網
+    website: https://www.taiwan.cn
+    category: 綜合新聞
+    region: China
+
+  - id: cnbeta
+    name: cnbeta中文業界資訊站
+    website: https://www.cnbeta.com
+    category: 科技媒體
+    region: China
+
+  - id: cri
+    name: 國際在線
+    website: https://www.cri.cn
+    category: 媒體
+    region: China
+
+  - id: hkmo
+    name: 香港手機遊戲網
+    website: https://www.hkmo.net
+    category: 遊戲娛樂
+    region: Hong Kong
+
+  - id: great_game
+    name: GREAT GAME
+    website: https://greatgame.asia
+    category: 遊戲娛樂
+    region: Hong Kong
+
+  - id: hk01
+    name: 香港01
+    website: https://www.hk01.com
+    category: 綜合新聞
+    region: Hong Kong
+
+  - id: hkgolden
+    name: 香港高登
+    website: https://golden.hk
+    category: 社群論壇
+    region: Hong Kong
+
+  - id: huanqiu
+    name: 環球網
+    website: https://www.huanqiu.com
+    category: 綜合新聞
+    region: China
+
+  - id: iresearch
+    name: 艾瑞網
+    website: https://www.iresearch.com.cn
+    category: 研究媒體
+    region: China
+
+  - id: it168
+    name: IT168
+    website: https://www.it168.com
+    category: 科技媒體
+    region: China
+
+  - id: mingpao
+    name: 明報(即時新聞)
+    website: https://news.mingpao.com
+    category: 綜合新聞
+    region: Hong Kong
+
+  - id: nakuz
+    name: 樂古手遊網
+    website: https://www.nakuz.com
+    category: 遊戲娛樂
+    region: Hong Kong
+
+  - id: oresal
+    name: 東方日報網
+    website: https://hk.on.cc
+    category: 綜合新聞
+    region: Hong Kong
+
+  - id: pchome_cn
+    name: 電腦之家
+    website: https://www.pchome.net
+    category: 科技媒體
+    region: China
+
+  - id: qq_game
+    name: QQ遊戲資訊
+    website: https://games.qq.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: qudong
+    name: 驅動中國
+    website: https://www.qudong.com
+    category: 科技媒體
+    region: China
+
+  - id: stheadline
+    name: 星島日報網
+    website: https://www.singtao.com
+    category: 綜合新聞
+    region: Hong Kong
+
+  - id: spill
+    name: SPILL
+    website: https://spill.hk
+    category: 娛樂媒體
+    region: Hong Kong
+
+  - id: pcgames
+    name: 太平洋電腦網
+    website: https://www.pconline.com.cn
+    category: 科技媒體
+    region: China
+
+  - id: sina_games
+    name: 新浪遊戲
+    website: https://games.sina.com.cn
+    category: 遊戲娛樂
+    region: China
+
+  - id: tencent_games
+    name: 人民網
+    website: https://www.people.com.cn
+    category: 綜合新聞
+    region: China
+
+  - id: uuu9
+    name: 游久網
+    website: https://www.uuu9.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: vj_games
+    name: VJ Games
+    website: https://vjgamer.com.hk
+    category: 遊戲娛樂
+    region: Hong Kong
+
+  - id: gameapps_hk
+    name: GAMEAPPS
+    website: https://www.gameapps.hk
+    category: 遊戲娛樂
+    region: Hong Kong
+
+  - id: gamelook
+    name: GAMELOOK
+    website: https://www.gamelook.com.cn
+    category: 遊戲娛樂
+    region: China
+
+  - id: gamersky
+    name: 遊民星空
+    website: https://www.gamersky.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: unwire_hk
+    name: UNWIRE.HK 流動科技生活
+    website: https://unwire.hk
+    category: 科技媒體
+    region: Hong Kong
+
+  - id: zdnet_asia
+    name: ZDNet Asia
+    website: https://www.zdnet.com/topic/asia/
+    category: 科技媒體
+    region: Hong Kong
+
+  - id: guanchazhe
+    name: 游迅網
+    website: https://www.youxiputao.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: a9vg
+    name: A9VG電玩部落
+    website: https://www.a9vg.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: gameapps_cn
+    name: 265g
+    website: https://www.265g.com
+    category: 遊戲娛樂
+    region: China
+
+  - id: yzz
+    name: 遊族網絡
+    website: https://www.yzz.cn
+    category: 遊戲娛樂
+    region: China
+
+  - id: mtgamer
+    name: MTGAMER
+    website: https://mtgamer.com
+    category: 遊戲娛樂
+    region: Hong Kong
+
+# ============================================================
+# 五、國際財經外媒清單（20大 + 100大）
+# (來源：20大財經外媒清單.xlsx + 100大財經外媒清單.xlsx)
+# ============================================================
+international_finance_media:
+  # --- 主要英語財經媒體 ---
+  - id: forbes
+    name: Forbes 福布斯
+    website: https://www.forbes.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: the_independent
+    name: The Independent
+    website: https://www.independent.co.uk
+    language: ENG
+    region: United Kingdom
+    category: 財經媒體
+
+  - id: livemint
+    name: livemint.com
+    website: https://www.livemint.com
+    language: ENG
+    region: India
+    category: 財經媒體
+
+  - id: cbs_moneywatch
+    name: CBS MoneyWatch
+    website: https://www.cbsnews.com/moneywatch/
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: wsj
+    name: 華爾街日報 Wall Street Journal
+    website: https://www.wsj.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: bloomberg
+    name: Bloomberg.com
+    website: https://www.bloomberg.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: investopedia
+    name: Investopedia
+    website: https://www.investopedia.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: ft_fintech
+    name: Financial Times - Fintech
+    website: https://www.ft.com/fintech
+    language: ENG
+    region: United States
+    category: 財科技媒體
+
+  - id: fintech_global
+    name: Fintech Global
+    website: https://fintech.global
+    language: ENG
+    region: United Kingdom
+    category: 財科技媒體
+
+  - id: the_fintech_times
+    name: The Fintech Times
+    website: https://thefintechtimes.com
+    language: ENG
+    region: United Kingdom
+    category: 財科技媒體
+
+  - id: cnbc
+    name: CNBC Fintech
+    website: https://www.cnbc.com/fintech/
+    language: ENG
+    region: United States
+    category: 財科技媒體
+
+  - id: fintech_futures
+    name: Fintech Futures
+    website: https://www.fintechfutures.com
+    language: ENG
+    region: United Kingdom
+    category: 財科技媒體
+
+  - id: business_insider
+    name: Business Insider
+    website: https://www.businessinsider.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: finextra
+    name: Finextra
+    website: https://www.finextra.com
+    language: ENG
+    region: United Kingdom
+    category: 財科技媒體
+
+  - id: reuters
+    name: Reuters 路透社
+    website: https://www.reuters.com
+    language: ENG
+    region: United Kingdom
+    category: 通訊社
+
+  - id: techcrunch
+    name: TechCrunch
+    website: https://techcrunch.com
+    language: ENG
+    region: United States
+    category: 科技媒體
+
+  - id: decrypt
+    name: Decrypt
+    website: https://decrypt.co/news
+    language: ENG
+    region: United States
+    category: 加密貨幣媒體
+
+  - id: fortune
+    name: Fortune 財星
+    website: https://fortune.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: payments_dive
+    name: Payments Dive
+    website: https://www.paymentsdive.com
+    language: ENG
+    region: United States
+    category: 支付媒體
+
+  - id: payments_journal
+    name: Payments Journal
+    website: https://www.paymentsjournal.com
+    language: ENG
+    region: United States
+    category: 支付媒體
+
+  - id: the_economist
+    name: 經濟學人 The Economist
+    website: https://www.economist.com
+    language: ENG
+    region: United Kingdom
+    category: 財經媒體
+
+  - id: nasdaq
+    name: NASDAQ
+    website: https://www.nasdaq.com
+    language: ENG
+    region: United States
+    category: 證券交易所
+
+  - id: benzinga
+    name: Benzinga
+    website: https://www.benzinga.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: morningstar
+    name: Morningstar
+    website: https://www.morningstar.com
+    language: ENG
+    region: United States
+    category: 財經研究
+
+  - id: afr
+    name: The Australian Financial Review
+    website: https://www.afr.com
+    language: ENG
+    region: Australia
+    category: 財經媒體
+
+  - id: investor_biz_daily
+    name: Investor Business Daily
+    website: https://www.investors.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: barrons
+    name: "Barron's Asia"
+    website: https://www.barrons.com/asia
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: world_bank
+    name: 世界銀行 World Bank
+    website: https://www.worldbank.org
+    language: ENG
+    region: United States
+    category: 國際組織
+
+  - id: cointelegraph
+    name: Cointelegraph
+    website: https://cointelegraph.com
+    language: ENG
+    region: United States
+    category: 加密貨幣媒體
+
+  - id: aastocks_en
+    name: 阿思達克財經網(英文版)
+    website: https://www.aastocks.com/en
+    language: ENG
+    region: Hong Kong
+    category: 財經媒體
+
+  - id: sec_gov
+    name: SEC 美國證管會
+    website: https://www.sec.gov
+    language: ENG
+    region: United States
+    category: 監管機構
+
+  - id: coindesk
+    name: CoinDesk
+    website: https://www.coindesk.com
+    language: ENG
+    region: United States
+    category: 加密貨幣媒體
+
+  - id: quartz
+    name: QUARTZ
+    website: https://qz.com
+    language: ENG
+    region: United States
+    category: 財科技媒體
+
+  - id: deloitte
+    name: Deloitte 勤業眾信
+    website: https://www2.deloitte.com
+    language: ENG
+    region: United States
+    category: 顧問研究
+
+  - id: fxstreet
+    name: FX Street
+    website: https://www.fxstreet.com
+    language: ENG
+    region: United States
+    category: 外匯媒體
+
+  - id: dow_jones
+    name: Dow Jones 道瓊斯
+    website: https://www.dowjones.com
+    language: ENG
+    region: United States
+    category: 財經媒體
+
+  - id: gartner
+    name: Gartner
+    website: https://www.gartner.com
+    language: ENG
+    region: United States
+    category: 研究機構
+
+  - id: imf
+    name: IMF 國際貨幣基金
+    website: https://www.imf.org
+    language: ENG
+    region: United States
+    category: 國際組織
+
+  - id: goldman_sachs
+    name: Goldman Sachs 高盛
+    website: https://www.goldmansachs.com
+    language: ENG
+    region: United States
+    category: 投資銀行
+
+  - id: ecb
+    name: European Central Bank 歐洲央行
+    website: https://www.ecb.europa.eu
+    language: ENG
+    region: Germany
+    category: 中央銀行
+
+  - id: federal_reserve
+    name: 美聯儲 Federal Reserve
+    website: https://www.federalreserve.gov
+    language: ENG
+    region: United States
+    category: 中央銀行
+
+  - id: bis
+    name: Bank for International Settlements 國際清算銀行
+    website: https://www.bis.org
+    language: ENG
+    region: Switzerland
+    category: 國際組織
+
+  - id: lse
+    name: London Stock Exchange 倫敦證交所
+    website: https://www.londonstockexchange.com
+    language: ENG
+    region: United Kingdom
+    category: 證券交易所
+
+  - id: nyse
+    name: 紐約證券交易所 NYSE
+    website: https://www.nyse.com
+    language: ENG
+    region: United States
+    category: 證券交易所
+
+  - id: hkex_en
+    name: 香港交易所(英文版)
+    website: https://www.hkex.com.hk/?sc_lang=en
+    language: ENG
+    region: Hong Kong
+    category: 證券交易所
+
+  - id: the_next_web
+    name: The Next Web
+    website: https://thenextweb.com
+    language: ENG
+    region: Netherlands
+    category: 科技媒體
+
+  - id: cryptopotato
+    name: CryptoPotato
+    website: https://cryptopotato.com
+    language: ENG
+    region: United States
+    category: 加密貨幣媒體
+
+  - id: ccn
+    name: CCN
+    website: https://www.ccn.com
+    language: ENG
+    region: United States
+    category: 加密貨幣媒體
+
+  - id: globenewswire
+    name: GlobeNewswire
+    website: https://globenewswire.com
+    language: ENG
+    region: United States
+    category: 新聞稿服務
+
+  - id: financial_post
+    name: Financial Post
+    website: https://financialpost.com
+    language: ENG
+    region: Canada
+    category: 財經媒體
+
+  - id: taxfoundation
+    name: Tax Foundation
+    website: https://taxfoundation.org
+    language: ENG
+    region: United States
+    category: 研究機構
+
+  - id: mas_sg
+    name: Monetary Authority of Singapore 新加坡金管局
+    website: https://www.mas.gov.sg
+    language: ENG
+    region: Singapore
+    category: 監管機構
+
+  - id: adb
+    name: 亞洲開發銀行 ADB
+    website: https://www.adb.org
+    language: ENG
+    region: Philippines
+    category: 國際組織
+
+  - id: fca_uk
+    name: 英國金融行為監管局 FCA
+    website: https://www.fca.org.uk
+    language: ENG
+    region: United Kingdom
+    category: 監管機構
+
+  - id: rba
+    name: 澳洲儲備銀行
+    website: https://www.rba.gov.au
+    language: ENG
+    region: Australia
+    category: 中央銀行
+
+  - id: pbc
+    name: 中國人民銀行
+    website: https://www.pbc.gov.cn/en
+    language: ENG
+    region: China
+    category: 中央銀行
+
+# ============================================================
+# 六、智冠監測關鍵字清單摘要
+# (來源：SOFTWD_關鍵字清單20241015.xlsx 關鍵字Sheet，2024/10/15版)
+# ============================================================
+keywords:
+  # 智冠集團（台灣）監測關鍵字
+  soft_world_group:
+    label: 智冠集團 (台灣)
+    primary:
+      - 智冠
+      - 智冠科技
+      - 智冠集團
+      - 中華網龍
+      - 網龍
+      - MyCard
+      - 藍新科技
+      - 藍新金流
+      - NewebPay
+      - ezPay
+      - 簡單付
+      - 簡單行動支付
+    game_titles:
+      - 遊戲+金庸群俠傳
+      - 遊戲+吞食天地
+      - 遊戲+吞食天地2
+      - 遊戲+威龍線上
+      - 遊戲+星際擴散
+      - 遊戲+天地劫
+      - 遊戲+炎龍騎士團
+      - 遊戲+MCL
+      - 遊戲+MCL 電子競技
+      - 遊戲+FOWGAMES
+      - 遊戲+GFi 賦能平台
+      - 遊戲+TRAHA 天選者
+    ip_keywords:
+      - IP+吞食天地
+      - IP+武林群俠傳
+      - IP+黃易
+      - IP+炎龍騎士團
+      - IP授權+吞食天地
+      - ip+戀愛盒子
+
+  # 藍新科技監測關鍵字
+  newebpay_group:
+    label: 藍新科技 (台灣)
+    primary:
+      - 藍新科技
+      - 藍新金流
+      - NewebPay
+      - ezPay
+      - 簡單付
+      - 歐付寶
+      - OPay
+      - 橘子支
+      - 街口支付
+      - 綠界科技
+      - ECPay
+      - 全支付
+      - 全盈支付
+
+  # 競業廠商監測關鍵字
+  competitor_group:
+    label: 競業新聞 (台灣)
+    primary:
+      - 遊戲橘子
+      - 樂利數位
+      - 有閑數位
+      - 大宇資
+      - 大宇資訊
+      - 昱泉
+      - 華義
+      - 鈊象
+      - 宇峻奧汀
+      - 茂為
+      - 茂為歐買尬
+      - 紅心辣椒
+      - 傳奇網路
+      - 網石
+      - 弘煜
+      - 真好玩
+      - 9Splay
+      - 唯數娛樂
+      - 天剛資訊
+      - 創業家兄弟
+      - 91APP
+      - 網銀國際
+      - Wanin
+      - 地心引力股份有限公司
+      - GameSword劍聖遊戲
+
+  # 產業新聞監測關鍵字
+  industry_group:
+    label: 產業新聞 (台灣)
+    game_type:
+      - 遊戲+VR
+      - 遊戲+AR
+      - 遊戲+LBS
+      - 遊戲+HTML5
+      - 遊戲+H5
+      - 遊戲+XBOX
+      - 遊戲+SWITCH
+      - 遊戲+PS4
+      - 遊戲+PS5
+      - 遊戲+Steam平台
+      - 遊戲+主機遊戲
+      - 遊戲+電競聯賽
+      - 遊戲+電競賽事
+      - 遊戲+暴雪
+      - 遊戲+Blizzard
+      - 遊戲+絕地求生
+      - 遊戲+PUBG
+    market_keywords:
+      - 產值+網路遊戲
+      - 產值+線上遊戲
+      - 產值+手機遊戲
+      - 產值+Mobile Game
+      - 產值+PC game
+      - 產值+元宇宙
+      - 產值+區塊鏈
+      - 產值+NFT遊戲
+      - 產值+GameFi
+      - 趨勢+線上遊戲
+      - 趨勢+手遊
+      - 趨勢+電腦遊戲
+      - 趨勢+雲端遊戲
+      - 市場+網路遊戲
+      - 市場+手機遊戲
