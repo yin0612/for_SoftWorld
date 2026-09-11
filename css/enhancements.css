@@ -464,3 +464,30 @@
     width: 100%;
   }
 }
+
+/* 慧科關鍵字導航與新聞中心增強樣式 */
+.huike-chip:hover {
+  border-color: #e76f51 !important;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(231, 111, 81, 0.15);
+}
+
+.tag-huike-chip:hover {
+  background: #ffe3dc !important;
+  transform: scale(1.03);
+}
+
+.timeline-company-badge:hover,
+.timeline-category:hover,
+.timeline-source-badge:hover {
+  opacity: 0.85;
+  text-decoration: underline;
+}
+
+mark {
+  background-color: #fef08a;
+  color: #854d0e;
+  border-radius: 3px;
+  padding: 0 2px;
+}
+

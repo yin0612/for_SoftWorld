@@ -506,27 +506,10 @@ function initNewsSection() {
 function initHuikeNav() {
     const tabsContainer = document.getElementById('huikeFolderTabs');
     const chipsContainer = document.getElementById('huikeKeywordChips');
-    const descEl = document.getElementById('huikeFolderDesc');
     const clearBtn = document.getElementById('clearHuikeFilterBtn');
     if (!tabsContainer || typeof HUIKE_2025_STRUCTURE === 'undefined') return;
 
-    tabsContainer.innerHTML = '';
-
-    HUIKE_2025_STRUCTURE.forEach(folder => {
-        const tabBtn = document.createElement('button');
-        tabBtn.className = `btn btn-sm ${folder.id === currentHuikeFolderId ? 'btn-primary' : 'btn-ghost'}`;
-        tabBtn.style.cssText = 'font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;';
-        tabBtn.innerHTML = `<span>${folder.icon}</span> <strong>${folder.folderName}</strong>`;
-        
-        tabBtn.addEventListener('click', () => {
-            currentHuikeFolderId = folder.id;
-            renderHuikeTabs();
-            renderHuikeChips();
-        });
-
-        tabsContainer.appendChild(tabBtn);
-    });
-
+    renderHuikeTabs();
     renderHuikeChips();
 
     if (clearBtn) {
@@ -541,19 +524,41 @@ function initHuikeNav() {
     }
 }
 
+function getFolderNewsCount(folderId) {
+    if (typeof PRESS_RELEASES === 'undefined') return 0;
+    return PRESS_RELEASES.filter(n => n.huikeFolder === folderId).length;
+}
+
+function getKeywordNewsCount(keyword) {
+    if (typeof PRESS_RELEASES === 'undefined' || !keyword) return 0;
+    const kw = keyword.toLowerCase().trim();
+    return PRESS_RELEASES.filter(n => 
+        (n.huikeKeyword && n.huikeKeyword.toLowerCase().includes(kw)) ||
+        (n.title && n.title.toLowerCase().includes(kw)) ||
+        (n.excerpt && n.excerpt.toLowerCase().includes(kw))
+    ).length;
+}
+
 function renderHuikeTabs() {
     const tabsContainer = document.getElementById('huikeFolderTabs');
     if (!tabsContainer || typeof HUIKE_2025_STRUCTURE === 'undefined') return;
 
-    const btns = tabsContainer.querySelectorAll('button');
-    HUIKE_2025_STRUCTURE.forEach((folder, idx) => {
-        if (btns[idx]) {
-            if (folder.id === currentHuikeFolderId) {
-                btns[idx].className = 'btn btn-sm btn-primary';
-            } else {
-                btns[idx].className = 'btn btn-sm btn-ghost';
-            }
-        }
+    tabsContainer.innerHTML = '';
+    HUIKE_2025_STRUCTURE.forEach(folder => {
+        const count = getFolderNewsCount(folder.id);
+        const tabBtn = document.createElement('button');
+        const isActive = (folder.id === currentHuikeFolderId);
+        tabBtn.className = `btn btn-sm ${isActive ? 'btn-primary' : 'btn-ghost'}`;
+        tabBtn.style.cssText = 'font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;';
+        tabBtn.innerHTML = `<span>${folder.icon}</span> <strong>${folder.folderName}</strong> <span style="background:${isActive ? 'rgba(255,255,255,0.25)' : '#e2e8f0'}; color:${isActive ? '#fff' : '#475569'}; font-size:0.75rem; padding:1px 6px; border-radius:10px; font-weight:700;">${count}</span>`;
+        
+        tabBtn.addEventListener('click', () => {
+            currentHuikeFolderId = folder.id;
+            renderHuikeTabs();
+            renderHuikeChips();
+        });
+
+        tabsContainer.appendChild(tabBtn);
     });
 }
 
@@ -571,21 +576,29 @@ function renderHuikeChips() {
     chipsContainer.innerHTML = '';
 
     currentFolder.keywords.forEach(kw => {
+        const count = getKeywordNewsCount(kw);
         const chip = document.createElement('button');
         const isActive = (activeHuikeKeyword === kw);
         chip.className = 'huike-chip';
         chip.style.cssText = `
-            border: 1px solid ${isActive ? '#e76f51' : '#cbd5e1'};
-            background: ${isActive ? '#e76f51' : '#ffffff'};
-            color: ${isActive ? '#ffffff' : '#334155'};
+            border: 1px solid ${isActive ? '#e76f51' : (count > 0 ? '#fb923c' : '#cbd5e1')};
+            background: ${isActive ? '#e76f51' : (count > 0 ? '#fff7ed' : '#ffffff')};
+            color: ${isActive ? '#ffffff' : (count > 0 ? '#c2410c' : '#334155')};
             font-size: 0.8rem;
             padding: 4px 10px;
             border-radius: 16px;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-weight: ${isActive ? '700' : '500'};
+            font-weight: ${isActive || count > 0 ? '700' : '500'};
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         `;
-        chip.textContent = kw;
+        
+        const countBadge = count > 0 
+            ? `<span style="background:${isActive ? '#ffffff' : '#f97316'}; color:${isActive ? '#e76f51' : '#ffffff'}; font-size:0.7rem; padding:1px 5px; border-radius:10px; font-weight:800;">${count}</span>` 
+            : '';
+        chip.innerHTML = `${kw} ${countBadge}`;
 
         chip.addEventListener('click', () => {
             if (activeHuikeKeyword === kw) {
@@ -706,12 +719,69 @@ function renderNews(append = false) {
         countEl.textContent = `共 ${filteredNews.length} 則符合條件新聞稿`;
     }
 
+function highlightKeyword(text, keyword) {
+    if (!text || !keyword) return text;
+    const cleanKw = keyword.trim();
+    if (!cleanKw) return text;
+    try {
+        const regex = new RegExp(`(${cleanKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+        return text.replace(regex, '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>');
+    } catch (e) {
+        return text;
+    }
+}
+
+function renderNews(append = false) {
+    const container = document.getElementById('timelineContainer');
+    const loadMoreBtn = document.getElementById('timelineLoadMore');
+    const countEl = document.getElementById('filterResultCount');
+    const currentKeyword = document.getElementById('filterKeyword')?.value.trim() || activeHuikeKeyword;
+
+    if (!container) return;
+
+    if (!append) {
+        container.innerHTML = '';
+    }
+
+    if (countEl) {
+        countEl.textContent = `共 ${filteredNews.length} 則符合條件新聞稿`;
+    }
+
     const startIndex = (currentNewsPage - 1) * NEWS_PER_PAGE;
     const endIndex = startIndex + NEWS_PER_PAGE;
     const newsToShow = filteredNews.slice(startIndex, endIndex);
 
     if (filteredNews.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding: 40px; color: var(--text-muted);">找不到符合條件的公關新聞稿。</div>';
+        container.innerHTML = `
+            <div style="text-align:center; padding: 48px 20px; color: var(--text-muted); background: #f8fafc; border-radius: 12px; border: 1px dashed var(--border-color);">
+                <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
+                <h4 style="font-size: 1.1rem; color: #334155; margin-bottom: 6px;">近兩個月內暫無完全相符的新聞稿紀錄</h4>
+                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">您可以嘗試清除關鍵字、點選上方其他熱門關鍵字標籤，或擴大日期搜尋範圍。</p>
+                <button class="btn btn-primary btn-sm" id="resetNewsFiltersBtn" style="padding: 6px 18px; border-radius: 20px;">
+                    ↻ 一鍵重設為近兩個月全部新聞
+                </button>
+            </div>
+        `;
+        const resetBtn = document.getElementById('resetNewsFiltersBtn');
+        if (resetBtn) {
+            resetBtn.onclick = () => {
+                const kwInput = document.getElementById('filterKeyword');
+                const catSelect = document.getElementById('filterCategory');
+                const srcSelect = document.getElementById('filterSource');
+                const fromInput = document.getElementById('filterDateFrom');
+                const toInput = document.getElementById('filterDateTo');
+                if (kwInput) kwInput.value = '';
+                if (catSelect) catSelect.value = '';
+                if (srcSelect) srcSelect.value = '';
+                if (fromInput) fromInput.value = '2026-07-01';
+                if (toInput) toInput.value = '2026-09-30';
+                activeHuikeKeyword = '';
+                const clearBtn = document.getElementById('clearHuikeFilterBtn');
+                if (clearBtn) clearBtn.style.display = 'none';
+                renderHuikeChips();
+                applyNewsFilters();
+            };
+        }
         if (loadMoreBtn) loadMoreBtn.style.display = 'none';
         return;
     }
@@ -726,40 +796,91 @@ function renderNews(append = false) {
             : '';
 
         const huikeBadge = news.huikeKeyword
-            ? `<span style="background:#fff1ee; color:#c84b31; border:1px solid #ffd8d0; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle;">📌 ${news.huikeKeyword}</span>`
+            ? `<span class="tag-huike-chip" data-kw="${news.huikeKeyword}" style="background:#fff1ee; color:#c84b31; border:1px solid #ffd8d0; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${news.huikeKeyword}</span>`
             : '';
 
         const targetUrl = (news.url && news.url.startsWith('http')) 
             ? news.url 
             : (typeof getMediaSearchUrl === 'function' ? getMediaSearchUrl(news.source, news.companyName) : '#');
 
+        const displayTitle = highlightKeyword(news.title, currentKeyword);
+        const displayExcerpt = highlightKeyword(news.excerpt, currentKeyword);
+
         item.innerHTML = `
             <div class="timeline-dot"></div>
             <div class="timeline-card">
                 <div class="timeline-card-header">
                     <div>
-                        <span class="timeline-company-badge" style="background: ${news.companyColor}18; color: ${news.companyColor}">
+                        <span class="timeline-company-badge" data-comp-id="${news.companyId}" style="background: ${news.companyColor}18; color: ${news.companyColor}; cursor:pointer;" title="點擊篩選該公司">
                             ${news.companyName}
                         </span>
                         ${huikeBadge}
                     </div>
-                    <span class="timeline-date">${news.date}</span>
+                    <span class="timeline-date">📅 ${news.date}</span>
                 </div>
                 <h4 class="timeline-title">
                     <a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.color='${news.companyColor}'" onmouseout="this.style.color='inherit'">
-                        ${news.title} <span style="font-size:0.85rem;">↗</span>
+                        ${displayTitle} <span style="font-size:0.85rem;">↗</span>
                     </a>
                     ${syntheticBadge}
                 </h4>
-                <p class="timeline-excerpt">${news.excerpt}</p>
-                <div class="timeline-footer">
-                    <span class="timeline-category">${news.category}</span>
-                    <a href="${targetUrl}" target="_blank" rel="noopener" class="timeline-source" style="color: var(--primary); text-decoration: underline; font-weight: 600;">
-                        來源：${news.source} ↗
+                <p class="timeline-excerpt">${displayExcerpt}</p>
+                <div class="timeline-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <span class="timeline-category" data-cat="${news.category}" style="cursor:pointer;" title="點擊篩選該類別">🏷️ ${news.category}</span>
+                        <span class="timeline-source-badge" data-src="${news.source}" style="background:#f1f5f9; color:#475569; font-size:0.75rem; padding:3px 8px; border-radius:6px; cursor:pointer; font-weight:600;" title="點擊篩選此媒體">📰 ${news.source}</span>
+                    </div>
+                    <a href="${targetUrl}" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline; font-weight: 600; font-size:0.82rem;">
+                        開啟完整新聞 ↗
                     </a>
                 </div>
             </div>
         `;
+
+        // 綁定卡片內標籤點選一鍵過濾事件
+        const chipEl = item.querySelector('.tag-huike-chip');
+        if (chipEl) {
+            chipEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const kw = chipEl.getAttribute('data-kw');
+                if (kw) {
+                    activeHuikeKeyword = kw;
+                    const kwInput = document.getElementById('filterKeyword');
+                    if (kwInput) kwInput.value = kw;
+                    const clearBtn = document.getElementById('clearHuikeFilterBtn');
+                    if (clearBtn) clearBtn.style.display = 'inline-block';
+                    renderHuikeChips();
+                    applyNewsFilters();
+                }
+            });
+        }
+
+        const catEl = item.querySelector('.timeline-category');
+        if (catEl) {
+            catEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const cat = catEl.getAttribute('data-cat');
+                const catSelect = document.getElementById('filterCategory');
+                if (catSelect && cat) {
+                    catSelect.value = cat;
+                    applyNewsFilters();
+                }
+            });
+        }
+
+        const srcEl = item.querySelector('.timeline-source-badge');
+        if (srcEl) {
+            srcEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const src = srcEl.getAttribute('data-src');
+                const srcSelect = document.getElementById('filterSource');
+                if (srcSelect && src) {
+                    srcSelect.value = src;
+                    applyNewsFilters();
+                }
+            });
+        }
+
         container.appendChild(item);
     });
 
