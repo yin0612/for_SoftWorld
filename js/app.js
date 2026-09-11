@@ -551,7 +551,10 @@ function applyNewsFilters() {
     filteredNews = PRESS_RELEASES.filter(news => {
         const matchCompany = selectedCompanies.includes(news.companyId);
         const matchCategory = !selectedCategory || news.category === selectedCategory;
-        const matchSource = !selectedSource || news.source === selectedSource;
+        const matchSource = !selectedSource || 
+                            news.source === selectedSource || 
+                            (news.source && news.source.includes(selectedSource)) ||
+                            (news.source && selectedSource.includes(news.source));
         const matchKeyword = !keyword || 
                              news.title.toLowerCase().includes(keyword) || 
                              news.excerpt.toLowerCase().includes(keyword) ||

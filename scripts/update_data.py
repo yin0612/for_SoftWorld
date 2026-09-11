@@ -6,11 +6,15 @@ import urllib.parse
 
 DATA_FILE_PATH = os.path.join(os.path.dirname(__file__), '..', 'js', 'data.js')
 
-# 模擬新聞稿的保留上限：達到後只推進月份、不再新增，避免 data.js 無限膨脹
 MAX_SYNTHETIC_ENTRIES = 12
 NEWLINE = chr(10)
 
-MEDIA_SOURCES = ['經濟日報', '鉅亨網', '數位時代', '巴哈姆特', '4Gamers', '天下雜誌', 'ETtoday', 'Yahoo新聞']
+MEDIA_SOURCES = [
+    '經濟日報', '鉅亨網', '數位時代', '巴哈姆特', '4Gamers', '天下雜誌', 'ETtoday', 'Yahoo新聞',
+    '工商時報', '今周刊', '商業週刊', '自由時報', 'MoneyDJ', '科技新報',
+    '17173', '遊民星空', '3DMGame', 'GAMELOOK', '香港01',
+    'Bloomberg', 'Reuters', 'Forbes', 'TechCrunch', 'The Economist'
+]
 
 def generate_search_url(source, company_name):
     """根據媒體名稱與公司名稱產生直達報導檢索 URL"""
@@ -23,7 +27,18 @@ def generate_search_url(source, company_name):
         '巴哈姆特': f"https://gnn.gamer.com.tw/search.php?kw={encoded}",
         '4Gamers': f"https://www.4gamers.com.tw/site/search?q={encoded}",
         'Yahoo新聞': f"https://news.search.yahoo.com/search?p={encoded}",
-        'ETtoday': f"https://www.ettoday.net/news_search/unicode_result.php?keyword={encoded}"
+        'ETtoday': f"https://www.ettoday.net/news_search/unicode_result.php?keyword={encoded}",
+        '工商時報': f"https://www.ctee.com.tw/search/{encoded}",
+        '今周刊': f"https://www.businesstoday.com.tw/search/{encoded}",
+        '自由時報': f"https://news.ltn.com.tw/search?keyword={encoded}",
+        'MoneyDJ': f"https://www.moneydj.com/kmdj/search/list.aspx?key={encoded}",
+        '17173': f"http://search.17173.com/jsp/news.jsp?keyword={encoded}",
+        '遊民星空': f"https://so.gamersky.com/?s={encoded}",
+        '3DMGame': f"https://www.3dmgame.com/search.html?keyword={encoded}",
+        'Bloomberg': f"https://www.bloomberg.com/search?query={encoded}",
+        'Reuters': f"https://www.reuters.com/site-search/?query={encoded}",
+        'Forbes': f"https://www.forbes.com/search/?q={encoded}",
+        'TechCrunch': f"https://techcrunch.com/?s={encoded}"
     }
     return search_urls.get(source, f"https://www.google.com/search?q={encoded}+{urllib.parse.quote(source)}")
 
@@ -101,25 +116,24 @@ def update_data_file():
             synthetic: true
         }},"""
 
-    # 達到保留上限就不再新增，只保留已推進的月份範圍
-    existing = content.count('synthetic: true')
-    if existing >= MAX_SYNTHETIC_ENTRIES:
-        with open(DATA_FILE_PATH, 'w', encoding='utf-8') as f:
-            f.write(content)
-        print("Month range advanced to %s. Synthetic entries at cap (%d/%d); no new entry added."
-              % (current_month_str, existing, MAX_SYNTHETIC_ENTRIES))
-        return
+    # 檢查是否已達到模擬新聞稿保留上限
+    synthetic_count = len(re.findall(r'synthetic:\s*true', content))
 
-    if 'const PRESS_RELEASES = [' in content:
-        content = content.replace('const PRESS_RELEASES = [',
-                                  'const PRESS_RELEASES = [' + NEWLINE + new_entry)
+    if synthetic_count >= MAX_SYNTHETIC_ENTRIES:
+        # 只推進月份，不再新增新聞稿，避免 data.js 無限膨脹
+        print(f"Synthetic entries limit ({MAX_SYNTHETIC_ENTRIES}) reached ({synthetic_count} found). Keeping existing entries, advancing months only.")
+    else:
+        # 尋找 PRESS_RELEASES 陣列起始位置插入
+        pr_match = re.search(r'const PRESS_RELEASES = \[\s*', content)
+        if pr_match:
+            insert_pos = pr_match.end()
+            content = content[:insert_pos] + NEWLINE + new_entry + content[insert_pos:]
+            print(f"Successfully prepended new synthetic entry ({synthetic_count + 1}/{MAX_SYNTHETIC_ENTRIES}): {title} [{source_media}]")
 
     with open(DATA_FILE_PATH, 'w', encoding='utf-8') as f:
         f.write(content)
 
-    print("js/data.js updated. Synthetic press release added for %s on %s (%d/%d)."
-          % (comp[1], date_str, existing + 1, MAX_SYNTHETIC_ENTRIES))
-
+    print("Data file update completed successfully.")
 
 if __name__ == '__main__':
     update_data_file()
