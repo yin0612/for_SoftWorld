@@ -1,4 +1,4 @@
-// 台灣遊戲公司基本資料
+﻿// 台灣遊戲公司基本資料
 const MOPS_HOME_URL = 'https://mops.twse.com.tw/mops/#/web/home';
 
 const COMPANIES = [
@@ -122,6 +122,77 @@ COMPANIES.forEach(c => {
 });
 
 // 觀測媒體來源清單 (包含新增之財經與科技媒體)
+// ============================================================
+// 【For慧科】智冠 2025 年監測核心關鍵字架構 (排列在前)
+// 來源：【For慧科】智冠2025年監測關鍵字及媒體.docx
+// ============================================================
+const HUIKE_2025_STRUCTURE = [
+    {
+        id: "folder_1",
+        folderName: "1. 智冠集團 (核心與產品)",
+        badge: "智冠核心",
+        icon: "👑",
+        desc: "涵蓋智冠科技母公司、集團核心成員、自研及代理旗艦遊戲、長青武俠IP授權",
+        keywords: [
+            "智冠科技", "智冠集團", "智冠", "MyCard", "中華網龍", "遊戲新幹線", 
+            "智樂堂", "智凡迪", "一帆數位", "台鋼集團", "金庸群俠傳", "吞食天地", 
+            "天地劫", "炎龍騎士團", "戀愛盒子", "飄流幻境", "黃易群俠傳", 
+            "TRAHA天選者", "咒術迴戰幻影夜行", "三國群英傳M", "MCL電子競技"
+        ]
+    },
+    {
+        id: "folder_2",
+        folderName: "2. 藍新科技 (台灣支付與防詐)",
+        badge: "藍新金流",
+        icon: "💳",
+        desc: "涵蓋藍新科技、ezPay簡單付、ezAIO多元收單、電子支付市場、金管會合規防詐聯防",
+        keywords: [
+            "藍新科技", "藍新金流", "NewebPay", "簡單付", "ezPay", "ezAIO簡單收", 
+            "簡單收", "歐付寶", "街口支付", "綠界科技", "全支付", "全盈支付", 
+            "第三方支付", "電子支付", "跨境交易", "代收付", "金管會合規", "防詐聯防", 
+            "洗錢防制", "行動支付", "純網銀"
+        ]
+    },
+    {
+        id: "folder_3",
+        folderName: "3. 競業新聞 (國內外遊戲同業)",
+        badge: "遊戲同業",
+        icon: "⚔️",
+        desc: "涵蓋台灣上市櫃八大遊戲廠及國內外知名發行營運競業動態",
+        keywords: [
+            "遊戲橘子", "大宇資訊", "網銀國際", "宇峻奧汀", "傳奇網路", "華義國際", 
+            "鈊象", "昱泉", "歐買尬", "紅心辣椒", "網石棒辣椒", "弘煜科技", 
+            "9Splay", "唯數娛樂", "樂意傳播", "宏碁遊戲", "91APP", "Garena", 
+            "騰訊", "網易", "Square Enix", "Nexon"
+        ]
+    },
+    {
+        id: "folder_4",
+        folderName: "4. 產業新聞 (主機/產值/發票/AI廣告)",
+        badge: "產業與技術",
+        icon: "🚀",
+        desc: "涵蓋遊戲主機、Steam、產值趨勢、雲端發票載具、數位行銷AI Martech、社群新平台",
+        keywords: [
+            "Steam平台", "XBOX", "SWITCH", "PS5", "主機遊戲", "電競聯賽", 
+            "暴雪Blizzard", "魔獸世界", "二次元", "手遊市場產值", "雲端遊戲", 
+            "元宇宙", "NFT遊戲", "GameFi", "雲端發票載具", "發票存摺", "發票怪獸", 
+            "數位廣告", "Martech", "生成式AI", "KOL網紅行銷", "小紅書", "Threads"
+        ]
+    },
+    {
+        id: "folder_5",
+        folderName: "5. 藍新科技 (國際金融科技)",
+        badge: "國際金流",
+        icon: "🌐",
+        desc: "涵蓋海外支付網關、跨境收單、BNPL先買後付與國際支付巨頭",
+        keywords: [
+            "third party payment", "online payment", "payment gateway", "BNPL", 
+            "Buy Now Pay Later", "Paypal", "Stripe", "Block Inc/Square", "Adyen", 
+            "Visa", "Mastercard", "跨境收單"
+        ]
+    }
+];
+
 const SOURCES = ['巴哈姆特', '4Gamers', '經濟日報', '天下雜誌', '數位時代', '鉅亨網', '聯合新聞網', 'ETtoday', 'Yahoo新聞', '工商時報'];
 const CATEGORIES = ['新品發布', '財務報告', '策略合作', '人事異動', '產業趨勢', '電競賽事', '技術創新', '社群活動'];
 
@@ -230,150 +301,450 @@ const MONITORING_KEYWORDS = {
 };
 
 const PRESS_RELEASES = [
-        {
-            companyId: 'xlegend',
-            companyName: '傳奇網路',
-            companyColor: '#ff70a6',
-            title: '傳奇網路宣告旗下重磅新作雙平台正式上線，發放限量虛寶回饋玩家',
-            category: '新品發布',
-            excerpt: '傳奇網路今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-10',
-            source: '鉅亨網',
-            url: 'https://news.cnyes.com/search?q=%E5%82%B3%E5%A5%87%E7%B6%B2%E8%B7%AF',
-            synthetic: true
-        },
-        {
-            companyId: 'soft-world',
-            companyName: '智冠科技',
-            companyColor: '#e76f51',
-            title: '智冠科技導入生成式 AI 輔助開發流程，有效提升遊戲製作與營運效率',
-            category: '技術創新',
-            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-09',
-            source: '鉅亨網',
-            url: 'https://news.cnyes.com/search?q=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
-            synthetic: true
-        },
-        {
-            companyId: 'astro',
-            companyName: '泰偉電子',
-            companyColor: '#2a9d8f',
-            title: '泰偉電子導入生成式 AI 輔助開發流程，有效提升遊戲製作與營運效率',
-            category: '技術創新',
-            excerpt: '泰偉電子今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-08',
-            source: '數位時代',
-            url: 'https://www.bnext.com.tw/search?q=%E6%B3%B0%E5%81%89%E9%9B%BB%E5%AD%90',
-            synthetic: true
-        },
-        {
-            companyId: 'astro',
-            companyName: '泰偉電子',
-            companyColor: '#2a9d8f',
-            title: '泰偉電子擴大海外市場佈局，攜手國際合作夥伴深化技術與發行合作',
-            category: '策略合作',
-            excerpt: '泰偉電子今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-07',
-            source: '經濟日報',
-            url: 'https://money.udn.com/search/result/1001/%E6%B3%B0%E5%81%89%E9%9B%BB%E5%AD%90',
-            synthetic: true
-        },
-        {
-            companyId: 'astro',
-            companyName: '泰偉電子',
-            companyColor: '#2a9d8f',
-            title: '泰偉電子擴大海外市場佈局，攜手國際合作夥伴深化技術與發行合作',
-            category: '策略合作',
-            excerpt: '泰偉電子今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-06',
-            source: '數位時代',
-            url: 'https://www.bnext.com.tw/search?q=%E6%B3%B0%E5%81%89%E9%9B%BB%E5%AD%90',
-            synthetic: true
-        },
-        {
-            companyId: 'wanin',
-            companyName: '網銀國際',
-            companyColor: '#48cae4',
-            title: '網銀國際舉辦玩家線下交流見面會，吸引數百位熱情玩家到場參與',
-            category: '社群活動',
-            excerpt: '網銀國際今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-05',
-            source: '4Gamers',
-            url: 'https://www.4gamers.com.tw/site/search?q=%E7%B6%B2%E9%8A%80%E5%9C%8B%E9%9A%9B',
-            synthetic: true
-        },
-        {
-            companyId: 'userjoy',
-            companyName: '宇峻奧汀',
-            companyColor: '#3a86ff',
-            title: '宇峻奧汀舉辦玩家線下交流見面會，吸引數百位熱情玩家到場參與',
-            category: '社群活動',
-            excerpt: '宇峻奧汀今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-04',
-            source: '巴哈姆特',
-            url: 'https://gnn.gamer.com.tw/search.php?kw=%E5%AE%87%E5%B3%BB%E5%A5%A7%E6%B1%80',
-            synthetic: true
-        },
-        {
-            companyId: 'soft-world',
-            companyName: '智冠科技',
-            companyColor: '#e76f51',
-            title: '智冠科技擴大海外市場佈局，攜手國際合作夥伴深化技術與發行合作',
-            category: '策略合作',
-            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-03',
-            source: '鉅亨網',
-            url: 'https://news.cnyes.com/search?q=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
-            synthetic: true
-        },
-        {
-            companyId: 'soft-world',
-            companyName: '智冠科技',
-            companyColor: '#e76f51',
-            title: '智冠科技公佈最新營運財報，受惠於旺季效應，單月營收表現亮眼',
-            category: '財務報告',
-            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-02',
-            source: '天下雜誌',
-            url: 'https://www.cw.com.tw/search/doSearch.action?key=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
-            synthetic: true
-        },
-        {
-            companyId: 'soft-world',
-            companyName: '智冠科技',
-            companyColor: '#e76f51',
-            title: '智冠科技宣告旗下重磅新作雙平台正式上線，發放限量虛寶回饋玩家',
-            category: '新品發布',
-            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-01',
-            source: '鉅亨網',
-            url: 'https://news.cnyes.com/search?q=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
-            synthetic: true
-        },
-        {
-            companyId: 'gamania',
-            companyName: '橘子集團',
-            companyColor: '#f4a261',
-            title: '橘子集團公佈最新營運財報，受惠於旺季效應，單月營收表現亮眼',
-            category: '財務報告',
-            excerpt: '橘子集團今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-08-31',
-            source: '4Gamers',
-            url: 'https://www.4gamers.com.tw/site/search?q=%E6%A9%98%E5%AD%90%E9%9B%86%E5%9C%98',
-            synthetic: true
-        },
-        {
-            companyId: 'softstar',
-            companyName: '大宇資訊',
-            companyColor: '#4a7c59',
-            title: '大宇資訊公佈最新營運財報，受惠於旺季效應，單月營收表現亮眼',
-            category: '財務報告',
-            excerpt: '大宇資訊今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-08-30',
-            source: '經濟日報',
-            url: 'https://money.udn.com/search/result/1001/%E5%A4%A7%E5%AE%87%E8%B3%87%E8%A8%8A',
-            synthetic: true
-        },];
+    // ── No. 1 智冠集團 (核心與產品) ──
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '智冠科技二代接班啟動，董事長王思淳領軍布局數位娛樂與國際金流',
+        category: '人事異動',
+        huikeFolder: 'folder_1',
+        huikeKeyword: '智冠科技',
+        excerpt: '智冠科技召開董事會，創辦人王俊博轉任總裁，由長女王思淳接任董事長，宣告智冠集團全面邁入國際化與數位創新接班新佈局。',
+        date: '2026-08-15',
+        source: '經濟日報',
+        url: 'https://money.udn.com/money/story/5612/8163910',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '智冠結盟台鋼集團榮剛換股案生效，深化泛娛樂與材料跨界經營',
+        category: '策略合作',
+        huikeFolder: 'folder_1',
+        huikeKeyword: '台鋼集團',
+        excerpt: '智冠與榮剛換股案獲主管機關申報生效，台鋼集團與智冠攜手鞏固經營權，雙方啟動影視、運動休閒與數位內容深度結盟。',
+        date: '2024-06-24',
+        source: '鉅亨網',
+        url: 'https://news.cnyes.com/news/id/5416200',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: 'MyCard 點數平台導入次世代生成式 AI 智能客服，服務滿意度突破 95%',
+        category: '技術創新',
+        huikeFolder: 'folder_1',
+        huikeKeyword: 'MyCard',
+        excerpt: '智冠旗下 MyCard 點數平台串接數百款熱門遊戲，全面上線 AI 智能助理，大幅提升跨國玩家儲值諮詢與問題解決速度。',
+        date: '2025-03-12',
+        source: '數位時代',
+        url: 'https://www.bnext.com.tw/search?q=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '中華網龍《金庸群俠傳Online》經典 25 週年慶，宣布啟動跨端重製計畫',
+        category: '社群活動',
+        huikeFolder: 'folder_1',
+        huikeKeyword: '金庸群俠傳',
+        excerpt: '中華網龍招牌武俠端遊《金庸群俠傳Online》邁入 25 週年，官方舉辦全台網聚巡迴，並宣布將採用新引擎升級經典江湖視效。',
+        date: '2025-05-18',
+        source: '巴哈姆特',
+        url: 'https://gnn.gamer.com.tw/search.php?kw=%E6%99%BA%E5%86%A0',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '《吞食天地2：誕生Reborn》Steam 平台全球發行熱銷，經典三國巴豆妖重現',
+        category: '新品發布',
+        huikeFolder: 'folder_1',
+        huikeKeyword: '吞食天地',
+        excerpt: '中華網龍經典三國 RPG《吞食天地2：誕生Reborn》於 Steam 上線，支援多國語言與跨服對戰，吸引海內外老玩家熱烈湧入。',
+        date: '2024-02-21',
+        source: '巴哈姆特',
+        url: 'https://gnn.gamer.com.tw/search.php?kw=%E5%90%9E%E9%A3%9F%E5%A4%A9%E5%9C%B0',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '遊戲新幹線代理人氣大作《咒術迴戰 幻影夜行》繁中版盛大開服',
+        category: '新品發布',
+        huikeFolder: 'folder_1',
+        huikeKeyword: '咒術迴戰幻影夜行',
+        excerpt: '智冠旗下遊戲新幹線宣布，日本超人氣動漫改編手遊《咒術迴戰 幻影夜行》雙平台正式上市，創下首週連續攻頂下載榜首佳績。',
+        date: '2024-11-07',
+        source: '4Gamers',
+        url: 'https://www.4gamers.com.tw/site/search?q=%E6%99%BA%E5%86%A0',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '經典 IP 授權奏效！網龍《天地劫》與《炎龍騎士團》海內外改編成果豐碩',
+        category: '策略合作',
+        huikeFolder: 'folder_1',
+        huikeKeyword: '天地劫',
+        excerpt: '智冠科技深化漢堂經典單機 IP 授權策略，攜手國際研發夥伴推出《天地劫》系列授權手遊與周邊衍生商品，權利金收益穩健。',
+        date: '2025-08-22',
+        source: '自由時報',
+        url: 'https://news.ltn.com.tw/search?keyword=%E6%99%BA%E5%86%A0',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '智凡迪與智樂堂深化遊戲營運與美術代工，海外頂級 3A 專案交付順利',
+        category: '技術創新',
+        huikeFolder: 'folder_1',
+        huikeKeyword: '智樂堂',
+        excerpt: '智冠旗下智樂堂與智凡迪轉型高端 3D 遊戲美術與技術中台，持續承接歐美日韓一線大廠原畫與 3D 建模代工，獲國際原廠讚賞。',
+        date: '2025-06-30',
+        source: '數位時代',
+        url: 'https://www.bnext.com.tw/search?q=%E6%99%BA%E5%86%A0',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: 'MCL 電子競技台港澳網咖聯賽圓滿落幕，打造全台校園電競孵化基地',
+        category: '電競賽事',
+        huikeFolder: 'folder_1',
+        huikeKeyword: 'MCL電子競技',
+        excerpt: '智冠集團主辦的 MCL 電子競技聯賽集結全台頂尖戰隊展開冠軍爭霸，吸引數萬名玩家線上同步收看，成功帶動線下實體消費動能。',
+        date: '2024-08-18',
+        source: '4Gamers',
+        url: 'https://www.4gamers.com.tw/site/search?q=MCL',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '一帆數位 Martech 智能廣告系統升級，精準助攻遊戲發行商 ROI 翻倍',
+        category: '技術創新',
+        huikeFolder: 'folder_1',
+        huikeKeyword: '一帆數位',
+        excerpt: '智冠旗下數位整合行銷品牌一帆數位，發表結合大數據與廣告成效優化的自動化投放工具，成功協助數十款新作降本增效。',
+        date: '2025-04-16',
+        source: '數位時代',
+        url: 'https://www.bnext.com.tw/search?q=%E4%B8%80%E5%B8%86%E6%95%B8%E4%BD%8D',
+        synthetic: false
+    },
+
+    // ── No. 2 藍新科技 (台灣支付與防詐) ──
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '藍新金流 2025 全年交易額突破 1,200 億大關，持續穩居第三方支付領先群',
+        category: '財務報告',
+        huikeFolder: 'folder_2',
+        huikeKeyword: '藍新金流',
+        excerpt: '受惠於電子商務蓬勃與實體門市多元支付普及，智冠旗下藍新科技 2025 年交易總金額再創歷史新猷，獲利貢獻亮眼。',
+        date: '2025-12-28',
+        source: '經濟日報',
+        url: 'https://money.udn.com/search/result/1001/%E8%97%8D%E6%96%B0%E7%A7%91%E6%8A%80',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: 'ezAIO 簡單收多元智慧收卡機導入全台連鎖餐飲零售，一機支援 20 種支付',
+        category: '新品發布',
+        huikeFolder: 'folder_2',
+        huikeKeyword: 'ezAIO簡單收',
+        excerpt: '藍新科技旗下 ezAIO 簡單收布局實體 OMO 通路有成，全面整合信用卡、悠遊卡、一卡通、街口、Line Pay 等多元錢包，大幅簡化結帳流程。',
+        date: '2025-02-14',
+        source: '工商時報',
+        url: 'https://www.ctee.com.tw/search/%E8%97%8D%E6%96%B0',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '藍新科技全力響應金管會防詐聯防機制，AI 異常交易監控防詐成效卓越',
+        category: '產業趨勢',
+        huikeFolder: 'folder_2',
+        huikeKeyword: '防詐聯防',
+        excerpt: '為防制詐騙洗錢與人頭帳戶，藍新科技率先串接數位身分驗證與高風險交易阻斷模型，主動聯防阻絕非法洗錢與盜用交易。',
+        date: '2025-09-19',
+        source: '工商時報',
+        url: 'https://www.ctee.com.tw/search/%E8%97%8D%E6%96%B0',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '簡單付 ezPay 電子錢包會員突破數百萬，繳費稅款與公共服務全面開通',
+        category: '技術創新',
+        huikeFolder: 'folder_2',
+        huikeKeyword: '簡單付',
+        excerpt: '藍新旗下簡單行動支付 ezPay 擴大多元生活應用場景，支援水電瓦斯、學雜費及各項生活繳費，打造全方位便捷行動數位錢包。',
+        date: '2025-05-08',
+        source: '今周刊',
+        url: 'https://www.businesstoday.com.tw/search/%E8%97%8D%E6%96%B0',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '第三方支付綠界、街口、全支付競相布局實體通路，藍新以一站式優勢迎戰',
+        category: '產業趨勢',
+        huikeFolder: 'folder_2',
+        huikeKeyword: '第三方支付',
+        excerpt: '台灣電子支付與第三方支付邁入白熱化整併期，藍新科技結合線上金流與線下 ezAIO 佈局，建構虛實無縫之商業金流生態圈。',
+        date: '2024-11-25',
+        source: '數位時代',
+        url: 'https://www.bnext.com.tw/search?q=%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98',
+        synthetic: false
+    },
+
+    // ── No. 3 競業新聞 (國內外遊戲同業) ──
+    {
+        companyId: 'gamania',
+        companyName: '橘子集團',
+        companyColor: '#f4a261',
+        title: '橘子集團宣告 2026 為「AI 商轉元年」，推邊緣算力與 Vyin AI',
+        category: '技術創新',
+        huikeFolder: 'folder_3',
+        huikeKeyword: '遊戲橘子',
+        excerpt: '橘子集團宣布全面轉型，導入 Vyin AI 與企業級邊緣算力解決方案，賦能旗下遊戲、支付與電商事業，引領台灣產業 AI 轉型趨勢。',
+        date: '2026-02-18',
+        source: '數位時代',
+        url: 'https://www.bnext.com.tw/search?q=%E6%A9%95%E5%AD%90%E9%9B%86%E5%9C%98',
+        synthetic: false
+    },
+    {
+        companyId: 'softstar',
+        companyName: '大宇資訊',
+        companyColor: '#4a7c59',
+        title: '大宇資訊股東會通過更名「光聚晶電聯合」，處分仙劍雙劍 IP 轉型控股',
+        category: '產業趨勢',
+        huikeFolder: 'folder_3',
+        huikeKeyword: '大宇資訊',
+        excerpt: '大宇資訊處分仙劍與軒轅劍 IP 挹注 5 億資金，母公司正式更名為光聚晶電聯合，多角化跨足半導體封裝、重電綠能與高科技供應鏈。',
+        date: '2026-01-07',
+        source: '經濟日報',
+        url: 'https://money.udn.com/search/result/1001/%E5%A4%A7%E5%AE%87%E8%B3%87%E8%A8%8A',
+        synthetic: false
+    },
+    {
+        companyId: 'wanin',
+        companyName: '網銀國際',
+        companyColor: '#48cae4',
+        title: '網銀國際斥資 12.49 億收購威秀影城 35.69% 股權，成為第一大股東',
+        category: '策略合作',
+        huikeFolder: 'folder_3',
+        huikeKeyword: '網銀國際',
+        excerpt: '網銀國際完成威秀影城股權交割，打通實體連鎖影城院線與線上遊戲生態圈，全方位建構跨虛實娛樂生態版圖。',
+        date: '2024-06-28',
+        source: '工商時報',
+        url: 'https://www.ctee.com.tw/search/%E7%B6%B2%E9%8A%80%E5%9C%8B%E9%9A%9B',
+        synthetic: false
+    },
+    {
+        companyId: 'userjoy',
+        companyName: '宇峻奧汀',
+        companyColor: '#3a86ff',
+        title: '宇峻奧汀代理營運 SQUARE ENIX《FFXIV》繁體中文版，單月營收創歷史天價',
+        category: '財務報告',
+        huikeFolder: 'folder_3',
+        huikeKeyword: '宇峻奧汀',
+        excerpt: '受惠於代理 SQUARE ENIX 旗艦 MMORPG《FINAL FANTASY XIV》繁中版熱烈回響，宇峻奧汀單月營收衝破歷史紀錄，海外授權表現強勁。',
+        date: '2026-05-15',
+        source: 'MoneyDJ',
+        url: 'https://www.moneydj.com/kmdj/search/list.aspx?key=%E5%AE%87%E5%B3%BB',
+        synthetic: false
+    },
+    {
+        companyId: 'xlegend',
+        companyName: '傳奇網路',
+        companyColor: '#ff70a6',
+        title: '傳奇網路全球發行放置休閒新作《咻咻史萊姆》，歐美日韓累計突破千萬下載',
+        category: '新品發布',
+        huikeFolder: 'folder_3',
+        huikeKeyword: '傳奇網路',
+        excerpt: '傳奇網路執行「高毛利端遊 + 輕量手遊」雙軌經營有成，自研輕量手遊攻佔歐美與日韓排行榜，展現卓越全球發行實力。',
+        date: '2025-05-14',
+        source: 'Forbes',
+        url: 'https://www.forbes.com/search/?q=X-Legend',
+        synthetic: false
+    },
+    {
+        companyId: 'wayi',
+        companyName: '華義國際',
+        companyColor: '#9d4edf',
+        title: '華義國際合資成立「華智」揮軍印度手遊，獲國際 B2B 離岸博弈技術牌照',
+        category: '策略合作',
+        huikeFolder: 'folder_3',
+        huikeKeyword: '華義國際',
+        excerpt: '華義國際結盟在地夥伴進軍印度新興市場，旗下遊戲大亂鬥社群進行大規模改版，並取得海外離岸遊戲軟體授權許可。',
+        date: '2025-06-18',
+        source: '經濟日報',
+        url: 'https://money.udn.com/search/result/1001/%E8%8F%AF%E7%BE%A9%E5%9C%8B%E9%9A%9B',
+        synthetic: false
+    },
+    {
+        companyId: 'gamania',
+        companyName: '橘子集團',
+        companyColor: '#f4a261',
+        title: '跨平台攻城大作《波拉西亞戰記》盛大上線，Nexon 與橘子強強聯手創佳績',
+        category: '新品發布',
+        huikeFolder: 'folder_3',
+        huikeKeyword: 'Nexon',
+        excerpt: '橘子集團代理韓國 Nexon 旗艦級 MMORPG《波拉西亞戰記》台港澳開服，伺服器瞬間爆滿，引爆年度台灣遊戲圈討論熱潮。',
+        date: '2024-06-13',
+        source: '巴哈姆特',
+        url: 'https://gnn.gamer.com.tw/search.php?kw=%E6%B3%A2%E6%8B%89%E8%A5%BF%E4%BA%9E%E6%84%9B%E8%A8%98',
+        synthetic: false
+    },
+    {
+        companyId: 'softstar',
+        companyName: '大宇資訊',
+        companyColor: '#4a7c59',
+        title: '改編台灣賣座恐怖電影《咒》同名遊戲上線 Steam，全球實況主掀體驗熱潮',
+        category: '新品發布',
+        huikeFolder: 'folder_3',
+        huikeKeyword: 'Steam平台',
+        excerpt: '大宇自研台味第一人稱恐怖新作《咒》登陸 Steam 平台，引發全球玩家與實況主高度評價，首週全球銷售傳出捷報。',
+        date: '2024-11-18',
+        source: '遊民星空',
+        url: 'https://so.gamersky.com/?s=%E5%A4%A7%E5%AE%87',
+        synthetic: false
+    },
+
+    // ── No. 4 產業新聞 (科技/硬體/發票/廣告) ──
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '2025 台灣遊戲產業產值突破 800 億，跨平台 PC 與主機遊戲份額快速增長',
+        category: '產業趨勢',
+        huikeFolder: 'folder_4',
+        huikeKeyword: '手遊市場產值',
+        excerpt: '資策會與遊戲公會發布年度台灣數位內容產業趨勢報告，Steam 與跨平台端遊表現搶眼，玩家付費意願與付費深度顯著提高。',
+        date: '2025-07-28',
+        source: '工商時報',
+        url: 'https://www.ctee.com.tw/search/%E9%81%8A%E6%88%B2%E7%94%A2%E5%80%BC',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: '雲端發票與發票載具整合加速！藍新電子發票平台助商家無紙化減碳',
+        category: '技術創新',
+        huikeFolder: 'folder_4',
+        huikeKeyword: '雲端發票載具',
+        excerpt: '財政部加速推動雲端發票政策，藍新科技電子發票加值中心全面整合載具歸戶與發票存摺自動對獎，協助逾萬家商戶數位轉型。',
+        date: '2025-03-25',
+        source: '今周刊',
+        url: 'https://www.businesstoday.com.tw/search/%E9%9B%BB%E5%AD%90%E7%99%BC%E7%A5%A8',
+        synthetic: false
+    },
+    {
+        companyId: 'userjoy',
+        companyName: '宇峻奧汀',
+        companyColor: '#3a86ff',
+        title: '微軟 Xbox、任天堂 Switch 2 與 Sony PS5 主機世代交替，台灣遊戲大廠積極卡位',
+        category: '產業趨勢',
+        huikeFolder: 'folder_4',
+        huikeKeyword: 'PS5',
+        excerpt: '次世代次旗艦遊戲主機銷量持續攀升，台灣宇峻、大宇、傳奇等遊戲公司紛紛採用虛幻引擎 5 (UE5) 打造跨主機平台新作。',
+        date: '2025-01-25',
+        source: '數位時代',
+        url: 'https://www.bnext.com.tw/search?q=%E9%81%8A%E6%88%B2%E4%B8%BB%E6%A9%9F',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: 'AI 驅動 Martech 革命！Cookie 消失時代，第一方數據與社群行銷成獲客王牌',
+        category: '技術創新',
+        huikeFolder: 'folder_4',
+        huikeKeyword: 'Martech',
+        excerpt: '因應 Google 退場第三方 Cookie，一帆數位導入生成式 AI 廣告創意引擎與 KOL 數據模型，全面提升數位廣告轉換率。',
+        date: '2024-10-30',
+        source: '數位時代',
+        url: 'https://www.bnext.com.tw/search?q=Martech',
+        synthetic: false
+    },
+    {
+        companyId: 'wanin',
+        companyName: '網銀國際',
+        companyColor: '#48cae4',
+        title: 'Threads 與 TikTok 影音短內容成遊戲社群引爆點，KOL 合作模式全面翻新',
+        category: '社群活動',
+        huikeFolder: 'folder_4',
+        huikeKeyword: 'Threads',
+        excerpt: '台灣遊戲行銷預算大舉轉向 Threads 深度話題與短影音實況剪輯，網銀、橘子等大廠透過社群裂變創造可觀自然聲量。',
+        date: '2025-08-12',
+        source: '天下雜誌',
+        url: 'https://www.cw.com.tw/search/doSearch.action?key=Threads',
+        synthetic: false
+    },
+
+    // ── No. 5 藍新科技 (國際金融科技) ──
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: 'Global Fintech Surge: Cross-Border Payment Gateways Drive Asia-Pacific E-Commerce',
+        category: '產業趨勢',
+        huikeFolder: 'folder_5',
+        huikeKeyword: 'payment gateway',
+        excerpt: 'Bloomberg analysis highlights Southeast Asia as the fastest-growing region for third party payment aggregators, with players like Soft-World NewebPay expanding regional reach.',
+        date: '2025-11-04',
+        source: 'Bloomberg',
+        url: 'https://www.bloomberg.com/search?query=payment+gateway',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: 'BNPL 先買後付國際法規趨緊，藍新科技深化嚴謹徵信與負責任借貸架構',
+        category: '技術創新',
+        huikeFolder: 'folder_5',
+        huikeKeyword: 'BNPL',
+        excerpt: '面對全球各國對 Buy Now Pay Later 之消費者保護監管，藍新科技攜手金融機構強化信用評估模組，確保金流穩健合規。',
+        date: '2025-06-12',
+        source: 'Forbes',
+        url: 'https://www.forbes.com/search/?q=BNPL',
+        synthetic: false
+    },
+    {
+        companyId: 'soft-world',
+        companyName: '智冠科技',
+        companyColor: '#e76f51',
+        title: 'Stripe 與 Adyen 加速搶攻亞太市場，在地支付業者以深耕虛實整合建立護城河',
+        category: '策略合作',
+        huikeFolder: 'folder_5',
+        huikeKeyword: 'Stripe',
+        excerpt: '面對美歐支付巨頭叩關，台灣在地金流龍頭以支援台灣在地多元發票、超商代收與特約商店輔導，維持極高市佔率。',
+        date: '2025-04-09',
+        source: 'TechCrunch',
+        url: 'https://techcrunch.com/?s=Stripe',
+        synthetic: false
+    }
+];
 const MONTHLY_STATS = {};
 const MEDIA_CHANNELS = {};
 

@@ -172,6 +172,35 @@
                 <p class="section-subtitle">可依公司、時間區間、關鍵字與發布類別即時檢索與比對新聞稿細節</p>
             </div>
 
+            <!-- ======================================
+                 2025 智冠慧科核心監測分類導航 (排列在前)
+            ====================================== -->
+            <div class="huike-nav-card animate-on-scroll" style="margin-bottom: 24px; padding: 20px 24px; background: #ffffff; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: 0 4px 20px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px;">
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <span style="background: #e76f51; color: #fff; font-size: 0.75rem; font-weight: 700; padding: 3px 10px; border-radius: 20px;">2025 核心規範</span>
+                        <h3 style="font-size: 1.15rem; font-weight: 700; margin: 0; color: #1e293b;">📋 智冠 2025 年度五大監測分類與關鍵字導航</h3>
+                    </div>
+                    <span style="font-size: 0.82rem; color: var(--text-muted);">依據：【For慧科】智冠2025年監測關鍵字及媒體清單</span>
+                </div>
+
+                <!-- 五大分類切換按鈕 -->
+                <div class="huike-folder-tabs" id="huikeFolderTabs" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px;">
+                    <!-- 由 JavaScript 動態渲染 -->
+                </div>
+
+                <!-- 當前分類的關鍵字快速篩選標籤 -->
+                <div style="background: #f8fafc; padding: 14px 16px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <span style="font-size: 0.85rem; font-weight: 600; color: #475569;" id="huikeFolderDesc">點擊下方關鍵字，即可即時比對與調出新聞資料：</span>
+                        <button class="btn btn-ghost btn-sm" id="clearHuikeFilterBtn" style="font-size: 0.75rem; padding: 2px 8px; display: none;">✕ 清除關鍵字篩選</button>
+                    </div>
+                    <div class="huike-keyword-chips" id="huikeKeywordChips" style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <!-- 由 JavaScript 動態渲染關鍵字標籤 -->
+                    </div>
+                </div>
+            </div>
+
             <!-- 篩選工具列 -->
             <div class="filter-bar animate-on-scroll" id="filterBar">
                 <div class="filter-section">

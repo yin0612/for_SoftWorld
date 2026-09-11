@@ -109,6 +109,8 @@ def update_data_file():
             companyColor: '{comp[2]}',
             title: '{title}',
             category: '{cat}',
+            huikeFolder: 'folder_1' if comp[0] == 'soft-world' else 'folder_3',
+            huikeKeyword: comp[1],
             excerpt: '{excerpt}',
             date: '{date_str}',
             source: '{source_media}',

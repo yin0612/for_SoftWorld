@@ -1,4 +1,204 @@
+# ============================================================
+# 【For慧科】智冠 2025 年核心監測關鍵字架構 (排列在前)
+# 依據來源：【For慧科】智冠2025年監測關鍵字及媒體.docx
+# ============================================================
+huike_2025_monitoring:
+  folder_1_softworld:
+    name: "智冠集團 (台灣/大灣區)"
+    single_keywords:
+      - 智冠科技
+      - 智冠集團
+      - 智冠
+      - MyCard
+      - 台灣淘米
+      - 中華網龍
+      - 網龍
+      - 遊戲新幹線
+      - 智凡迪
+      - 智樂堂
+      - 一帆數位
+      - 台鋼集團
+      - 台鋼
+    group_1_games:
+      operator: "A(遊戲) + B(產品名稱)"
+      products:
+        - 神嵐遊戲
+        - 樂聚多科技
+        - 威龍線上
+        - 超級遊戲
+        - 熊樂子
+        - 游龍在線
+        - 東方龍數位
+        - 吞食天地
+        - 戀愛盒子
+        - 黃易群俠傳
+        - 中華英雄
+        - 尋秦記
+        - 武林群俠傳
+        - 天子傳奇
+        - 金庸群俠傳
+        - 星際擴散
+        - 落櫻幻夢譚
+        - 落櫻散華抄
+        - Fate Grand Order繁中版
+        - FGO
+        - IDOLiSH7偶像星願
+        - 勇者鬥惡龍戰略指揮家
+        - TRAHA：天選者
+        - 吞食天地2：誕生Reborn
+        - 星躍物語
+        - 咒術迴戰幻影夜行
+        - 三國群英傳M
+        - 古劍奇譚網路版
+        - 新天龍八部
+        - 完美世界2
+        - 信長之野望
+        - 純白和弦
+        - 指劍江湖
+        - GFi賦能平台
+        - 風色幻想
+        - 漢堂
+        - 天地劫
+        - 炎龍騎士團
+        - MCL電子競技
+        - 精靈M
+        - 棕色塵埃2
+        - 遺跡傳說
+        - 星之後裔2
+        - 上古世紀戰爭
+    group_2_ip_licensing:
+      operator: "A(IP/IP授權) + B(核心IP)"
+      ip_list:
+        - 吞食天地
+        - 黃易群俠傳
+        - 天地劫
+        - 武林群俠傳
+        - 炎龍騎士團
+        - 戀愛盒子
+        - 飄流幻境
+
+  folder_2_newebpay:
+    name: "藍新科技 (台灣支付與法規)"
+    single_keywords:
+      - 藍新科技
+      - 藍新金流
+      - NewebPay
+      - 簡單付
+      - ezPay
+      - 簡單行動支付
+      - ezAIO簡單收
+      - ezAIO
+      - 簡單收
+      - 歐付寶
+      - OPay
+      - 橘子支
+      - 街口支付
+      - 綠界科技
+      - ECPay
+      - 全支付
+      - 全盈支付
+    group_1_payment_and_fraud:
+      operator: "A(詐騙/趨勢/市場/合作/創新/產業/策略/成長/案件) + B(支付生態)"
+      terms:
+        - 第三方支付
+        - 電子支付
+        - 行動支付
+        - 多元支付
+        - 跨境交易
+        - 跨境電商
+        - 超商繳費
+        - 代收付
+        - 金管會
+        - Apple Pay
+        - Google Pay
+        - 台灣Pay
+        - 悠遊卡
+        - 一卡通
+        - 純網銀
+        - BNPL
+        - 先買後付
+        - 防詐聯防
+        - 洗錢防制
+        - 警示帳戶
+
+  folder_3_competitors:
+    name: "競業新聞 (國內外遊戲發行與營運)"
+    single_keywords:
+      - 台灣淘米
+      - 遊戲橘子
+      - 大宇資訊
+      - 昱泉
+      - 華義
+      - 鈊象
+      - 宇峻奧汀
+      - 茂為歐買尬
+      - 紅心辣椒
+      - 傳奇網路
+      - 網石棒辣椒
+      - 弘煜科技
+      - 隆中網絡
+      - 真好玩
+      - 9Splay
+      - 唯數娛樂
+      - 網銀國際
+      - Wanin
+      - 地心引力
+      - 樂意傳播
+      - 宏碁遊戲
+      - 91APP
+
+  folder_4_industry:
+    name: "產業新聞 (科技/主機/產值/發票/AI廣告)"
+    hardware_and_titles:
+      - Steam平台
+      - XBOX
+      - SWITCH
+      - PS5
+      - 主機遊戲
+      - 電競聯賽
+      - 暴雪Blizzard
+      - 魔獸世界
+      - 暗黑破壞神
+      - 絕地求生PUBG
+    market_and_trends:
+      - 手遊市場產值
+      - 網路遊戲產值
+      - 雲端遊戲
+      - 元宇宙
+      - NFT遊戲
+      - GameFi
+    cloud_invoice:
+      - 雲端發票載具
+      - 發票載具
+      - 發票存摺
+      - 發票怪獸
+    martech_ai:
+      - 數位廣告
+      - 生成式AI
+      - Martech
+      - KOL行銷
+      - Threads
+      - 小紅書
+
+  folder_5_intl_fintech:
+    name: "藍新科技 (國際金融科技)"
+    single_keywords:
+      - third party payment
+      - online payment
+      - payment gateway
+      - BNPL
+      - Buy Now Pay Later
+      - Paypal
+      - Stripe
+      - Block Inc
+      - Square
+      - Adyen
+      - Visa
+      - Mastercard
+
+# ============================================================
 # 觀測媒體來源配置清單 (Media Sources Configuration)
+# ============================================================
 
 # 一、具備官方 RSS Feed 的財經與科技媒體
 rss_sources:

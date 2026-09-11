@@ -481,11 +481,14 @@ function initStatsOverview() {
 let currentNewsPage = 1;
 const NEWS_PER_PAGE = 8;
 let filteredNews = [];
+let currentHuikeFolderId = 'folder_1';
+let activeHuikeKeyword = '';
 
 function initNewsSection() {
     const container = document.getElementById('timelineContainer');
     if (!container) return;
 
+    initHuikeNav();
     setupNewsFilters();
     filteredNews = [...PRESS_RELEASES];
     renderNews();
@@ -497,6 +500,111 @@ function initNewsSection() {
             renderNews(true);
         });
     }
+}
+
+// 初始化 2025 智冠慧科五大監測分類導航
+function initHuikeNav() {
+    const tabsContainer = document.getElementById('huikeFolderTabs');
+    const chipsContainer = document.getElementById('huikeKeywordChips');
+    const descEl = document.getElementById('huikeFolderDesc');
+    const clearBtn = document.getElementById('clearHuikeFilterBtn');
+    if (!tabsContainer || typeof HUIKE_2025_STRUCTURE === 'undefined') return;
+
+    tabsContainer.innerHTML = '';
+
+    HUIKE_2025_STRUCTURE.forEach(folder => {
+        const tabBtn = document.createElement('button');
+        tabBtn.className = `btn btn-sm ${folder.id === currentHuikeFolderId ? 'btn-primary' : 'btn-ghost'}`;
+        tabBtn.style.cssText = 'font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;';
+        tabBtn.innerHTML = `<span>${folder.icon}</span> <strong>${folder.folderName}</strong>`;
+        
+        tabBtn.addEventListener('click', () => {
+            currentHuikeFolderId = folder.id;
+            renderHuikeTabs();
+            renderHuikeChips();
+        });
+
+        tabsContainer.appendChild(tabBtn);
+    });
+
+    renderHuikeChips();
+
+    if (clearBtn) {
+        clearBtn.addEventListener('click', () => {
+            activeHuikeKeyword = '';
+            const kwInput = document.getElementById('filterKeyword');
+            if (kwInput) kwInput.value = '';
+            clearBtn.style.display = 'none';
+            renderHuikeChips();
+            applyNewsFilters();
+        });
+    }
+}
+
+function renderHuikeTabs() {
+    const tabsContainer = document.getElementById('huikeFolderTabs');
+    if (!tabsContainer || typeof HUIKE_2025_STRUCTURE === 'undefined') return;
+
+    const btns = tabsContainer.querySelectorAll('button');
+    HUIKE_2025_STRUCTURE.forEach((folder, idx) => {
+        if (btns[idx]) {
+            if (folder.id === currentHuikeFolderId) {
+                btns[idx].className = 'btn btn-sm btn-primary';
+            } else {
+                btns[idx].className = 'btn btn-sm btn-ghost';
+            }
+        }
+    });
+}
+
+function renderHuikeChips() {
+    const chipsContainer = document.getElementById('huikeKeywordChips');
+    const descEl = document.getElementById('huikeFolderDesc');
+    const clearBtn = document.getElementById('clearHuikeFilterBtn');
+    if (!chipsContainer || typeof HUIKE_2025_STRUCTURE === 'undefined') return;
+
+    const currentFolder = HUIKE_2025_STRUCTURE.find(f => f.id === currentHuikeFolderId) || HUIKE_2025_STRUCTURE[0];
+    if (descEl) {
+        descEl.innerHTML = `<strong>${currentFolder.icon} ${currentFolder.desc}</strong>（點擊標籤即刻精準檢索新聞）：`;
+    }
+
+    chipsContainer.innerHTML = '';
+
+    currentFolder.keywords.forEach(kw => {
+        const chip = document.createElement('button');
+        const isActive = (activeHuikeKeyword === kw);
+        chip.className = 'huike-chip';
+        chip.style.cssText = `
+            border: 1px solid ${isActive ? '#e76f51' : '#cbd5e1'};
+            background: ${isActive ? '#e76f51' : '#ffffff'};
+            color: ${isActive ? '#ffffff' : '#334155'};
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: ${isActive ? '700' : '500'};
+        `;
+        chip.textContent = kw;
+
+        chip.addEventListener('click', () => {
+            if (activeHuikeKeyword === kw) {
+                activeHuikeKeyword = '';
+                const kwInput = document.getElementById('filterKeyword');
+                if (kwInput) kwInput.value = '';
+                if (clearBtn) clearBtn.style.display = 'none';
+            } else {
+                activeHuikeKeyword = kw;
+                const kwInput = document.getElementById('filterKeyword');
+                if (kwInput) kwInput.value = kw;
+                if (clearBtn) clearBtn.style.display = 'inline-block';
+            }
+            renderHuikeChips();
+            applyNewsFilters();
+        });
+
+        chipsContainer.appendChild(chip);
+    });
 }
 
 function setupNewsFilters() {
@@ -558,7 +666,8 @@ function applyNewsFilters() {
         const matchKeyword = !keyword || 
                              news.title.toLowerCase().includes(keyword) || 
                              news.excerpt.toLowerCase().includes(keyword) ||
-                             news.companyName.toLowerCase().includes(keyword);
+                             news.companyName.toLowerCase().includes(keyword) ||
+                             (news.huikeKeyword && news.huikeKeyword.toLowerCase().includes(keyword));
         
         let matchDate = true;
         if (dateFrom && news.date < dateFrom) matchDate = false;
@@ -600,9 +709,13 @@ function renderNews(append = false) {
         const item = document.createElement('div');
         item.className = 'timeline-item animate-on-scroll is-visible';
         item.style.setProperty('--item-brand-color', news.companyColor || '#2d5a3f');
-        // F-08 Option B：合成資料徽章
+        
         const syntheticBadge = news.synthetic
             ? '<span style="background:#fef3c7;color:#92400e;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">🤖 模擬資料</span>'
+            : '';
+
+        const huikeBadge = news.huikeKeyword
+            ? `<span style="background:#fff1ee; color:#c84b31; border:1px solid #ffd8d0; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle;">📌 ${news.huikeKeyword}</span>`
             : '';
 
         const targetUrl = (news.url && news.url.startsWith('http')) 
@@ -613,9 +726,12 @@ function renderNews(append = false) {
             <div class="timeline-dot"></div>
             <div class="timeline-card">
                 <div class="timeline-card-header">
-                    <span class="timeline-company-badge" style="background: ${news.companyColor}18; color: ${news.companyColor}">
-                        ${news.companyName}
-                    </span>
+                    <div>
+                        <span class="timeline-company-badge" style="background: ${news.companyColor}18; color: ${news.companyColor}">
+                            ${news.companyName}
+                        </span>
+                        ${huikeBadge}
+                    </div>
                     <span class="timeline-date">${news.date}</span>
                 </div>
                 <h4 class="timeline-title">
