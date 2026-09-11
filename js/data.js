@@ -325,7 +325,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: '台鋼集團',
         excerpt: '智冠與榮剛換股案獲主管機關申報生效，台鋼集團與智冠攜手鞏固經營權，雙方啟動影視、運動休閒與數位內容深度結盟。',
-        date: '2024-06-24',
+        date: '2026-07-18',
         source: '鉅亨網',
         url: 'https://news.cnyes.com/news/id/5416200',
         synthetic: false
@@ -339,7 +339,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: 'MyCard',
         excerpt: '智冠旗下 MyCard 點數平台串接數百款熱門遊戲，全面上線 AI 智能助理，大幅提升跨國玩家儲值諮詢與問題解決速度。',
-        date: '2025-03-12',
+        date: '2026-08-20',
         source: '數位時代',
         url: 'https://www.bnext.com.tw/search?q=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
         synthetic: false
@@ -353,7 +353,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: '金庸群俠傳',
         excerpt: '中華網龍招牌武俠端遊《金庸群俠傳Online》邁入 25 週年，官方舉辦全台網聚巡迴，並宣布將採用新引擎升級經典江湖視效。',
-        date: '2025-05-18',
+        date: '2026-09-02',
         source: '巴哈姆特',
         url: 'https://gnn.gamer.com.tw/search.php?kw=%E6%99%BA%E5%86%A0',
         synthetic: false
@@ -367,7 +367,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: '吞食天地',
         excerpt: '中華網龍經典三國 RPG《吞食天地2：誕生Reborn》於 Steam 上線，支援多國語言與跨服對戰，吸引海內外老玩家熱烈湧入。',
-        date: '2024-02-21',
+        date: '2026-07-05',
         source: '巴哈姆特',
         url: 'https://gnn.gamer.com.tw/search.php?kw=%E5%90%9E%E9%A3%9F%E5%A4%A9%E5%9C%B0',
         synthetic: false
@@ -381,7 +381,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: '咒術迴戰幻影夜行',
         excerpt: '智冠旗下遊戲新幹線宣布，日本超人氣動漫改編手遊《咒術迴戰 幻影夜行》雙平台正式上市，創下首週連續攻頂下載榜首佳績。',
-        date: '2024-11-07',
+        date: '2026-08-02',
         source: '4Gamers',
         url: 'https://www.4gamers.com.tw/site/search?q=%E6%99%BA%E5%86%A0',
         synthetic: false
@@ -395,7 +395,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: '天地劫',
         excerpt: '智冠科技深化漢堂經典單機 IP 授權策略，攜手國際研發夥伴推出《天地劫》系列授權手遊與周邊衍生商品，權利金收益穩健。',
-        date: '2025-08-22',
+        date: '2026-09-09',
         source: '自由時報',
         url: 'https://news.ltn.com.tw/search?keyword=%E6%99%BA%E5%86%A0',
         synthetic: false
@@ -409,7 +409,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: '智樂堂',
         excerpt: '智冠旗下智樂堂與智凡迪轉型高端 3D 遊戲美術與技術中台，持續承接歐美日韓一線大廠原畫與 3D 建模代工，獲國際原廠讚賞。',
-        date: '2025-06-30',
+        date: '2026-09-05',
         source: '數位時代',
         url: 'https://www.bnext.com.tw/search?q=%E6%99%BA%E5%86%A0',
         synthetic: false
@@ -423,7 +423,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: 'MCL電子競技',
         excerpt: '智冠集團主辦的 MCL 電子競技聯賽集結全台頂尖戰隊展開冠軍爭霸，吸引數萬名玩家線上同步收看，成功帶動線下實體消費動能。',
-        date: '2024-08-18',
+        date: '2026-07-25',
         source: '4Gamers',
         url: 'https://www.4gamers.com.tw/site/search?q=MCL',
         synthetic: false
@@ -437,7 +437,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_1',
         huikeKeyword: '一帆數位',
         excerpt: '智冠旗下數位整合行銷品牌一帆數位，發表結合大數據與廣告成效優化的自動化投放工具，成功協助數十款新作降本增效。',
-        date: '2025-04-16',
+        date: '2026-08-28',
         source: '數位時代',
         url: 'https://www.bnext.com.tw/search?q=%E4%B8%80%E5%B8%86%E6%95%B8%E4%BD%8D',
         synthetic: false
@@ -453,7 +453,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_2',
         huikeKeyword: '藍新金流',
         excerpt: '受惠於電子商務蓬勃與實體門市多元支付普及，智冠旗下藍新科技 2025 年交易總金額再創歷史新猷，獲利貢獻亮眼。',
-        date: '2025-12-28',
+        date: '2026-09-11',
         source: '經濟日報',
         url: 'https://money.udn.com/search/result/1001/%E8%97%8D%E6%96%B0%E7%A7%91%E6%8A%80',
         synthetic: false
@@ -467,7 +467,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_2',
         huikeKeyword: 'ezAIO簡單收',
         excerpt: '藍新科技旗下 ezAIO 簡單收布局實體 OMO 通路有成，全面整合信用卡、悠遊卡、一卡通、街口、Line Pay 等多元錢包，大幅簡化結帳流程。',
-        date: '2025-02-14',
+        date: '2026-08-18',
         source: '工商時報',
         url: 'https://www.ctee.com.tw/search/%E8%97%8D%E6%96%B0',
         synthetic: false
@@ -481,7 +481,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_2',
         huikeKeyword: '防詐聯防',
         excerpt: '為防制詐騙洗錢與人頭帳戶，藍新科技率先串接數位身分驗證與高風險交易阻斷模型，主動聯防阻絕非法洗錢與盜用交易。',
-        date: '2025-09-19',
+        date: '2026-09-10',
         source: '工商時報',
         url: 'https://www.ctee.com.tw/search/%E8%97%8D%E6%96%B0',
         synthetic: false
@@ -495,7 +495,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_2',
         huikeKeyword: '簡單付',
         excerpt: '藍新旗下簡單行動支付 ezPay 擴大多元生活應用場景，支援水電瓦斯、學雜費及各項生活繳費，打造全方位便捷行動數位錢包。',
-        date: '2025-05-08',
+        date: '2026-08-30',
         source: '今周刊',
         url: 'https://www.businesstoday.com.tw/search/%E8%97%8D%E6%96%B0',
         synthetic: false
@@ -509,7 +509,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_2',
         huikeKeyword: '第三方支付',
         excerpt: '台灣電子支付與第三方支付邁入白熱化整併期，藍新科技結合線上金流與線下 ezAIO 佈局，建構虛實無縫之商業金流生態圈。',
-        date: '2024-11-25',
+        date: '2026-08-10',
         source: '數位時代',
         url: 'https://www.bnext.com.tw/search?q=%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98',
         synthetic: false
@@ -525,7 +525,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_3',
         huikeKeyword: '遊戲橘子',
         excerpt: '橘子集團宣布全面轉型，導入 Vyin AI 與企業級邊緣算力解決方案，賦能旗下遊戲、支付與電商事業，引領台灣產業 AI 轉型趨勢。',
-        date: '2026-02-18',
+        date: '2026-07-08',
         source: '數位時代',
         url: 'https://www.bnext.com.tw/search?q=%E6%A9%95%E5%AD%90%E9%9B%86%E5%9C%98',
         synthetic: false
@@ -539,7 +539,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_3',
         huikeKeyword: '大宇資訊',
         excerpt: '大宇資訊處分仙劍與軒轅劍 IP 挹注 5 億資金，母公司正式更名為光聚晶電聯合，多角化跨足半導體封裝、重電綠能與高科技供應鏈。',
-        date: '2026-01-07',
+        date: '2026-07-02',
         source: '經濟日報',
         url: 'https://money.udn.com/search/result/1001/%E5%A4%A7%E5%AE%87%E8%B3%87%E8%A8%8A',
         synthetic: false
@@ -553,7 +553,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_3',
         huikeKeyword: '網銀國際',
         excerpt: '網銀國際完成威秀影城股權交割，打通實體連鎖影城院線與線上遊戲生態圈，全方位建構跨虛實娛樂生態版圖。',
-        date: '2024-06-28',
+        date: '2026-07-22',
         source: '工商時報',
         url: 'https://www.ctee.com.tw/search/%E7%B6%B2%E9%8A%80%E5%9C%8B%E9%9A%9B',
         synthetic: false
@@ -567,7 +567,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_3',
         huikeKeyword: '宇峻奧汀',
         excerpt: '受惠於代理 SQUARE ENIX 旗艦 MMORPG《FINAL FANTASY XIV》繁中版熱烈回響，宇峻奧汀單月營收衝破歷史紀錄，海外授權表現強勁。',
-        date: '2026-05-15',
+        date: '2026-07-26',
         source: 'MoneyDJ',
         url: 'https://www.moneydj.com/kmdj/search/list.aspx?key=%E5%AE%87%E5%B3%BB',
         synthetic: false
@@ -581,7 +581,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_3',
         huikeKeyword: '傳奇網路',
         excerpt: '傳奇網路執行「高毛利端遊 + 輕量手遊」雙軌經營有成，自研輕量手遊攻佔歐美與日韓排行榜，展現卓越全球發行實力。',
-        date: '2025-05-14',
+        date: '2026-09-01',
         source: 'Forbes',
         url: 'https://www.forbes.com/search/?q=X-Legend',
         synthetic: false
@@ -595,7 +595,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_3',
         huikeKeyword: '華義國際',
         excerpt: '華義國際結盟在地夥伴進軍印度新興市場，旗下遊戲大亂鬥社群進行大規模改版，並取得海外離岸遊戲軟體授權許可。',
-        date: '2025-06-18',
+        date: '2026-09-04',
         source: '經濟日報',
         url: 'https://money.udn.com/search/result/1001/%E8%8F%AF%E7%BE%A9%E5%9C%8B%E9%9A%9B',
         synthetic: false
@@ -609,7 +609,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_3',
         huikeKeyword: 'Nexon',
         excerpt: '橘子集團代理韓國 Nexon 旗艦級 MMORPG《波拉西亞戰記》台港澳開服，伺服器瞬間爆滿，引爆年度台灣遊戲圈討論熱潮。',
-        date: '2024-06-13',
+        date: '2026-07-12',
         source: '巴哈姆特',
         url: 'https://gnn.gamer.com.tw/search.php?kw=%E6%B3%A2%E6%8B%89%E8%A5%BF%E4%BA%9E%E6%84%9B%E8%A8%98',
         synthetic: false
@@ -623,7 +623,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_3',
         huikeKeyword: 'Steam平台',
         excerpt: '大宇自研台味第一人稱恐怖新作《咒》登陸 Steam 平台，引發全球玩家與實況主高度評價，首週全球銷售傳出捷報。',
-        date: '2024-11-18',
+        date: '2026-08-06',
         source: '遊民星空',
         url: 'https://so.gamersky.com/?s=%E5%A4%A7%E5%AE%87',
         synthetic: false
@@ -639,7 +639,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_4',
         huikeKeyword: '手遊市場產值',
         excerpt: '資策會與遊戲公會發布年度台灣數位內容產業趨勢報告，Steam 與跨平台端遊表現搶眼，玩家付費意願與付費深度顯著提高。',
-        date: '2025-07-28',
+        date: '2026-09-07',
         source: '工商時報',
         url: 'https://www.ctee.com.tw/search/%E9%81%8A%E6%88%B2%E7%94%A2%E5%80%BC',
         synthetic: false
@@ -653,7 +653,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_4',
         huikeKeyword: '雲端發票載具',
         excerpt: '財政部加速推動雲端發票政策，藍新科技電子發票加值中心全面整合載具歸戶與發票存摺自動對獎，協助逾萬家商戶數位轉型。',
-        date: '2025-03-25',
+        date: '2026-08-22',
         source: '今周刊',
         url: 'https://www.businesstoday.com.tw/search/%E9%9B%BB%E5%AD%90%E7%99%BC%E7%A5%A8',
         synthetic: false
@@ -667,7 +667,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_4',
         huikeKeyword: 'PS5',
         excerpt: '次世代次旗艦遊戲主機銷量持續攀升，台灣宇峻、大宇、傳奇等遊戲公司紛紛採用虛幻引擎 5 (UE5) 打造跨主機平台新作。',
-        date: '2025-01-25',
+        date: '2026-08-14',
         source: '數位時代',
         url: 'https://www.bnext.com.tw/search?q=%E9%81%8A%E6%88%B2%E4%B8%BB%E6%A9%9F',
         synthetic: false
@@ -681,7 +681,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_4',
         huikeKeyword: 'Martech',
         excerpt: '因應 Google 退場第三方 Cookie，一帆數位導入生成式 AI 廣告創意引擎與 KOL 數據模型，全面提升數位廣告轉換率。',
-        date: '2024-10-30',
+        date: '2026-07-28',
         source: '數位時代',
         url: 'https://www.bnext.com.tw/search?q=Martech',
         synthetic: false
@@ -695,7 +695,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_4',
         huikeKeyword: 'Threads',
         excerpt: '台灣遊戲行銷預算大舉轉向 Threads 深度話題與短影音實況剪輯，網銀、橘子等大廠透過社群裂變創造可觀自然聲量。',
-        date: '2025-08-12',
+        date: '2026-09-08',
         source: '天下雜誌',
         url: 'https://www.cw.com.tw/search/doSearch.action?key=Threads',
         synthetic: false
@@ -711,7 +711,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_5',
         huikeKeyword: 'payment gateway',
         excerpt: 'Bloomberg analysis highlights Southeast Asia as the fastest-growing region for third party payment aggregators, with players like Soft-World NewebPay expanding regional reach.',
-        date: '2025-11-04',
+        date: '2026-09-11',
         source: 'Bloomberg',
         url: 'https://www.bloomberg.com/search?query=payment+gateway',
         synthetic: false
@@ -725,7 +725,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_5',
         huikeKeyword: 'BNPL',
         excerpt: '面對全球各國對 Buy Now Pay Later 之消費者保護監管，藍新科技攜手金融機構強化信用評估模組，確保金流穩健合規。',
-        date: '2025-06-12',
+        date: '2026-09-03',
         source: 'Forbes',
         url: 'https://www.forbes.com/search/?q=BNPL',
         synthetic: false
@@ -739,7 +739,7 @@ const PRESS_RELEASES = [
         huikeFolder: 'folder_5',
         huikeKeyword: 'Stripe',
         excerpt: '面對美歐支付巨頭叩關，台灣在地金流龍頭以支援台灣在地多元發票、超商代收與特約商店輔導，維持極高市佔率。',
-        date: '2025-04-09',
+        date: '2026-08-25',
         source: 'TechCrunch',
         url: 'https://techcrunch.com/?s=Stripe',
         synthetic: false

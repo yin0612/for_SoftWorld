@@ -639,6 +639,17 @@ function setupNewsFilters() {
     const dateFromInput = document.getElementById('filterDateFrom');
     const dateToInput = document.getElementById('filterDateTo');
 
+    // 動態設定預設起始日期為「兩個月前」
+    if (dateFromInput && !dateFromInput.value) {
+        const today = new Date();
+        const twoMonthsAgo = new Date(today);
+        twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
+        const yyyy = twoMonthsAgo.getFullYear();
+        const mm = String(twoMonthsAgo.getMonth() + 1).padStart(2, '0');
+        const dd = String(twoMonthsAgo.getDate()).padStart(2, '0');
+        dateFromInput.value = `${yyyy}-${mm}-${dd}`;
+    }
+
     if (categorySelect) categorySelect.addEventListener('change', applyNewsFilters);
     if (sourceSelect) sourceSelect.addEventListener('change', applyNewsFilters);
     if (keywordInput) keywordInput.addEventListener('input', applyNewsFilters);
