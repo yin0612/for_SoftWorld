@@ -301,7 +301,21 @@ const MONITORING_KEYWORDS = {
 };
 
 const PRESS_RELEASES = [
-    // ══════════════════════════════════════════════════════════
+    
+        {
+            companyId: 'xlegend',
+            companyName: '傳奇網路',
+            companyColor: '#ff70a6',
+            title: '傳奇網路舉辦玩家線下交流見面會，吸引數百位熱情玩家到場參與',
+            category: '社群活動',
+            huikeFolder: 'folder_1' if comp[0] == 'soft-world' else 'folder_3',
+            huikeKeyword: comp[1],
+            excerpt: '傳奇網路今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-12',
+            source: 'ETtoday',
+            url: 'https://www.ettoday.net/news_search/unicode_result.php?keyword=%E5%82%B3%E5%A5%87%E7%B6%B2%E8%B7%AF',
+            synthetic: true
+        },// ══════════════════════════════════════════════════════════
     // 【No. 1 智冠集團 (核心與產品)】
     // ══════════════════════════════════════════════════════════
     {
