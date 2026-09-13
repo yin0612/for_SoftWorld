@@ -302,7 +302,21 @@ const MONITORING_KEYWORDS = {
 
 const PRESS_RELEASES = [
     
+        
         {
+            companyId: 'soft-world',
+            companyName: '智冠科技',
+            companyColor: '#e76f51',
+            title: '智冠科技導入生成式 AI 輔助開發流程，有效提升遊戲製作與營運效率',
+            category: '技術創新',
+            huikeFolder: 'folder_1' if comp[0] == 'soft-world' else 'folder_3',
+            huikeKeyword: comp[1],
+            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-13',
+            source: '天下雜誌',
+            url: 'https://www.cw.com.tw/search/doSearch.action?key=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
+            synthetic: true
+        },{
             companyId: 'xlegend',
             companyName: '傳奇網路',
             companyColor: '#ff70a6',
