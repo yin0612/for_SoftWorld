@@ -29,3 +29,14 @@ http://127.0.0.1:8765/
 ## 🌐 部署
 平台部署於 GitHub Pages（源自 `main` 分支根目錄）。
 - **網址**: [https://yin0612.github.io/for_SoftWorld/](https://yin0612.github.io/for_SoftWorld/)
+
+## 🔎 真實新聞監測 MVP
+
+網站保留既有視覺化展示資料；正式監測資料由 `worker/` 中的 Cloudflare Worker + D1 提供，並只顯示已審核文章。
+
+- `config/monitoring_rules.json`：由慧科關鍵字規格資料化而成的規則、範圍與排除詞。
+- `config/core_media_sources.json`：第一階段核心媒體白名單。來源預設停用，必須確認 RSS/API、服務條款與擷取政策後才可啟用。
+- `worker/schema.sql`：媒體、規則、文章、命中證據、審核與收集執行紀錄。
+- `worker/README.md`：D1 初始化、Worker 部署與前端串接步驟。
+
+在 `js/monitoring.js` 設定 Worker URL 後，新聞中心會優先顯示 API 回傳的已審核真實文章；未設定或 API 失敗時仍保留展示資料，且不會假稱為真實監測結果。

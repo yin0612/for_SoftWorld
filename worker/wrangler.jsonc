@@ -1,0 +1,17 @@
+{
+  "name": "softworld-monitoring-api",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-14",
+  "triggers": { "crons": ["17 * * * *"] },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "softworld-monitoring",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+    }
+  ],
+  "vars": {
+    "CORS_ORIGIN": "https://yin0612.github.io",
+    "RULES_VERSION": "2026-09-14"
+  }
+}

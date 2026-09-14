@@ -492,6 +492,22 @@ function initNewsSection() {
     setupNewsFilters();
     applyNewsFilters();
 
+    // 正式 Worker 已設定時，僅以「已審核」的真實文章取代展示型新聞資料。
+    // API 不可用時維持原有資料，並在頁面明確標示，避免靜默混用兩種資料。
+    if (typeof loadVerifiedMonitoringArticles === 'function') {
+        loadVerifiedMonitoringArticles().then((result) => {
+            if (!result.loaded) return;
+            PRESS_RELEASES.splice(0, PRESS_RELEASES.length, ...result.articles);
+            const resultEl = document.getElementById('filterResultCount');
+            if (resultEl) resultEl.dataset.dataMode = 'verified';
+            renderHuikeTabs();
+            renderHuikeChips();
+            applyNewsFilters();
+        }).catch((error) => {
+            console.warn('Verified monitoring API unavailable; showing demonstration data only.', error);
+        });
+    }
+
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', () => {
@@ -695,7 +711,7 @@ function applyNewsFilters() {
     const dateTo = document.getElementById('filterDateTo')?.value || '';
 
     filteredNews = PRESS_RELEASES.filter(news => {
-        const matchCompany = selectedCompanies.includes(news.companyId);
+        const matchCompany = news.companyId === 'monitoring' || selectedCompanies.includes(news.companyId);
         const matchCategory = !selectedCategory || news.category === selectedCategory;
         const matchSource = !selectedSource || 
                             news.source === selectedSource || 
@@ -753,7 +769,8 @@ function renderNews(append = false) {
     }
 
     if (countEl) {
-        countEl.textContent = `共 ${filteredNews.length} 則符合條件新聞稿`;
+        const mode = countEl.dataset.dataMode === 'verified' ? '已審核真實監測文章' : '展示資料新聞稿';
+        countEl.textContent = `共 ${filteredNews.length} 則符合條件${mode}`;
     }
 
     const startIndex = (currentNewsPage - 1) * NEWS_PER_PAGE;
@@ -804,6 +821,10 @@ function renderNews(append = false) {
             ? '<span style="background:#fef3c7;color:#92400e;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">🤖 模擬資料</span>'
             : '';
 
+        const verifiedBadge = news.verifiedMonitoring
+            ? '<span style="background:#dcfce7;color:#166534;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已審核監測</span>'
+            : '';
+
         const huikeBadge = news.huikeKeyword
             ? `<span class="tag-huike-chip" data-kw="${news.huikeKeyword}" style="background:#fff1ee; color:#c84b31; border:1px solid #ffd8d0; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${news.huikeKeyword}</span>`
             : '';
@@ -832,6 +853,7 @@ function renderNews(append = false) {
                         ${displayTitle} <span style="font-size:0.85rem;">↗</span>
                     </a>
                     ${syntheticBadge}
+                    ${verifiedBadge}
                 </h4>
                 <p class="timeline-excerpt">${displayExcerpt}</p>
                 <div class="timeline-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">

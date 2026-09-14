@@ -1,0 +1,24 @@
+{
+  "version": "2026-09-14",
+  "description": "由【For慧科】智冠2025年監測關鍵字及媒體與 SOFTWD 關鍵字清單資料化而成。規則以可測試的原子詞與邏輯群組保存。",
+  "folders": [
+    {"id":"folder_1","name":"智冠集團","region_scope":["TW","CN","HK"],"priority":"high"},
+    {"id":"folder_2","name":"藍新科技","region_scope":["TW"],"priority":"high"},
+    {"id":"folder_3","name":"競業新聞","region_scope":["TW","CN","HK"],"priority":"normal"},
+    {"id":"folder_4","name":"產業新聞","region_scope":["TW","CN","HK"],"priority":"normal"},
+    {"id":"folder_5","name":"國際金融科技","region_scope":["GLOBAL"],"priority":"normal"}
+  ],
+  "rules": [
+    {"id":"softworld-brand","folder_id":"folder_1","scope":"full_text","any_of":["智冠科技","智冠集團","MyCard","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台灣淘米"],"all_of":[],"exclude_any":[]},
+    {"id":"softworld-games","folder_id":"folder_1","scope":"full_text","any_of":["遊戲"],"all_of":["神嵐遊戲","樂聚多科技","遊樂多PLAY","吞食天地","戀愛盒子","黃易群俠傳","中華英雄","尋秦記","金庸群俠傳","TRAHA","咒術迴戰幻影夜行","三國群英傳M","古劍奇譚網路版","新天龍八部","完美世界2","信長之野望","天地劫","炎龍騎士團"],"exclude_any":[]},
+    {"id":"softworld-ip","folder_id":"folder_1","scope":"full_text","any_of":["IP","IP授權"],"all_of":["吞食天地","黃易","天地劫","武林群俠傳","炎龍騎士團","戀愛盒子","飄流幻境"],"exclude_any":[]},
+    {"id":"newebpay-brand","folder_id":"folder_2","scope":"full_text","any_of":["藍新科技","藍新金流","NewebPay","簡單付","ezPay","ezAIO","簡單收","歐付寶","O'Pay","OPay"],"all_of":[],"exclude_any":[]},
+    {"id":"newebpay-market","folder_id":"folder_2","scope":"full_text","any_of":["詐騙","趨勢","市場","合作","創新","產業","策略","成長","案件"],"all_of":["第三方支付","電子支付","行動支付","跨境交易","跨境電商","O2O","P2P","金管會","Apple Pay","Google Pay","台灣Pay","悠遊卡","一卡通","虛擬貨幣","加密貨幣","區塊鏈","BNPL","洗錢","人頭戶","警示帳戶","LINE Pay"],"exclude_any":[]},
+    {"id":"competitor-brand","folder_id":"folder_3","scope":"full_text","any_of":["遊戲橘子","樂利數位","大宇資訊","昱泉","華義","鈊象","宇峻奧汀","歐買尬","紅心辣椒","傳奇網路","網石","網銀國際","Wanin","宏碁遊戲","91APP"],"all_of":[],"exclude_any":[]},
+    {"id":"competitor-game","folder_id":"folder_3","scope":"paragraph","any_of":["遊戲"],"all_of":["Garena","騰訊","網易","NEXON","SQUARE ENIX","CAPCOM","KONAMI","SEGA","NetMarble","Pearlabyss","Kakao Games","Com2uS"],"exclude_any":[]},
+    {"id":"industry-platform","folder_id":"folder_4","scope":"title_or_lead","any_of":["遊戲"],"all_of":["VR","AR","LBS","HTML5","H5","XBOX","SWITCH","主機遊戲","PS5","Steam","電競","Blizzard","魔獸世界","PUBG","博弈","區塊鏈"],"exclude_any":[]},
+    {"id":"industry-market","folder_id":"folder_4","scope":"title_or_lead","any_of":["產值","趨勢","市場"],"all_of":["網路遊戲","線上遊戲","Online Game","網頁遊戲","Web game","社交遊戲","手機遊戲","Mobile Game","雲端遊戲","元宇宙","NFT遊戲","GameFi"],"exclude_any":[]},
+    {"id":"international-fintech","folder_id":"folder_5","scope":"full_text","any_of":["third party payment","online payment","payment gateway","BNPL","Buy Now Pay Later","PayPal","Stripe","Block Inc","Square","Adyen","Visa","Mastercard"],"all_of":[],"exclude_any":[]}
+  ],
+  "negative_terms": ["大宇紡織"]
+}
