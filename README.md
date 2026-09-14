@@ -30,13 +30,14 @@ http://127.0.0.1:8765/
 平台部署於 GitHub Pages（源自 `main` 分支根目錄）。
 - **網址**: [https://yin0612.github.io/for_SoftWorld/](https://yin0612.github.io/for_SoftWorld/)
 
-## 🔎 真實新聞監測 MVP
+## 🔎 已驗證真實新聞監測
 
-網站保留既有視覺化展示資料；正式監測資料由 `worker/` 中的 Cloudflare Worker + D1 提供，並只顯示已審核文章。
+`#/news` 是與既有視覺化展示資料分離的真實監測頁。它只會顯示「已驗證公開 RSS、近兩個月、命中 Word 規則、附原文連結」的文章；服務不可用時會明確顯示不可驗證狀態，絕不以展示資料替代。
 
-- `config/monitoring_rules.json`：由慧科關鍵字規格資料化而成的規則、範圍與排除詞。
-- `config/core_media_sources.json`：第一階段核心媒體白名單。來源預設停用，必須確認 RSS/API、服務條款與擷取政策後才可啟用。
-- `worker/schema.sql`：媒體、規則、文章、命中證據、審核與收集執行紀錄。
-- `worker/README.md`：D1 初始化、Worker 部署與前端串接步驟。
+- `config/monitoring_rules.json`：Word 文件完整的 5 個資料夾、15 組規則與關鍵字別名；A+B 條件以兩組皆命中實作，並套用「大宇紡織」排除詞。
+- `config/media_catalog.json`：Word 文件的完整 171 家媒體候選清單（148 家在地、23 家國際金融科技媒體）。它是覆蓋範圍清單，不代表所有媒體都已自動擷取。
+- `config/core_media_sources.json`：目前實測可用且獲准自動收錄的官方 RSS 白名單。其他媒體保留為 `manual_or_authorized`，必須先完成 RSS/API、條款或授權檢查。
+- `worker/schema.sql`：媒體、規則、媒體清單、文章、命中證據、審核與收集執行紀錄。
+- `worker/README.md`：D1 migration、部署、收集與資料品質政策。
 
-在 `js/monitoring.js` 設定 Worker URL 後，新聞中心會優先顯示 API 回傳的已審核真實文章；未設定或 API 失敗時仍保留展示資料，且不會假稱為真實監測結果。
+為降低泛用詞誤報，只有高精準的品牌、產品/IP 與國際金融科技規則會自動公開；支付生態、競業與產業寬鬆規則仍會保留為待覆核資料，而不會出現在公開新聞頁。

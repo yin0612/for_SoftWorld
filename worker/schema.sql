@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS media_sources (
   feed_url TEXT,
   tier TEXT NOT NULL DEFAULT 'B',
   enabled INTEGER NOT NULL DEFAULT 0 CHECK (enabled IN (0, 1)),
+  auto_publish INTEGER NOT NULL DEFAULT 0 CHECK (auto_publish IN (0, 1)),
   last_success_at TEXT,
   last_attempt_at TEXT,
   health_status TEXT NOT NULL DEFAULT 'not_configured',
@@ -24,8 +25,32 @@ CREATE TABLE IF NOT EXISTS monitoring_rules (
   all_of_json TEXT NOT NULL,
   exclude_any_json TEXT NOT NULL,
   version TEXT NOT NULL,
+  auto_publish INTEGER NOT NULL DEFAULT 0 CHECK (auto_publish IN (0, 1)),
   active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1))
 );
+
+CREATE TABLE IF NOT EXISTS monitoring_folders (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL,
+  region_scope_json TEXT NOT NULL,
+  priority TEXT NOT NULL,
+  description TEXT NOT NULL,
+  version TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS monitoring_media_catalog (
+  id TEXT PRIMARY KEY,
+  document_name TEXT NOT NULL,
+  region TEXT NOT NULL,
+  category TEXT NOT NULL,
+  document_url TEXT,
+  is_new_2025 INTEGER NOT NULL DEFAULT 0 CHECK (is_new_2025 IN (0, 1)),
+  onboarding_status TEXT NOT NULL DEFAULT 'manual_or_authorized',
+  source_id TEXT REFERENCES media_sources(id),
+  version TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_monitoring_media_catalog_region ON monitoring_media_catalog(region);
 
 CREATE TABLE IF NOT EXISTS articles (
   id TEXT PRIMARY KEY,

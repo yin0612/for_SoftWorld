@@ -1,36 +1,45 @@
 # 真實新聞監測 Worker
 
-此資料夾提供第一版 Cloudflare Worker + D1 的新聞監測管線。公開前端維持 GitHub Pages；Worker 只提供已審核文章與來源健康資料。
+此 Worker 將公開 RSS 的標題與摘要（不擷取全文）套用 Word 監測規則，保存原文連結與命中證據。GitHub Pages 的 `#/news` 只讀取可公開的已驗證結果。
 
-## 部署前準備
+## 資料品質政策
 
-1. 在 Cloudflare 建立 D1 資料庫 `softworld-monitoring`。
-2. 將資料庫 ID 寫入 `wrangler.jsonc` 的 `database_id`，並依實際 Worker 網址更新 `CORS_ORIGIN`。
-3. 在此資料夾執行：
+- 收集和公開 API 都硬性限制在台北時間「今天往前兩個月」。無發布日期或超出區間的 RSS 項目不會入庫。
+- 媒體來源必須同時是 `enabled=1`、`auto_publish=1`、`access_mode='rss'`，才會收集並自動公開。
+- 規則也有獨立的 `auto_publish` 保護。只有 `monitoring_rules.json` 中列出的高精準規則會自動公開；較寬鬆的規則以 `pending` 儲存，避免泛用詞誤報。
+- 公開 API 固定只回傳 `articles.review_status='approved'` 且 `article_matches.status='approved'` 的資料，忽略外部傳入的 `status` 參數。
+- 不鏡像未取得授權的全文。資料庫僅保存原始 URL、標題、RSS 摘要、發布／擷取時間與規則命中證據。
+
+## 初始部署或更新
+
+1. 在 `wrangler.jsonc` 設定 D1 資料庫 ID 與 GitHub Pages 的 `CORS_ORIGIN`。
+2. 若 D1 是舊版資料庫，先各執行一次 migration；全新資料庫不需要這兩步：
+
+```bash
+npx wrangler d1 execute softworld-monitoring --remote --file=./migrations/0001_add_auto_publish.sql
+npx wrangler d1 execute softworld-monitoring --remote --file=./migrations/0002_add_rule_auto_publish.sql
+```
+
+3. 建立新表、產生設定 seed，並匯入：
 
 ```bash
 npx wrangler d1 execute softworld-monitoring --remote --file=./schema.sql
-```
-
-4. 產生並匯入版本化的設定資料：
-
-```bash
-python worker/scripts/build_seed_sql.py > worker/seed.sql
+python ./scripts/build_seed_sql.py > ./seed.sql
 npx wrangler d1 execute softworld-monitoring --remote --file=./seed.sql
 ```
 
-第一版刻意將所有來源設為 `enabled: false`；逐一確認 RSS/API 授權、robots 與條款後，才可啟用。
-5. 執行 `npx wrangler deploy`，再將 Worker URL 設至 `js/monitoring.js` 的 `window.MONITORING_API_BASE`。
+4. 設定僅供管理者立即收集用的 secret，然後部署：
+
+```bash
+npx wrangler secret put MONITORING_ADMIN_TOKEN
+npx wrangler deploy
+```
 
 ## API
 
-* `GET /api/articles?limit=30&folder=folder_1&status=approved`：已審核文章。
-* `GET /api/health`：來源健康摘要。
+- `GET /api/articles?limit=30&folder=folder_1`：只回傳可公開的已驗證文章；日期參數一律限制近兩個月。
+- `GET /api/status`：規則版本、來源健康、已公開／待覆核數量與 Word 媒體清單覆蓋狀態。
+- `GET /api/health`：來源健康摘要。
+- `POST /api/internal/collect`：須附帶 `Authorization: Bearer <MONITORING_ADMIN_TOKEN>`；用於立即執行收集，不對公開前端開放。
 
-排程每小時第 17 分鐘執行一次。它只擷取 D1 中 `enabled=1`、`access_mode='rss'` 且具有 `feed_url` 的來源；寫入為冪等，並保留收集執行紀錄。
-
-## 安全與資料品質
-
-* Worker 不提供公開寫入端點；匯入、來源啟用與文章審核應透過受保護的管理流程處理。
-* 不鏡像未取得授權的全文。最小保存欄位是原始 URL、標題、摘要、發布／擷取時間與規則命中證據。
-* 文章在 `approved` 前不會出現在公開前端，避免寬鬆關鍵字帶來的誤收錄。
+排程每小時第 17 分鐘執行一次，寫入為冪等，並保留每次收集紀錄。

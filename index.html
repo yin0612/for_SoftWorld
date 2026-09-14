@@ -167,9 +167,13 @@
     <section class="section section-alt" id="news">
         <div class="container">
             <div class="section-header animate-on-scroll">
-                <span class="section-tag">PRESS RELEASES CENTER</span>
-                <h2 class="section-title">公關新聞稿<span class="text-gradient">即時動態時間軸</span></h2>
-                <p class="section-subtitle">可依公司、時間區間、關鍵字與發布類別即時檢索與比對新聞稿細節</p>
+                <span class="section-tag">VERIFIED NEWS MONITORING</span>
+                <h2 class="section-title">關鍵字新聞<span class="text-gradient">真實監測時間軸</span></h2>
+                <p class="section-subtitle">依 Word 監測規則，僅顯示已驗證公開 RSS 來源、近兩個月內且附原文連結的命中文章</p>
+            </div>
+
+            <div id="monitoringTransparency" class="animate-on-scroll" style="margin: 0 0 20px; padding: 14px 18px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px;">
+                <p style="margin:0; font-size:0.86rem; color:#334155;">正在讀取真實新聞監測狀態。</p>
             </div>
 
             <!-- ======================================
@@ -203,7 +207,7 @@
 
             <!-- 篩選工具列 -->
             <div class="filter-bar animate-on-scroll" id="filterBar">
-                <div class="filter-section">
+                <div class="filter-section" id="companyFilterSection">
                     <label class="filter-label">依公司篩選 (可複選)：</label>
                     <div class="filter-company-toggles" id="companyToggles">
                         <!-- 由 JavaScript 動態渲染 -->
@@ -211,23 +215,16 @@
                 </div>
                 <div class="filter-row">
                     <div class="filter-group">
-                        <label class="filter-label" for="filterCategory">新聞類別</label>
+                        <label class="filter-label" for="filterCategory">監測類別</label>
                         <select class="filter-select" id="filterCategory">
-                            <option value="">全部分類</option>
-                            <option value="新品發布">新品發布 (遊戲上線/改版)</option>
-                            <option value="財務報告">財務報告 (營收/季報)</option>
-                            <option value="策略合作">策略合作 (投資/併購/授權)</option>
-                            <option value="人事異動">人事異動 (高層接班/董事會)</option>
-                            <option value="產業趨勢">產業趨勢 (AI/Web3/展覽)</option>
-                            <option value="電競賽事">電競賽事 (賽事活動/戰隊)</option>
-                            <option value="技術創新">技術創新 (研發/系統發布)</option>
-                            <option value="社群活動">社群活動 (玩家見面會/虛寶)</option>
+                            <option value="">全部監測類別</option>
+                            <option value="關鍵字監測">關鍵字監測（已驗證 RSS）</option>
                         </select>
                     </div>
                     <div class="filter-group">
-                        <label class="filter-label" for="filterSource">媒體來源</label>
+                        <label class="filter-label" for="filterSource">已驗證 RSS 來源</label>
                         <select class="filter-select" id="filterSource">
-                            <option value="">全部觀測媒體</option>
+                            <option value="">全部已驗證 RSS 來源</option>
                             <option value="經濟日報">📰 經濟日報 (即時/產經)</option>
                             <option value="天下雜誌">📰 天下雜誌 (精選/全球)</option>
                             <option value="數位時代">📰 數位時代 (科技新創)</option>
@@ -771,12 +768,12 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="js/data.js?v=20260914_04"></script>
+    <script src="js/data.js?v=20260914_06"></script>
     <script src="js/animations.js?v=20260914_03"></script>
     <script src="js/charts.js?v=20260914_03"></script>
     <script src="js/compare.js?v=20260914_03"></script>
-    <script src="js/monitoring.js?v=20260914_05"></script>
-    <script src="js/app.js?v=20260914_04"></script>
+    <script src="js/monitoring.js?v=20260914_07"></script>
+    <script src="js/app.js?v=20260914_07"></script>
     <script src="js/enhancements.js?v=20260914_04"></script>
 </body>
 </html>

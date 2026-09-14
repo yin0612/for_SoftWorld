@@ -481,8 +481,127 @@ function initStatsOverview() {
 let currentNewsPage = 1;
 const NEWS_PER_PAGE = 8;
 let filteredNews = [];
-let currentHuikeFolderId = 'folder_1';
+// 真實監測資料與 data.js 的既有展示/分析資料分離，避免互相污染。
+let monitoringNews = [];
+let currentHuikeFolderId = '';
 let activeHuikeKeyword = '';
+let monitoringManifest = null;
+let monitoringRuntimeStatus = null;
+let monitoringLoadState = null;
+
+function escapeHtml(value = '') {
+    return String(value).replace(/[&<>'"]/g, (char) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[char]));
+}
+
+function safeHttpUrl(value) {
+    try {
+        const url = new URL(value);
+        return /^https?:$/.test(url.protocol) ? url.toString() : '#';
+    } catch (_) {
+        return '#';
+    }
+}
+
+function safeCssColor(value) {
+    return /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(value || '')) ? value : '#0f766e';
+}
+
+function setNewsDataMode(mode) {
+    const resultEl = document.getElementById('filterResultCount');
+    if (resultEl) resultEl.dataset.dataMode = mode;
+}
+
+function setVerifiedNewsTotal(total) {
+    ['totalPressReleases', 'statTotalNews'].forEach((id) => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.textContent = Number(total || 0).toLocaleString();
+            element.setAttribute('data-target', total || 0);
+        }
+    });
+}
+
+function hydrateMonitoringManifest(manifest) {
+    if (!manifest || !Array.isArray(manifest.rules) || !Array.isArray(manifest.folders)) return;
+    monitoringManifest = manifest;
+    const rulesByFolder = new Map();
+    manifest.rules.forEach((rule) => {
+        const terms = (rule.required_any_groups || []).flat();
+        const existing = rulesByFolder.get(rule.folder_id) || [];
+        rulesByFolder.set(rule.folder_id, [...existing, ...terms]);
+    });
+
+    HUIKE_2025_STRUCTURE.forEach((folder, index) => {
+        const sourceFolder = manifest.folders.find((entry) => entry.id === folder.id);
+        const exactKeywords = [...new Set(rulesByFolder.get(folder.id) || [])];
+        const ruleCount = manifest.rules.filter((rule) => rule.folder_id === folder.id).length;
+        const quickKeywords = folder.keywords.filter((keyword) => exactKeywords.includes(keyword));
+        folder.keywords = (quickKeywords.length ? quickKeywords : exactKeywords).slice(0, 24);
+        folder.allKeywords = exactKeywords;
+        folder.ruleCount = ruleCount;
+        if (sourceFolder) {
+            folder.folderName = `${index + 1}. ${sourceFolder.name}`;
+            folder.desc = sourceFolder.description;
+        }
+        folder.desc = `${folder.desc}。完整規則 ${ruleCount} 組、別名詞 ${exactKeywords.length} 個`;
+    });
+    renderMonitoringTransparency();
+}
+
+function renderMonitoringTransparency() {
+    const panel = document.getElementById('monitoringTransparency');
+    if (!panel) return;
+    panel.innerHTML = '';
+
+    const summary = document.createElement('p');
+    summary.style.cssText = 'margin:0; font-size:0.86rem; line-height:1.6; color:#334155;';
+    const sources = monitoringRuntimeStatus?.source_summary || {};
+    const articles = monitoringRuntimeStatus?.article_summary || {};
+    const catalog = monitoringRuntimeStatus?.media_catalog_summary || {};
+    const loadText = monitoringLoadState && !monitoringLoadState.complete
+        ? ` 公開結果目前僅完整載入 ${monitoringLoadState.loaded}/${monitoringLoadState.total} 篇，請重新整理後再確認。`
+        : '';
+    const statusText = monitoringRuntimeStatus
+        ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個）；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇真實文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
+        : '正在讀取來源健康與收錄狀態。';
+    summary.textContent = `真實性原則：僅顯示已驗證公開 RSS 來源、命中 Word 規則且附原文連結的文章；不顯示展示資料。${statusText}${loadText}`;
+    panel.appendChild(summary);
+
+    if (!monitoringManifest) return;
+    if (monitoringManifest.automatic_publication_note) {
+        const note = document.createElement('p');
+        note.style.cssText = 'margin:8px 0 0; font-size:0.82rem; line-height:1.55; color:#0f766e;';
+        note.textContent = `發布保護：${monitoringManifest.automatic_publication_note}`;
+        panel.appendChild(note);
+    }
+    const details = document.createElement('details');
+    details.style.marginTop = '10px';
+    const title = document.createElement('summary');
+    title.textContent = '查看 Word 文件完整監測規則與關鍵字';
+    title.style.cssText = 'cursor:pointer; font-weight:700; color:#0f766e;';
+    details.appendChild(title);
+
+    monitoringManifest.folders.forEach((folder) => {
+        const section = document.createElement('div');
+        section.style.cssText = 'margin-top:10px; padding-top:10px; border-top:1px solid #e2e8f0;';
+        const heading = document.createElement('strong');
+        heading.textContent = `${folder.name}｜來源區域：${(folder.region_scope || []).join('、')}`;
+        section.appendChild(heading);
+        const list = document.createElement('ul');
+        list.style.cssText = 'margin:6px 0 0 18px; padding:0; font-size:0.82rem; color:#475569;';
+        monitoringManifest.rules.filter((rule) => rule.folder_id === folder.id).forEach((rule) => {
+            const item = document.createElement('li');
+            const groups = (rule.required_any_groups || []).map((group) => group.join('、')).join(' ＋ ');
+            item.textContent = `${rule.display_name}（${rule.scope_note}）：${groups}`;
+            list.appendChild(item);
+        });
+        section.appendChild(list);
+        details.appendChild(section);
+    });
+    panel.appendChild(details);
+}
 
 function getRollingMonitoringDateRange() {
     const today = new Date();
@@ -527,23 +646,55 @@ function initNewsSection() {
 
     initHuikeNav();
     setupNewsFilters();
+    // 公開新聞頁絕不回退到展示資料，避免未驗證內容被當作真實新聞。
+    monitoringNews = [];
+    monitoringLoadState = null;
+    setVerifiedNewsTotal(0);
+    setNewsDataMode('loading');
+    renderHuikeTabs();
+    renderHuikeChips();
     applyNewsFilters();
 
-    // 正式 Worker 已設定時，僅以「已審核」的真實文章取代展示型新聞資料。
-    // API 不可用時維持原有資料，並在頁面明確標示，避免靜默混用兩種資料。
-    if (typeof loadVerifiedMonitoringArticles === 'function') {
-        loadVerifiedMonitoringArticles().then((result) => {
-            if (!result.loaded) return;
-            PRESS_RELEASES.splice(0, PRESS_RELEASES.length, ...result.articles);
-            const resultEl = document.getElementById('filterResultCount');
-            if (resultEl) resultEl.dataset.dataMode = 'verified';
-            renderHuikeTabs();
-            renderHuikeChips();
-            applyNewsFilters();
-        }).catch((error) => {
-            console.warn('Verified monitoring API unavailable; showing demonstration data only.', error);
-        });
+    const configured = Boolean(window.MONITORING_API_BASE && typeof loadVerifiedMonitoringArticles === 'function');
+    const companyFilter = document.getElementById('companyFilterSection');
+    if (configured && companyFilter) companyFilter.hidden = true;
+    if (configured) refreshVerifiedSourceOptions([], []);
+    renderMonitoringTransparency();
+    if (!configured) {
+        setNewsDataMode('unavailable');
+        applyNewsFilters();
+        return;
     }
+
+    const manifestPromise = typeof loadMonitoringManifest === 'function'
+        ? loadMonitoringManifest().catch((error) => { console.warn('Monitoring manifest unavailable.', error); return null; })
+        : Promise.resolve(null);
+    const statusPromise = typeof loadMonitoringStatus === 'function'
+        ? loadMonitoringStatus().catch((error) => { console.warn('Monitoring status unavailable.', error); return null; })
+        : Promise.resolve(null);
+
+    Promise.all([loadVerifiedMonitoringArticles(), manifestPromise, statusPromise]).then(([result, manifest, status]) => {
+        if (!result.loaded) throw new Error('Monitoring API is not configured.');
+        monitoringRuntimeStatus = status;
+        if (manifest) hydrateMonitoringManifest(manifest);
+        monitoringNews = result.articles;
+        monitoringLoadState = { total: result.total ?? monitoringNews.length, loaded: monitoringNews.length, complete: result.complete !== false };
+        setVerifiedNewsTotal(monitoringLoadState.total);
+        setNewsDataMode('verified');
+        refreshVerifiedSourceOptions(result.articles, status?.enabled_sources || []);
+        renderMonitoringTransparency();
+        renderHuikeTabs();
+        renderHuikeChips();
+        applyNewsFilters();
+    }).catch((error) => {
+        console.warn('Verified monitoring API unavailable; no unverified content is shown.', error);
+        monitoringNews = [];
+        monitoringLoadState = null;
+        setVerifiedNewsTotal(0);
+        setNewsDataMode('unavailable');
+        renderMonitoringTransparency();
+        applyNewsFilters();
+    });
 
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
@@ -552,6 +703,32 @@ function initNewsSection() {
             renderNews(true);
         });
     }
+}
+
+function refreshVerifiedSourceOptions(articles, sourceDetails) {
+    const sourceSelect = document.getElementById('filterSource');
+    if (!sourceSelect) return;
+    const previous = sourceSelect.value;
+    sourceSelect.replaceChildren();
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = '全部已驗證 RSS 來源';
+    sourceSelect.appendChild(allOption);
+
+    const details = Array.isArray(sourceDetails) && sourceDetails.length
+        ? sourceDetails
+        : [...new Set(articles.map((article) => article.source).filter(Boolean))].map((name) => ({ name }));
+    const seen = new Set();
+    details.sort((a, b) => String(a.name).localeCompare(String(b.name), 'zh-Hant')).forEach((source) => {
+        if (!source?.name || seen.has(source.name)) return;
+        seen.add(source.name);
+        const option = document.createElement('option');
+        option.value = source.name;
+        const health = source.health_status === 'healthy' ? '健康' : source.health_status ? '待確認' : '';
+        option.textContent = `📰 ${source.name}${health ? `（${health}）` : ''}`;
+        sourceSelect.appendChild(option);
+    });
+    if ([...sourceSelect.options].some((option) => option.value === previous)) sourceSelect.value = previous;
 }
 
 // 初始化 2025 智冠慧科五大監測分類導航
@@ -577,15 +754,15 @@ function initHuikeNav() {
 }
 
 function getFolderNewsCount(folderId) {
-    if (typeof PRESS_RELEASES === 'undefined') return 0;
-    return PRESS_RELEASES.filter(n => n.huikeFolder === folderId).length;
+    return monitoringNews.filter((news) => (news.huikeFolders || [news.huikeFolder]).includes(folderId)).length;
 }
 
 function getKeywordNewsCount(keyword) {
-    if (typeof PRESS_RELEASES === 'undefined' || !keyword) return 0;
+    if (!keyword) return 0;
     const kw = keyword.toLowerCase().trim();
-    return PRESS_RELEASES.filter(n => 
+    return monitoringNews.filter(n =>
         (n.huikeKeyword && n.huikeKeyword.toLowerCase().includes(kw)) ||
+        (n.matchedTerms && n.matchedTerms.some((term) => term.toLowerCase().includes(kw))) ||
         (n.title && n.title.toLowerCase().includes(kw)) ||
         (n.excerpt && n.excerpt.toLowerCase().includes(kw))
     ).length;
@@ -596,6 +773,21 @@ function renderHuikeTabs() {
     if (!tabsContainer || typeof HUIKE_2025_STRUCTURE === 'undefined') return;
 
     tabsContainer.innerHTML = '';
+    const allTab = document.createElement('button');
+    const allActive = !currentHuikeFolderId;
+    allTab.className = `btn btn-sm ${allActive ? 'btn-primary' : 'btn-ghost'}`;
+    allTab.style.cssText = 'font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;';
+    allTab.textContent = `全部分類（${monitoringNews.length}）`;
+    allTab.addEventListener('click', () => {
+        currentHuikeFolderId = '';
+        activeHuikeKeyword = '';
+        const keywordInput = document.getElementById('filterKeyword');
+        if (keywordInput) keywordInput.value = '';
+        renderHuikeTabs();
+        renderHuikeChips();
+        applyNewsFilters();
+    });
+    tabsContainer.appendChild(allTab);
     HUIKE_2025_STRUCTURE.forEach(folder => {
         const count = getFolderNewsCount(folder.id);
         const tabBtn = document.createElement('button');
@@ -606,8 +798,12 @@ function renderHuikeTabs() {
         
         tabBtn.addEventListener('click', () => {
             currentHuikeFolderId = folder.id;
+            activeHuikeKeyword = '';
+            const keywordInput = document.getElementById('filterKeyword');
+            if (keywordInput) keywordInput.value = '';
             renderHuikeTabs();
             renderHuikeChips();
+            applyNewsFilters();
         });
 
         tabsContainer.appendChild(tabBtn);
@@ -620,9 +816,15 @@ function renderHuikeChips() {
     const clearBtn = document.getElementById('clearHuikeFilterBtn');
     if (!chipsContainer || typeof HUIKE_2025_STRUCTURE === 'undefined') return;
 
-    const currentFolder = HUIKE_2025_STRUCTURE.find(f => f.id === currentHuikeFolderId) || HUIKE_2025_STRUCTURE[0];
+    const currentFolder = HUIKE_2025_STRUCTURE.find(f => f.id === currentHuikeFolderId);
+    if (!currentFolder) {
+        if (descEl) descEl.textContent = '全部五大監測分類：選擇一個資料夾可使用其精選關鍵字快速篩選。';
+        chipsContainer.innerHTML = '';
+        if (clearBtn) clearBtn.style.display = 'none';
+        return;
+    }
     if (descEl) {
-        descEl.innerHTML = `<strong>${currentFolder.icon} ${currentFolder.desc}</strong>（點擊標籤即刻精準檢索新聞）：`;
+        descEl.innerHTML = `<strong>${currentFolder.icon} ${currentFolder.desc}</strong>（以下為精選快速篩選；完整條件請展開上方規則清單）：`;
     }
 
     chipsContainer.innerHTML = '';
@@ -746,24 +948,26 @@ function applyNewsFilters() {
     const dateFrom = dateFromInput?.value || '';
     const dateTo = dateToInput?.value || '';
 
-    filteredNews = PRESS_RELEASES.filter(news => {
+    filteredNews = monitoringNews.filter(news => {
+        const newsFolders = news.huikeFolders || [news.huikeFolder];
         const matchCompany = news.companyId === 'monitoring' || selectedCompanies.includes(news.companyId);
+        const matchFolder = !currentHuikeFolderId || newsFolders.includes(currentHuikeFolderId);
         const matchCategory = !selectedCategory || news.category === selectedCategory;
         const matchSource = !selectedSource || 
                             news.source === selectedSource || 
                             (news.source && news.source.includes(selectedSource)) ||
                             (news.source && selectedSource.includes(news.source));
-        const matchKeyword = !keyword || 
-                             news.title.toLowerCase().includes(keyword) || 
-                             news.excerpt.toLowerCase().includes(keyword) ||
-                             news.companyName.toLowerCase().includes(keyword) ||
-                             (news.huikeKeyword && news.huikeKeyword.toLowerCase().includes(keyword));
+        const searchable = [
+            news.title, news.excerpt, news.companyName, news.huikeKeyword,
+            ...(news.matchedTerms || []), ...(news.ruleIds || [])
+        ].filter(Boolean).join(' ').toLowerCase();
+        const matchKeyword = !keyword || searchable.includes(keyword);
         
         let matchDate = true;
         if (dateFrom && news.date < dateFrom) matchDate = false;
         if (dateTo && news.date > dateTo) matchDate = false;
 
-        return matchCompany && matchCategory && matchSource && matchKeyword && matchDate;
+        return matchCompany && matchFolder && matchCategory && matchSource && matchKeyword && matchDate;
     });
 
     // 依發布日期排序 (預設最新優先)
@@ -781,14 +985,15 @@ function applyNewsFilters() {
 }
 
 function highlightKeyword(text, keyword) {
-    if (!text || !keyword) return text;
+    const safeText = escapeHtml(text || '');
+    if (!text || !keyword) return safeText;
     const cleanKw = keyword.trim();
-    if (!cleanKw) return text;
+    if (!cleanKw) return safeText;
     try {
         const regex = new RegExp(`(${cleanKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return text.replace(regex, '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>');
+        return safeText.replace(regex, '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>');
     } catch (e) {
-        return text;
+        return safeText;
     }
 }
 
@@ -797,6 +1002,7 @@ function renderNews(append = false) {
     const loadMoreBtn = document.getElementById('timelineLoadMore');
     const countEl = document.getElementById('filterResultCount');
     const currentKeyword = document.getElementById('filterKeyword')?.value.trim() || activeHuikeKeyword;
+    const dataMode = countEl?.dataset.dataMode || 'unavailable';
 
     if (!container) return;
 
@@ -805,8 +1011,13 @@ function renderNews(append = false) {
     }
 
     if (countEl) {
-        const mode = countEl.dataset.dataMode === 'verified' ? '已審核真實監測文章' : '展示資料新聞稿';
-        countEl.textContent = `共 ${filteredNews.length} 則符合條件${mode}`;
+        const modes = {
+            loading: '正在載入已驗證 RSS 新聞',
+            verified: '已驗證 RSS 真實新聞',
+            unavailable: '真實新聞服務目前無法驗證'
+        };
+        const mode = modes[dataMode] || modes.unavailable;
+        countEl.textContent = `共 ${filteredNews.length} 則符合條件｜${mode}`;
     }
 
     const startIndex = (currentNewsPage - 1) * NEWS_PER_PAGE;
@@ -814,14 +1025,30 @@ function renderNews(append = false) {
     const newsToShow = filteredNews.slice(startIndex, endIndex);
 
     if (filteredNews.length === 0) {
+        const emptyState = {
+            loading: {
+                icon: '⏳', title: '正在讀取已驗證 RSS 新聞',
+                message: '系統正在確認來源健康狀態、近兩個月日期範圍與關鍵字命中結果。', reset: false
+            },
+            unavailable: {
+                icon: '⚠️', title: '真實新聞服務暫時無法驗證',
+                message: '為避免未驗證內容被誤認為新聞，頁面不會改顯示展示資料。請稍後重新整理。', reset: false
+            },
+            verified: {
+                icon: '🔍', title: '目前沒有可顯示的已驗證 RSS 新聞',
+                message: '頁面只顯示已驗證公開 RSS 來源且命中規則的文章。請查看上方來源狀態，或調整資料夾與關鍵字條件。', reset: true
+            }
+        }[dataMode] || null;
+        const state = emptyState || {
+            icon: '⚠️', title: '真實新聞服務暫時無法驗證',
+            message: '為避免未驗證內容被誤認為新聞，頁面不會改顯示展示資料。請稍後重新整理。', reset: false
+        };
         container.innerHTML = `
             <div style="text-align:center; padding: 48px 20px; color: var(--text-muted); background: #f8fafc; border-radius: 12px; border: 1px dashed var(--border-color);">
-                <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
-                <h4 style="font-size: 1.1rem; color: #334155; margin-bottom: 6px;">近兩個月內暫無完全相符的新聞稿紀錄</h4>
-                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">您可以嘗試清除關鍵字、點選上方其他熱門關鍵字標籤，或調整分類條件。</p>
-                <button class="btn btn-primary btn-sm" id="resetNewsFiltersBtn" style="padding: 6px 18px; border-radius: 20px;">
-                    ↻ 一鍵重設為近兩個月全部新聞
-                </button>
+                <div style="font-size: 2rem; margin-bottom: 8px;">${state.icon}</div>
+                <h4 style="font-size: 1.1rem; color: #334155; margin-bottom: 6px;">${state.title}</h4>
+                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">${state.message}</p>
+                ${state.reset ? '<button class="btn btn-primary btn-sm" id="resetNewsFiltersBtn" style="padding: 6px 18px; border-radius: 20px;">↻ 一鍵重設為近兩個月全部新聞</button>' : ''}
             </div>
         `;
         const resetBtn = document.getElementById('resetNewsFiltersBtn');
@@ -838,9 +1065,11 @@ function renderNews(append = false) {
                 const rollingRange = getRollingMonitoringDateRange();
                 if (fromInput) fromInput.value = rollingRange.from;
                 if (toInput) toInput.value = rollingRange.to;
+                currentHuikeFolderId = '';
                 activeHuikeKeyword = '';
                 const clearBtn = document.getElementById('clearHuikeFilterBtn');
                 if (clearBtn) clearBtn.style.display = 'none';
+                renderHuikeTabs();
                 renderHuikeChips();
                 applyNewsFilters();
             };
@@ -852,58 +1081,89 @@ function renderNews(append = false) {
     newsToShow.forEach(news => {
         const item = document.createElement('div');
         item.className = 'timeline-item animate-on-scroll is-visible';
-        item.style.setProperty('--item-brand-color', news.companyColor || '#2d5a3f');
+        const brandColor = safeCssColor(news.companyColor);
+        const companyId = escapeHtml(news.companyId || 'monitoring');
+        const companyName = escapeHtml(news.companyName || '已驗證 RSS 監測');
+        const category = escapeHtml(news.category || '關鍵字監測');
+        const source = escapeHtml(news.source || '來源未提供');
+        const date = escapeHtml(news.date || '日期未提供');
+        const huikeKeyword = escapeHtml(news.huikeKeyword || '');
+        item.style.setProperty('--item-brand-color', brandColor);
         
         const syntheticBadge = news.synthetic
             ? '<span style="background:#fef3c7;color:#92400e;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">🤖 模擬資料</span>'
             : '';
 
         const verifiedBadge = news.verifiedMonitoring
-            ? '<span style="background:#dcfce7;color:#166534;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已審核監測</span>'
+            ? '<span style="background:#dcfce7;color:#166534;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證 RSS</span>'
             : '';
 
-        const huikeBadge = news.huikeKeyword
-            ? `<span class="tag-huike-chip" data-kw="${news.huikeKeyword}" style="background:#fff1ee; color:#c84b31; border:1px solid #ffd8d0; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${news.huikeKeyword}</span>`
+        const huikeBadge = huikeKeyword
+            ? `<span class="tag-huike-chip" data-kw="${huikeKeyword}" style="background:#fff1ee; color:#c84b31; border:1px solid #ffd8d0; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${huikeKeyword}</span>`
             : '';
 
-        const targetUrl = (news.url && news.url.startsWith('http')) 
-            ? news.url 
-            : (typeof getMediaSearchUrl === 'function' ? getMediaSearchUrl(news.source, news.companyName) : '#');
+        const directUrl = safeHttpUrl(news.url);
+        const targetUrl = escapeHtml(directUrl);
+        const hasOriginalLink = directUrl !== '#';
 
         const displayTitle = highlightKeyword(news.title, currentKeyword);
         const displayExcerpt = highlightKeyword(news.excerpt, currentKeyword);
+        const titleContent = hasOriginalLink
+            ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.color='${brandColor}'" onmouseout="this.style.color='inherit'">${displayTitle} <span style="font-size:0.85rem;">↗</span></a>`
+            : `<span style="color:inherit;">${displayTitle}</span>`;
+        const originalLink = hasOriginalLink
+            ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline; font-weight: 600; font-size:0.82rem;">開啟完整新聞 ↗</a>`
+            : '<span style="color:#64748b; font-size:0.82rem;">原文連結不可用</span>';
 
         item.innerHTML = `
             <div class="timeline-dot"></div>
             <div class="timeline-card">
                 <div class="timeline-card-header">
                     <div>
-                        <span class="timeline-company-badge" data-comp-id="${news.companyId}" style="background: ${news.companyColor}18; color: ${news.companyColor}; cursor:pointer;" title="點擊篩選該公司">
-                            ${news.companyName}
+                        <span class="timeline-company-badge" data-comp-id="${companyId}" style="background: ${brandColor}18; color: ${brandColor}; cursor:pointer;" title="已驗證 RSS 監測">
+                            ${companyName}
                         </span>
                         ${huikeBadge}
                     </div>
-                    <span class="timeline-date">📅 ${news.date}</span>
+                    <span class="timeline-date">📅 ${date}</span>
                 </div>
                 <h4 class="timeline-title">
-                    <a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.color='${news.companyColor}'" onmouseout="this.style.color='inherit'">
-                        ${displayTitle} <span style="font-size:0.85rem;">↗</span>
-                    </a>
+                    ${titleContent}
                     ${syntheticBadge}
                     ${verifiedBadge}
                 </h4>
                 <p class="timeline-excerpt">${displayExcerpt}</p>
                 <div class="timeline-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                     <div style="display:flex; gap:8px; align-items:center;">
-                        <span class="timeline-category" data-cat="${news.category}" style="cursor:pointer;" title="點擊篩選該類別">🏷️ ${news.category}</span>
-                        <span class="timeline-source-badge" data-src="${news.source}" style="background:#f1f5f9; color:#475569; font-size:0.75rem; padding:3px 8px; border-radius:6px; cursor:pointer; font-weight:600;" title="點擊篩選此媒體">📰 ${news.source}</span>
+                        <span class="timeline-category" data-cat="${category}" style="cursor:pointer;" title="點擊篩選該類別">🏷️ ${category}</span>
+                        <span class="timeline-source-badge" data-src="${source}" style="background:#f1f5f9; color:#475569; font-size:0.75rem; padding:3px 8px; border-radius:6px; cursor:pointer; font-weight:600;" title="點擊篩選此媒體">📰 ${source}</span>
                     </div>
-                    <a href="${targetUrl}" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline; font-weight: 600; font-size:0.82rem;">
-                        開啟完整新聞 ↗
-                    </a>
+                    ${originalLink}
                 </div>
             </div>
         `;
+
+        const matchedTerms = [...new Set((news.matchedTerms || []).filter(Boolean))];
+        const ruleIds = [...new Set((news.ruleIds || []).filter(Boolean))];
+        if (matchedTerms.length || ruleIds.length) {
+            const evidence = document.createElement('div');
+            evidence.style.cssText = 'margin:10px 0; padding:8px 10px; background:#f8fafc; border-left:3px solid #0f766e; border-radius:4px; font-size:0.78rem; color:#475569; line-height:1.55;';
+            const label = document.createElement('strong');
+            label.textContent = '規則命中證據：';
+            evidence.appendChild(label);
+            if (matchedTerms.length) {
+                const terms = document.createElement('span');
+                terms.textContent = ` 關鍵字 ${matchedTerms.join('、')}`;
+                evidence.appendChild(terms);
+            }
+            if (ruleIds.length) {
+                const rules = document.createElement('span');
+                rules.style.marginLeft = '8px';
+                rules.textContent = `規則 ${ruleIds.join('、')}`;
+                evidence.appendChild(rules);
+            }
+            item.querySelector('.timeline-footer')?.before(evidence);
+        }
 
         // 綁定卡片內標籤點選一鍵過濾事件
         const chipEl = item.querySelector('.tag-huike-chip');
