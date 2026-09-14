@@ -498,6 +498,29 @@ function getRollingMonitoringDateRange() {
     return { from: asDateInput(from), to: asDateInput(today) };
 }
 
+function constrainMonitoringDateInputs(dateFromInput, dateToInput) {
+    const range = getRollingMonitoringDateRange();
+    const inputs = [
+        [dateFromInput, range.from],
+        [dateToInput, range.to]
+    ];
+
+    inputs.forEach(([input, fallback]) => {
+        if (!input) return;
+        input.min = range.from;
+        input.max = range.to;
+        if (!input.value || input.value < range.from || input.value > range.to) {
+            input.value = fallback;
+        }
+    });
+
+    // 日期範圍不得顛倒；若使用者調整起始日超過結束日，保留起始日並同步結束日。
+    if (dateFromInput && dateToInput && dateFromInput.value > dateToInput.value) {
+        dateToInput.value = dateFromInput.value;
+    }
+    return range;
+}
+
 function initNewsSection() {
     const container = document.getElementById('timelineContainer');
     if (!container) return;
@@ -681,16 +704,18 @@ function setupNewsFilters() {
     const dateFromInput = document.getElementById('filterDateFrom');
     const dateToInput = document.getElementById('filterDateTo');
 
-    // 網站與 API 均以「今天往前兩個月」為預設監測窗口。
-    const rollingRange = getRollingMonitoringDateRange();
-    if (dateFromInput && !dateFromInput.value) dateFromInput.value = rollingRange.from;
-    if (dateToInput && !dateToInput.value) dateToInput.value = rollingRange.to;
+    // 網站與 API 均只保留「今天往前兩個月」的監測窗口。
+    constrainMonitoringDateInputs(dateFromInput, dateToInput);
 
     if (categorySelect) categorySelect.addEventListener('change', applyNewsFilters);
     if (sourceSelect) sourceSelect.addEventListener('change', applyNewsFilters);
     if (keywordInput) keywordInput.addEventListener('input', applyNewsFilters);
-    if (dateFromInput) dateFromInput.addEventListener('change', applyNewsFilters);
-    if (dateToInput) dateToInput.addEventListener('change', applyNewsFilters);
+    const onDateRangeChange = () => {
+        constrainMonitoringDateInputs(dateFromInput, dateToInput);
+        applyNewsFilters();
+    };
+    if (dateFromInput) dateFromInput.addEventListener('change', onDateRangeChange);
+    if (dateToInput) dateToInput.addEventListener('change', onDateRangeChange);
 
     const sortToggleBtn = document.getElementById('sortToggle');
     if (sortToggleBtn && !sortToggleBtn.dataset.bound) {
@@ -715,8 +740,11 @@ function applyNewsFilters() {
     const selectedCategory = document.getElementById('filterCategory')?.value || '';
     const selectedSource = document.getElementById('filterSource')?.value || '';
     const keyword = document.getElementById('filterKeyword')?.value.toLowerCase().trim() || '';
-    const dateFrom = document.getElementById('filterDateFrom')?.value || '';
-    const dateTo = document.getElementById('filterDateTo')?.value || '';
+    const dateFromInput = document.getElementById('filterDateFrom');
+    const dateToInput = document.getElementById('filterDateTo');
+    constrainMonitoringDateInputs(dateFromInput, dateToInput);
+    const dateFrom = dateFromInput?.value || '';
+    const dateTo = dateToInput?.value || '';
 
     filteredNews = PRESS_RELEASES.filter(news => {
         const matchCompany = news.companyId === 'monitoring' || selectedCompanies.includes(news.companyId);
@@ -790,7 +818,7 @@ function renderNews(append = false) {
             <div style="text-align:center; padding: 48px 20px; color: var(--text-muted); background: #f8fafc; border-radius: 12px; border: 1px dashed var(--border-color);">
                 <div style="font-size: 2rem; margin-bottom: 8px;">🔍</div>
                 <h4 style="font-size: 1.1rem; color: #334155; margin-bottom: 6px;">近兩個月內暫無完全相符的新聞稿紀錄</h4>
-                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">您可以嘗試清除關鍵字、點選上方其他熱門關鍵字標籤，或擴大日期搜尋範圍。</p>
+                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">您可以嘗試清除關鍵字、點選上方其他熱門關鍵字標籤，或調整分類條件。</p>
                 <button class="btn btn-primary btn-sm" id="resetNewsFiltersBtn" style="padding: 6px 18px; border-radius: 20px;">
                     ↻ 一鍵重設為近兩個月全部新聞
                 </button>

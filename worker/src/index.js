@@ -13,6 +13,45 @@ function normalize(text = '') {
   return text.toLowerCase().normalize('NFKC').replace(/\s+/g, ' ').trim();
 }
 
+function taipeiDate(date = new Date()) {
+  const values = Object.fromEntries(
+    new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'
+    }).formatToParts(date).filter((part) => part.type !== 'literal').map((part) => [part.type, part.value])
+  );
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
+function subtractCalendarMonths(dateString, months) {
+  const [year, month, day] = dateString.split('-').map(Number);
+  const monthIndex = year * 12 + month - 1 - months;
+  const targetYear = Math.floor(monthIndex / 12);
+  const targetMonth = (monthIndex % 12) + 1;
+  const lastDay = new Date(Date.UTC(targetYear, targetMonth, 0)).getUTCDate();
+  return `${targetYear}-${String(targetMonth).padStart(2, '0')}-${String(Math.min(day, lastDay)).padStart(2, '0')}`;
+}
+
+function parseTaipeiDate(value, fallback) {
+  if (!value) return fallback;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    const parsed = new Date(`${value}T00:00:00+08:00`);
+    return Number.isNaN(parsed.getTime()) || taipeiDate(parsed) !== value ? fallback : value;
+  }
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? fallback : taipeiDate(parsed);
+}
+
+function articleQueryRange(searchParams) {
+  const today = taipeiDate();
+  const earliest = subtractCalendarMonths(today, 2);
+  const clamp = (date) => date < earliest ? earliest : date > today ? today : date;
+  let fromDate = clamp(parseTaipeiDate(searchParams.get('from'), earliest));
+  let toDate = clamp(parseTaipeiDate(searchParams.get('to'), today));
+  if (fromDate > toDate) toDate = fromDate;
+  const boundary = (date, endOfDay) => new Date(`${date}T${endOfDay ? '23:59:59.999' : '00:00:00.000'}+08:00`).toISOString();
+  return { fromDate, toDate, from: boundary(fromDate, false), to: boundary(toDate, true) };
+}
+
 function parseRss(xml) {
   const entries = xml.match(/<item\b[\s\S]*?<\/item>|<entry\b[\s\S]*?<\/entry>/gi) || [];
   const text = (block, tag) => (block.match(new RegExp(`<${tag}[^>]*>(?:<!\\[CDATA\\[)?([\\s\\S]*?)(?:\\]\\]>)?<\\/${tag}>`, 'i')) || [])[1]?.replace(/<[^>]+>/g, '').trim() || '';
@@ -96,11 +135,7 @@ export default {
       const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 30), 1), 100);
       const folder = url.searchParams.get('folder');
       const status = url.searchParams.get('status') || 'approved';
-      const today = new Date();
-      const defaultFrom = new Date(today);
-      defaultFrom.setMonth(defaultFrom.getMonth() - 2);
-      const from = url.searchParams.get('from') || defaultFrom.toISOString();
-      const to = url.searchParams.get('to') || today.toISOString();
+      const { fromDate, toDate, from, to } = articleQueryRange(url.searchParams);
       const statement = folder
         ? `SELECT DISTINCT a.id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status, s.name AS source, r.folder_id, r.id AS rule_id, m.evidence_json
            FROM articles a JOIN media_sources s ON s.id=a.source_id JOIN article_matches m ON m.article_id=a.id JOIN monitoring_rules r ON r.id=m.rule_id
@@ -109,7 +144,7 @@ export default {
            FROM articles a JOIN media_sources s ON s.id=a.source_id JOIN article_matches m ON m.article_id=a.id JOIN monitoring_rules r ON r.id=m.rule_id
            WHERE a.review_status=? AND COALESCE(a.published_at, a.fetched_at) BETWEEN ? AND ? ORDER BY COALESCE(a.published_at, a.fetched_at) DESC LIMIT ?`;
       const result = await env.DB.prepare(statement).bind(...(folder ? [status, folder, from, to, limit] : [status, from, to, limit])).all();
-      return json({ articles: result.results, data_mode: 'verified_monitoring' }, 200, headers);
+      return json({ articles: result.results, data_mode: 'verified_monitoring', range: { from: fromDate, to: toDate } }, 200, headers);
     }
     return json({ error: 'Not found' }, 404, headers);
   },

@@ -10,7 +10,14 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     const base = (window.MONITORING_API_BASE || '').replace(/\/$/, '');
     if (!base) return { loaded: false, reason: 'not_configured' };
 
-    const response = await fetch(`${base}/api/articles?limit=100`, { headers: { Accept: 'application/json' } });
+    const params = new URLSearchParams({ limit: '100' });
+    // 與頁面日期欄位使用相同的近兩個月窗口；API 端也會再次強制限制。
+    if (typeof getRollingMonitoringDateRange === 'function') {
+        const range = getRollingMonitoringDateRange();
+        params.set('from', range.from);
+        params.set('to', range.to);
+    }
+    const response = await fetch(`${base}/api/articles?${params.toString()}`, { headers: { Accept: 'application/json' } });
     if (!response.ok) throw new Error(`Monitoring API returned ${response.status}`);
     const payload = await response.json();
     const articles = Array.isArray(payload.articles) ? payload.articles : [];
