@@ -303,7 +303,21 @@ const MONITORING_KEYWORDS = {
 
 const PRESS_RELEASES = [
     
+        
         {
+            companyId: 'wayi',
+            companyName: '華義國際',
+            companyColor: '#9d4edf',
+            title: '華義國際贊助頂級電競賽事圓滿落幕，吸引數十萬玩家線上觀戰',
+            category: '電競賽事',
+            huikeFolder: 'folder_3',
+            huikeKeyword: '華義國際',
+            excerpt: '華義國際今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-14',
+            source: '香港01',
+            url: 'https://www.google.com/search?q=%E8%8F%AF%E7%BE%A9%E5%9C%8B%E9%9A%9B+%E9%A6%99%E6%B8%AF01',
+            synthetic: true
+        },{
             companyId: 'wayi',
             companyName: '華義國際',
             companyColor: '#9d4edf',
