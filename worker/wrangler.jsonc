@@ -7,7 +7,7 @@
     {
       "binding": "DB",
       "database_name": "softworld-monitoring",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID"
+      "database_id": "60e945d0-593c-467c-9dfa-27911af49130"
     }
   ],
   "vars": {

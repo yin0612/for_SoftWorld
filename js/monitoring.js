@@ -4,7 +4,7 @@
  * window.MONITORING_API_BASE = 'https://softworld-monitoring-api.<account>.workers.dev';
  * 未設定或 API 無法使用時，網站維持既有展示資料，不會把它誤標示為真實監測資料。
  */
-window.MONITORING_API_BASE = '';
+window.MONITORING_API_BASE = 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev';
 
 window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArticles() {
     const base = (window.MONITORING_API_BASE || '').replace(/\/$/, '');
