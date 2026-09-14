@@ -490,8 +490,7 @@ function initNewsSection() {
 
     initHuikeNav();
     setupNewsFilters();
-    filteredNews = [...PRESS_RELEASES];
-    renderNews();
+    applyNewsFilters();
 
     const loadMoreBtn = document.getElementById('loadMoreBtn');
     if (loadMoreBtn) {
@@ -668,6 +667,21 @@ function setupNewsFilters() {
     if (keywordInput) keywordInput.addEventListener('input', applyNewsFilters);
     if (dateFromInput) dateFromInput.addEventListener('change', applyNewsFilters);
     if (dateToInput) dateToInput.addEventListener('change', applyNewsFilters);
+
+    const sortToggleBtn = document.getElementById('sortToggle');
+    if (sortToggleBtn && !sortToggleBtn.dataset.bound) {
+        sortToggleBtn.dataset.bound = 'true';
+        sortToggleBtn.addEventListener('click', () => {
+            const currentSort = sortToggleBtn.getAttribute('data-sort') || 'desc';
+            const newSort = currentSort === 'desc' ? 'asc' : 'desc';
+            sortToggleBtn.setAttribute('data-sort', newSort);
+            const span = sortToggleBtn.querySelector('span');
+            if (span) {
+                span.textContent = newSort === 'desc' ? '發布時間：最新優先' : '發布時間：最舊優先';
+            }
+            applyNewsFilters();
+        });
+    }
 }
 
 function applyNewsFilters() {
@@ -698,6 +712,16 @@ function applyNewsFilters() {
         if (dateTo && news.date > dateTo) matchDate = false;
 
         return matchCompany && matchCategory && matchSource && matchKeyword && matchDate;
+    });
+
+    // 依發布日期排序 (預設最新優先)
+    const sortOrder = document.getElementById('sortToggle')?.getAttribute('data-sort') || 'desc';
+    filteredNews.sort((a, b) => {
+        if (!a.date) return 1;
+        if (!b.date) return -1;
+        return sortOrder === 'asc' 
+            ? a.date.localeCompare(b.date) 
+            : b.date.localeCompare(a.date);
     });
 
     currentNewsPage = 1;
