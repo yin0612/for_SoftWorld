@@ -302,7 +302,21 @@ const MONITORING_KEYWORDS = {
 
 
 const PRESS_RELEASES = [
-    // ══════════════════════════════════════════════════════════
+    
+        {
+            companyId: 'wayi',
+            companyName: '華義國際',
+            companyColor: '#9d4edf',
+            title: '華義國際公佈最新營運財報，受惠於旺季效應，單月營收表現亮眼',
+            category: '財務報告',
+            huikeFolder: 'folder_3',
+            huikeKeyword: '華義國際',
+            excerpt: '華義國際今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
+            date: '2026-09-14',
+            source: 'Yahoo新聞',
+            url: 'https://news.search.yahoo.com/search?p=%E8%8F%AF%E7%BE%A9%E5%9C%8B%E9%9A%9B',
+            synthetic: true
+        },// ══════════════════════════════════════════════════════════
     // 【No. 1 智冠集團 (核心與產品)】
     // ══════════════════════════════════════════════════════════
     {
