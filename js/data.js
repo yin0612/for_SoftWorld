@@ -1,4 +1,4 @@
-﻿// 台灣遊戲公司基本資料
+// 台灣遊戲公司基本資料
 const MOPS_HOME_URL = 'https://mops.twse.com.tw/mops/#/web/home';
 
 const COMPANIES = [
@@ -302,35 +302,7 @@ const MONITORING_KEYWORDS = {
 
 
 const PRESS_RELEASES = [
-    
-        
-        {
-            companyId: 'soft-world',
-            companyName: '智冠科技',
-            companyColor: '#e76f51',
-            title: '智冠科技導入生成式 AI 輔助開發流程，有效提升遊戲製作與營運效率',
-            category: '技術創新',
-            huikeFolder: 'folder_1' if comp[0] == 'soft-world' else 'folder_3',
-            huikeKeyword: comp[1],
-            excerpt: '智冠科技今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-13',
-            source: '天下雜誌',
-            url: 'https://www.cw.com.tw/search/doSearch.action?key=%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80',
-            synthetic: true
-        },{
-            companyId: 'xlegend',
-            companyName: '傳奇網路',
-            companyColor: '#ff70a6',
-            title: '傳奇網路舉辦玩家線下交流見面會，吸引數百位熱情玩家到場參與',
-            category: '社群活動',
-            huikeFolder: 'folder_1' if comp[0] == 'soft-world' else 'folder_3',
-            huikeKeyword: comp[1],
-            excerpt: '傳奇網路今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。',
-            date: '2026-09-12',
-            source: 'ETtoday',
-            url: 'https://www.ettoday.net/news_search/unicode_result.php?keyword=%E5%82%B3%E5%A5%87%E7%B6%B2%E8%B7%AF',
-            synthetic: true
-        },// ══════════════════════════════════════════════════════════
+    // ══════════════════════════════════════════════════════════
     // 【No. 1 智冠集團 (核心與產品)】
     // ══════════════════════════════════════════════════════════
     {

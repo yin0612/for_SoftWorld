@@ -103,14 +103,17 @@ def update_data_file():
     title = news_topics.get(cat, f"{comp[1]}發布最新營運動態新聞稿")
     excerpt = f"{comp[1]}今日發布最新公關訊息，針對事業佈局與近期產品計畫進行詳細說明，展現營運成長動能。"
 
+    h_folder = 'folder_1' if comp[0] == 'soft-world' else 'folder_3'
+    h_kw = comp[1]
+
     new_entry = f"""        {{
             companyId: '{comp[0]}',
             companyName: '{comp[1]}',
             companyColor: '{comp[2]}',
             title: '{title}',
             category: '{cat}',
-            huikeFolder: 'folder_1' if comp[0] == 'soft-world' else 'folder_3',
-            huikeKeyword: comp[1],
+            huikeFolder: '{h_folder}',
+            huikeKeyword: '{h_kw}',
             excerpt: '{excerpt}',
             date: '{date_str}',
             source: '{source_media}',
