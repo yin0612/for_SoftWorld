@@ -55,9 +55,11 @@ async function collectSource(source, env) {
       const matches = rules.results.map((rule) => ({ rule, result: evaluateRule(article, rule) })).filter(({ result }) => result.matched);
       if (!matches.length) continue;
       const id = crypto.randomUUID();
+      const parsedDate = new Date(item.publishedAt);
+      const publishedAt = Number.isNaN(parsedDate.getTime()) ? null : parsedDate.toISOString();
       const insert = await env.DB.prepare(`INSERT OR IGNORE INTO articles
         (id, canonical_url, source_id, title, excerpt, published_at, fetched_at, review_status)
-        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`).bind(id, canonicalUrl, source.id, item.title, item.excerpt || null, item.publishedAt || null, now).run();
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`).bind(id, canonicalUrl, source.id, item.title, item.excerpt || null, publishedAt, now).run();
       if (!insert.meta.changes) continue;
       added++;
       for (const { rule, result } of matches) {
@@ -94,14 +96,19 @@ export default {
       const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 30), 1), 100);
       const folder = url.searchParams.get('folder');
       const status = url.searchParams.get('status') || 'approved';
+      const today = new Date();
+      const defaultFrom = new Date(today);
+      defaultFrom.setMonth(defaultFrom.getMonth() - 2);
+      const from = url.searchParams.get('from') || defaultFrom.toISOString();
+      const to = url.searchParams.get('to') || today.toISOString();
       const statement = folder
         ? `SELECT DISTINCT a.id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status, s.name AS source, r.folder_id, r.id AS rule_id, m.evidence_json
            FROM articles a JOIN media_sources s ON s.id=a.source_id JOIN article_matches m ON m.article_id=a.id JOIN monitoring_rules r ON r.id=m.rule_id
-           WHERE a.review_status=? AND r.folder_id=? ORDER BY COALESCE(a.published_at, a.fetched_at) DESC LIMIT ?`
+           WHERE a.review_status=? AND r.folder_id=? AND COALESCE(a.published_at, a.fetched_at) BETWEEN ? AND ? ORDER BY COALESCE(a.published_at, a.fetched_at) DESC LIMIT ?`
         : `SELECT DISTINCT a.id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status, s.name AS source, r.folder_id, r.id AS rule_id, m.evidence_json
            FROM articles a JOIN media_sources s ON s.id=a.source_id JOIN article_matches m ON m.article_id=a.id JOIN monitoring_rules r ON r.id=m.rule_id
-           WHERE a.review_status=? ORDER BY COALESCE(a.published_at, a.fetched_at) DESC LIMIT ?`;
-      const result = await env.DB.prepare(statement).bind(...(folder ? [status, folder, limit] : [status, limit])).all();
+           WHERE a.review_status=? AND COALESCE(a.published_at, a.fetched_at) BETWEEN ? AND ? ORDER BY COALESCE(a.published_at, a.fetched_at) DESC LIMIT ?`;
+      const result = await env.DB.prepare(statement).bind(...(folder ? [status, folder, from, to, limit] : [status, from, to, limit])).all();
       return json({ articles: result.results, data_mode: 'verified_monitoring' }, 200, headers);
     }
     return json({ error: 'Not found' }, 404, headers);

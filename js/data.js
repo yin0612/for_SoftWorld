@@ -1292,7 +1292,7 @@ const PRESS_RELEASES = [
 const MONTHLY_STATS = {};
 const MEDIA_CHANNELS = {};
 
-// 輔助函數：產生隨機日期 (2026-07-01 到 2026-09-14)
+// 輔助函數：產生隨機日期（僅供展示資料使用）
 function getRandomDate() {
     const start = new Date(2026, 6, 1).getTime();
     const end = new Date(2026, 8, 14).getTime();
@@ -1328,11 +1328,14 @@ function loadSources(companyId, month) {
     return matched;
 }
 
-// 產生每月統計數據 (2024-01 到 2026-08, 共 32 個月)
-const START_YEAR = 2024;
-const START_MONTH = 1;
-const END_YEAR = 2026;
-const END_MONTH = 9;
+// 展示圖表與真實監測均只保留今天往前兩個月的資料窗口。
+const MONITORING_TODAY = new Date();
+const MONITORING_START_DATE = new Date(MONITORING_TODAY);
+MONITORING_START_DATE.setMonth(MONITORING_START_DATE.getMonth() - 2);
+const START_YEAR = MONITORING_START_DATE.getFullYear();
+const START_MONTH = MONITORING_START_DATE.getMonth() + 1;
+const END_YEAR = MONITORING_TODAY.getFullYear();
+const END_MONTH = MONITORING_TODAY.getMonth() + 1;
 
 const MONTHS_LIST = [];
 for (let y = START_YEAR; y <= END_YEAR; y++) {

@@ -484,6 +484,20 @@ let filteredNews = [];
 let currentHuikeFolderId = 'folder_1';
 let activeHuikeKeyword = '';
 
+function getRollingMonitoringDateRange() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const from = new Date(today);
+    from.setMonth(from.getMonth() - 2);
+    const asDateInput = (date) => {
+        const yyyy = date.getFullYear();
+        const mm = String(date.getMonth() + 1).padStart(2, '0');
+        const dd = String(date.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    };
+    return { from: asDateInput(from), to: asDateInput(today) };
+}
+
 function initNewsSection() {
     const container = document.getElementById('timelineContainer');
     if (!container) return;
@@ -667,16 +681,10 @@ function setupNewsFilters() {
     const dateFromInput = document.getElementById('filterDateFrom');
     const dateToInput = document.getElementById('filterDateTo');
 
-    // 動態設定預設起始日期為「兩個月前」
-    if (dateFromInput && !dateFromInput.value) {
-        const today = new Date();
-        const twoMonthsAgo = new Date(today);
-        twoMonthsAgo.setMonth(twoMonthsAgo.getMonth() - 2);
-        const yyyy = twoMonthsAgo.getFullYear();
-        const mm = String(twoMonthsAgo.getMonth() + 1).padStart(2, '0');
-        const dd = String(twoMonthsAgo.getDate()).padStart(2, '0');
-        dateFromInput.value = `${yyyy}-${mm}-${dd}`;
-    }
+    // 網站與 API 均以「今天往前兩個月」為預設監測窗口。
+    const rollingRange = getRollingMonitoringDateRange();
+    if (dateFromInput && !dateFromInput.value) dateFromInput.value = rollingRange.from;
+    if (dateToInput && !dateToInput.value) dateToInput.value = rollingRange.to;
 
     if (categorySelect) categorySelect.addEventListener('change', applyNewsFilters);
     if (sourceSelect) sourceSelect.addEventListener('change', applyNewsFilters);
@@ -799,8 +807,9 @@ function renderNews(append = false) {
                 if (kwInput) kwInput.value = '';
                 if (catSelect) catSelect.value = '';
                 if (srcSelect) srcSelect.value = '';
-                if (fromInput) fromInput.value = '2026-07-01';
-                if (toInput) toInput.value = '2026-09-30';
+                const rollingRange = getRollingMonitoringDateRange();
+                if (fromInput) fromInput.value = rollingRange.from;
+                if (toInput) toInput.value = rollingRange.to;
                 activeHuikeKeyword = '';
                 const clearBtn = document.getElementById('clearHuikeFilterBtn');
                 if (clearBtn) clearBtn.style.display = 'none';

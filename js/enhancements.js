@@ -164,8 +164,9 @@ function initTrendYearFilter() {
     const host = document.getElementById('trendYearFilter');
     if (!host || host.dataset.rendered === 'true') return;
 
-    const years = ['all', '2024', '2025', '2026'];
-    const labelOf = y => (y === 'all' ? '全部區間' : y + ' 年');
+    const availableMonths = typeof MONTHS_LIST === 'undefined' ? [] : MONTHS_LIST;
+    const years = ['all', ...Array.from(new Set(availableMonths.map(m => m.slice(0, 4))))];
+    const labelOf = y => (y === 'all' ? '近兩個月' : y + ' 年');
 
     host.innerHTML = years.map(y => `
         <button type="button" class="year-chip${y === 'all' ? ' is-active' : ''}"
@@ -368,28 +369,13 @@ function initSkipLink() {
    ========================================================================== */
 
 /**
- * 把三處會過期的硬編碼日期換成實際資料區間。
- * update_data.py 每週會推進 END_MONTH，寫死的日期會逐漸對不上。
+ * 同步圖表標籤到目前兩個月的展示資料窗口。
  */
 function syncDateRanges() {
     if (typeof MONTHS_LIST === 'undefined' || !MONTHS_LIST.length) return;
 
     const first = MONTHS_LIST[0];
     const last = MONTHS_LIST[MONTHS_LIST.length - 1];
-    const [lastYear, lastMonth] = last.split('-').map(Number);
-    const lastDay = new Date(lastYear, lastMonth, 0).getDate();
-
-    const from = document.getElementById('filterDateFrom');
-    const to = document.getElementById('filterDateTo');
-    if (from && !from.dataset.synced) {
-        from.value = first + '-01';
-        from.dataset.synced = 'true';
-    }
-    if (to && !to.dataset.synced) {
-        to.value = last + '-' + String(lastDay).padStart(2, '0');
-        to.dataset.synced = 'true';
-    }
-
     const label = document.getElementById('trendRangeLabel');
     if (label && (!window.TREND_YEAR || window.TREND_YEAR === 'all')) {
         label.textContent = '監測區間：' + first.replace('-', '/') + ' — ' + last.replace('-', '/');
