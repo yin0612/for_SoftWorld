@@ -452,29 +452,16 @@ function initStatsOverview() {
         });
     }
 
-    const elHeroPR = document.getElementById('totalPressReleases');
     const elNews = document.getElementById('statTotalNews');
     const elCoverage = document.getElementById('statTotalCoverage');
     const elSocial = document.getElementById('statTotalSocial');
     const elKol = document.getElementById('statTotalKol');
-    const elMonths = document.getElementById('totalMonths');
-    const elChannels = document.getElementById('totalChannels');
 
-    if (elHeroPR) { elHeroPR.textContent = totalPR.toLocaleString(); elHeroPR.setAttribute('data-target', totalPR); }
     if (elNews) { elNews.textContent = totalPR.toLocaleString(); elNews.setAttribute('data-target', totalPR); }
     if (elCoverage) { elCoverage.textContent = totalCoverage.toLocaleString(); elCoverage.setAttribute('data-target', totalCoverage); }
     if (elSocial) { elSocial.textContent = totalSocial.toLocaleString(); elSocial.setAttribute('data-target', totalSocial); }
     if (elKol) { elKol.textContent = totalKol.toLocaleString(); elKol.setAttribute('data-target', totalKol); }
 
-    if (elMonths && typeof MONTHS_LIST !== 'undefined') {
-        elMonths.textContent = MONTHS_LIST.length;
-        elMonths.setAttribute('data-target', MONTHS_LIST.length);
-    }
-    if (elChannels && typeof MEDIA_CHANNELS !== 'undefined' && typeof COMPANIES !== 'undefined' && COMPANIES.length > 0) {
-        const numChannels = Object.keys(MEDIA_CHANNELS[COMPANIES[0].id] || {}).length;
-        elChannels.textContent = numChannels;
-        elChannels.setAttribute('data-target', numChannels);
-    }
 }
 
 // 4. 新聞發布區塊與過濾邏輯
@@ -521,6 +508,14 @@ function setVerifiedNewsTotal(total) {
             element.setAttribute('data-target', total || 0);
         }
     });
+}
+
+function setVerifiedMonitoringSourceTotal(status) {
+    const element = document.getElementById('totalChannels');
+    if (!element) return;
+    const healthySources = Number(status?.source_summary?.healthy || 0);
+    element.textContent = healthySources.toLocaleString();
+    element.setAttribute('data-target', healthySources);
 }
 
 function hydrateMonitoringManifest(manifest) {
@@ -650,6 +645,7 @@ function initNewsSection() {
     monitoringNews = [];
     monitoringLoadState = null;
     setVerifiedNewsTotal(0);
+    setVerifiedMonitoringSourceTotal(null);
     setNewsDataMode('loading');
     renderHuikeTabs();
     renderHuikeChips();
@@ -676,6 +672,7 @@ function initNewsSection() {
     Promise.all([loadVerifiedMonitoringArticles(), manifestPromise, statusPromise]).then(([result, manifest, status]) => {
         if (!result.loaded) throw new Error('Monitoring API is not configured.');
         monitoringRuntimeStatus = status;
+        setVerifiedMonitoringSourceTotal(status);
         if (manifest) hydrateMonitoringManifest(manifest);
         monitoringNews = result.articles;
         monitoringLoadState = { total: result.total ?? monitoringNews.length, loaded: monitoringNews.length, complete: result.complete !== false };
@@ -691,6 +688,7 @@ function initNewsSection() {
         monitoringNews = [];
         monitoringLoadState = null;
         setVerifiedNewsTotal(0);
+        setVerifiedMonitoringSourceTotal(null);
         setNewsDataMode('unavailable');
         renderMonitoringTransparency();
         applyNewsFilters();
