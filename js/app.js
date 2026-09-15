@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCompanyCards();
     initStatsOverview();
     initNewsSection();
+    initFintechMonitoringPage();
     initNavbar();
     initHashRouter();
     initBackToTop();
@@ -15,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 1. Hash SPA 獨立切頁路由器 (點選目錄只顯示該項獨立頁面)
 function initHashRouter() {
-    const pages = ['companies', 'news', 'analytics', 'compare', 'trends', 'methodology'];
+    const pages = ['companies', 'news', 'fintech', 'analytics', 'compare', 'trends', 'methodology'];
 
     function handleRouteChange() {
         let hash = window.location.hash || '#/companies';
@@ -475,6 +476,16 @@ let activeHuikeKeyword = '';
 let monitoringManifest = null;
 let monitoringRuntimeStatus = null;
 let monitoringLoadState = null;
+let monitoringDataMode = 'loading';
+let fintechMode = 'all';
+let fintechPage = 1;
+const FINTECH_PER_PAGE = 12;
+const FINTECH_FOLDER_IDS = new Set(['folder_2', 'folder_5', 'folder_6']);
+const STABLECOIN_TERM_GROUPS = [
+    { label: '穩定幣類別', terms: ['穩定幣', 'stablecoin', 'stable coin'] },
+    { label: '穩定幣資產', terms: ['USDT', 'USDC', 'USDe', 'PYUSD', 'RLUSD', 'FDUSD', 'EURC', 'USDG', 'GUSD'] },
+    { label: '發行與結算', terms: ['Tether', '鏈上結算', '鏈上支付', '代幣化存款', '代幣化貨幣', 'tokenized deposit', 'tokenized deposits', 'stablecoin settlement', 'stablecoin payment', 'stablecoin payments'] }
+];
 
 function escapeHtml(value = '') {
     return String(value).replace(/[&<>'"]/g, (char) => ({
@@ -496,6 +507,7 @@ function safeCssColor(value) {
 }
 
 function setNewsDataMode(mode) {
+    monitoringDataMode = mode;
     const resultEl = document.getElementById('filterResultCount');
     if (resultEl) resultEl.dataset.dataMode = mode;
 }
@@ -650,6 +662,7 @@ function initNewsSection() {
     renderHuikeTabs();
     renderHuikeChips();
     applyNewsFilters();
+    renderFintechMonitoring();
 
     const configured = Boolean(window.MONITORING_API_BASE && typeof loadVerifiedMonitoringArticles === 'function');
     const companyFilter = document.getElementById('companyFilterSection');
@@ -659,6 +672,7 @@ function initNewsSection() {
     if (!configured) {
         setNewsDataMode('unavailable');
         applyNewsFilters();
+        renderFintechMonitoring();
         return;
     }
 
@@ -675,7 +689,12 @@ function initNewsSection() {
         setVerifiedMonitoringSourceTotal(status);
         if (manifest) hydrateMonitoringManifest(manifest);
         monitoringNews = result.articles;
-        monitoringLoadState = { total: result.total ?? monitoringNews.length, loaded: monitoringNews.length, complete: result.complete !== false };
+        monitoringLoadState = {
+            total: result.total ?? monitoringNews.length,
+            loaded: monitoringNews.length,
+            complete: result.complete !== false,
+            range: result.range || getRollingMonitoringDateRange()
+        };
         setVerifiedNewsTotal(monitoringLoadState.total);
         setNewsDataMode('verified');
         refreshVerifiedSourceOptions(result.articles, status?.enabled_sources || []);
@@ -683,6 +702,7 @@ function initNewsSection() {
         renderHuikeTabs();
         renderHuikeChips();
         applyNewsFilters();
+        renderFintechMonitoring();
     }).catch((error) => {
         console.warn('Verified monitoring API unavailable; no unverified content is shown.', error);
         monitoringNews = [];
@@ -692,6 +712,7 @@ function initNewsSection() {
         setNewsDataMode('unavailable');
         renderMonitoringTransparency();
         applyNewsFilters();
+        renderFintechMonitoring();
     });
 
     const loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -727,6 +748,371 @@ function refreshVerifiedSourceOptions(articles, sourceDetails) {
         sourceSelect.appendChild(option);
     });
     if ([...sourceSelect.options].some((option) => option.value === previous)) sourceSelect.value = previous;
+}
+
+function getMonitoringFoldersForArticle(news) {
+    const folders = Array.isArray(news?.huikeFolders)
+        ? news.huikeFolders
+        : [news?.huikeFolder];
+    return folders.filter(Boolean);
+}
+
+function articleHasMonitoringFolder(news, folderId) {
+    return getMonitoringFoldersForArticle(news).includes(folderId);
+}
+
+function stablecoinSearchText(news) {
+    return [
+        news?.title,
+        news?.excerpt,
+        ...(news?.matchedTerms || []),
+        ...(news?.ruleIds || [])
+    ].filter(Boolean).join(' ');
+}
+
+function matchesStablecoinTerm(target, term) {
+    const text = String(target || '');
+    const query = String(term || '');
+    if (!text || !query) return false;
+    if (/^[A-Za-z0-9]+$/.test(query)) {
+        return new RegExp('(^|[^a-z0-9])' + query.toLowerCase() + '($|[^a-z0-9])', 'i').test(text);
+    }
+    return text.toLowerCase().includes(query.toLowerCase());
+}
+
+function getStablecoinTermMatches(news) {
+    const target = stablecoinSearchText(news);
+    const matches = [];
+    STABLECOIN_TERM_GROUPS.forEach((group) => {
+        group.terms.forEach((term) => {
+            if (matchesStablecoinTerm(target, term)) matches.push(term);
+        });
+    });
+    return [...new Set(matches)];
+}
+
+function isStablecoinArticle(news) {
+    return articleHasMonitoringFolder(news, 'folder_6') || getStablecoinTermMatches(news).length > 0;
+}
+
+function isFintechMonitoringArticle(news) {
+    return getMonitoringFoldersForArticle(news).some((folderId) => FINTECH_FOLDER_IDS.has(folderId))
+        || isStablecoinArticle(news);
+}
+
+function getFintechMonitoringArticles() {
+    return monitoringNews
+        .filter(isFintechMonitoringArticle)
+        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+}
+
+function getFintechCategoryLabels(news) {
+    const labels = [];
+    if (articleHasMonitoringFolder(news, 'folder_2')) labels.push('台灣支付');
+    if (articleHasMonitoringFolder(news, 'folder_5')) labels.push('國際金融科技');
+    if (isStablecoinArticle(news)) labels.push('穩定幣');
+    return labels.length ? labels : ['金融科技'];
+}
+
+function plainFintechText(value) {
+    const decoder = document.createElement('div');
+    decoder.innerHTML = String(value || '');
+    return decoder.textContent || '';
+}
+
+function truncateFintechText(value, maxLength = 300) {
+    const text = plainFintechText(value).replace(/\s+/g, ' ').trim();
+    return text.length > maxLength ? text.slice(0, maxLength).trimEnd() + '…' : text;
+}
+
+function fintechSearchText(news) {
+    return [
+        stablecoinSearchText(news),
+        ...getStablecoinTermMatches(news),
+        ...getFintechCategoryLabels(news)
+    ].filter(Boolean).join(' ').toLowerCase();
+}
+
+function updateFintechModeButtons() {
+    document.querySelectorAll('[data-fintech-mode]').forEach((button) => {
+        const isActive = button.getAttribute('data-fintech-mode') === fintechMode;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    });
+}
+
+function refreshFintechSourceOptions(articles) {
+    const sourceSelect = document.getElementById('fintechSourceFilter');
+    if (!sourceSelect) return;
+    const sources = [...new Set(articles.map((article) => article.source).filter(Boolean))]
+        .sort((a, b) => String(a).localeCompare(String(b), 'zh-Hant'));
+    const signature = sources.join('|');
+    if (sourceSelect.dataset.sourceSignature === signature) return;
+
+    const previous = sourceSelect.value;
+    sourceSelect.replaceChildren();
+    const allOption = document.createElement('option');
+    allOption.value = '';
+    allOption.textContent = '全部已驗證 RSS 來源';
+    sourceSelect.appendChild(allOption);
+    sources.forEach((source) => {
+        const option = document.createElement('option');
+        option.value = source;
+        option.textContent = source;
+        sourceSelect.appendChild(option);
+    });
+    if (sources.includes(previous)) sourceSelect.value = previous;
+    sourceSelect.dataset.sourceSignature = signature;
+}
+
+function renderFintechKeywordPills(articles) {
+    const container = document.getElementById('fintechKeywordPills');
+    if (!container) return;
+    container.replaceChildren();
+    const scopes = [
+        { label: '台灣支付與藍新科技', count: articles.filter((article) => articleHasMonitoringFolder(article, 'folder_2')).length },
+        { label: '國際支付與金融科技', count: articles.filter((article) => articleHasMonitoringFolder(article, 'folder_5')).length },
+        { label: '穩定幣與鏈上結算', count: articles.filter(isStablecoinArticle).length }
+    ];
+    scopes.forEach((scope) => {
+        const pill = document.createElement('span');
+        pill.className = 'fintech-scope-pill';
+        pill.textContent = scope.label + ' ' + scope.count + ' 篇';
+        container.appendChild(pill);
+    });
+}
+
+function renderFintechSummary(summary, articles) {
+    summary.replaceChildren();
+    const range = monitoringLoadState?.range || getRollingMonitoringDateRange();
+    const stablecoinCount = articles.filter(isStablecoinArticle).length;
+    const sources = new Set(articles.map((article) => article.source).filter(Boolean));
+
+    const state = document.createElement('p');
+    state.className = 'fintech-summary-state';
+    state.textContent = '已驗證 RSS 資料。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留原文連結與命中證據。';
+    summary.appendChild(state);
+
+    const grid = document.createElement('div');
+    grid.className = 'fintech-stat-grid';
+    [
+        [String(articles.length), '金融科技新聞'],
+        [String(stablecoinCount), '穩定幣相關'],
+        [String(sources.size), '已驗證來源'],
+        [range.from + ' 至 ' + range.to, '資料範圍']
+    ].forEach(([value, label]) => {
+        const item = document.createElement('div');
+        item.className = 'fintech-stat';
+        const statValue = document.createElement('strong');
+        statValue.className = 'fintech-stat-value';
+        statValue.textContent = value;
+        const statLabel = document.createElement('span');
+        statLabel.className = 'fintech-stat-label';
+        statLabel.textContent = label;
+        item.append(statValue, statLabel);
+        grid.appendChild(item);
+    });
+    summary.appendChild(grid);
+}
+
+function makeFintechEmptyState(icon, title, message) {
+    const empty = document.createElement('div');
+    empty.className = 'fintech-empty-state';
+    const iconEl = document.createElement('div');
+    iconEl.className = 'fintech-empty-icon';
+    iconEl.textContent = icon;
+    const titleEl = document.createElement('h3');
+    titleEl.textContent = title;
+    const messageEl = document.createElement('p');
+    messageEl.textContent = message;
+    empty.append(iconEl, titleEl, messageEl);
+    return empty;
+}
+
+function createFintechArticleCard(news) {
+    const card = document.createElement('article');
+    card.className = 'fintech-news-card';
+
+    const header = document.createElement('div');
+    header.className = 'fintech-card-header';
+    const badges = document.createElement('div');
+    badges.className = 'fintech-card-badges';
+    getFintechCategoryLabels(news).forEach((label) => {
+        const badge = document.createElement('span');
+        badge.className = 'fintech-category-badge';
+        badge.textContent = label;
+        badges.appendChild(badge);
+    });
+    const date = document.createElement('time');
+    date.className = 'fintech-card-date';
+    date.textContent = '📅 ' + (news.date || '日期未提供');
+    header.append(badges, date);
+
+    const title = document.createElement('h3');
+    title.className = 'fintech-card-title';
+    const displayTitle = plainFintechText(news.title || '未提供標題');
+    const directUrl = safeHttpUrl(news.url);
+    if (directUrl !== '#') {
+        const link = document.createElement('a');
+        link.href = directUrl;
+        link.target = '_blank';
+        link.rel = 'noopener';
+        link.textContent = displayTitle;
+        title.appendChild(link);
+    } else {
+        title.textContent = displayTitle;
+    }
+
+    const excerpt = document.createElement('p');
+    excerpt.className = 'fintech-card-excerpt';
+    excerpt.textContent = truncateFintechText(news.excerpt || '此文章由已驗證公開 RSS 來源收錄。');
+
+    const matchedTerms = [...new Set([
+        ...(news.matchedTerms || []),
+        ...getStablecoinTermMatches(news)
+    ].filter(Boolean))].slice(0, 8);
+    const evidence = document.createElement('div');
+    evidence.className = 'fintech-evidence';
+    const evidenceLabel = document.createElement('span');
+    evidenceLabel.className = 'fintech-evidence-label';
+    evidenceLabel.textContent = '命中詞';
+    evidence.appendChild(evidenceLabel);
+    if (matchedTerms.length) {
+        matchedTerms.forEach((term) => {
+            const termEl = document.createElement('span');
+            termEl.className = 'fintech-term';
+            termEl.textContent = term;
+            evidence.appendChild(termEl);
+        });
+    } else {
+        const ruleEl = document.createElement('span');
+        ruleEl.className = 'fintech-term';
+        ruleEl.textContent = (news.ruleIds || [])[0] || '規則命中';
+        evidence.appendChild(ruleEl);
+    }
+
+    const footer = document.createElement('div');
+    footer.className = 'fintech-card-footer';
+    const source = document.createElement('span');
+    source.className = 'fintech-card-source';
+    source.textContent = '📰 ' + (news.source || '來源未提供');
+    const original = document.createElement('a');
+    original.className = 'fintech-original-link';
+    if (directUrl !== '#') {
+        original.href = directUrl;
+        original.target = '_blank';
+        original.rel = 'noopener';
+        original.textContent = '開啟原文 ↗';
+    } else {
+        original.removeAttribute('href');
+        original.textContent = '原文連結不可用';
+    }
+    footer.append(source, original);
+    card.append(header, title, excerpt, evidence, footer);
+    return card;
+}
+
+function renderFintechMonitoring() {
+    const summary = document.getElementById('fintechMonitoringSummary');
+    const grid = document.getElementById('fintechNewsGrid');
+    const resultCount = document.getElementById('fintechResultCount');
+    const loadMore = document.getElementById('fintechLoadMore');
+    if (!summary || !grid || !resultCount || !loadMore) return;
+    updateFintechModeButtons();
+
+    if (monitoringDataMode !== 'verified') {
+        const isLoading = monitoringDataMode === 'loading';
+        summary.replaceChildren();
+        const state = document.createElement('p');
+        state.className = 'fintech-summary-state';
+        state.textContent = isLoading
+            ? '正在讀取已驗證 RSS 來源、近兩個月資料與關鍵字命中結果。'
+            : '真實新聞服務目前無法驗證，頁面不會改以展示資料替代。';
+        summary.appendChild(state);
+        renderFintechKeywordPills([]);
+        grid.replaceChildren();
+        grid.appendChild(makeFintechEmptyState(
+            isLoading ? '⏳' : '⚠️',
+            isLoading ? '正在讀取金融科技新聞' : '真實新聞服務暫時無法驗證',
+            isLoading
+                ? '系統正在確認來源健康狀態與兩個月資料窗口。'
+                : '為避免未驗證內容被誤認為新聞，請稍後重新整理。'
+        ));
+        resultCount.textContent = isLoading ? '正在載入已驗證 RSS 新聞' : '真實新聞服務目前無法驗證';
+        loadMore.hidden = true;
+        return;
+    }
+
+    const allArticles = getFintechMonitoringArticles();
+    refreshFintechSourceOptions(allArticles);
+    renderFintechSummary(summary, allArticles);
+    renderFintechKeywordPills(allArticles);
+
+    const selectedSource = document.getElementById('fintechSourceFilter')?.value || '';
+    const keyword = document.getElementById('fintechKeywordFilter')?.value.trim().toLowerCase() || '';
+    const filtered = allArticles.filter((article) => {
+        const matchMode = fintechMode === 'all'
+            || (fintechMode === 'taiwan' && articleHasMonitoringFolder(article, 'folder_2'))
+            || (fintechMode === 'international' && articleHasMonitoringFolder(article, 'folder_5'))
+            || (fintechMode === 'stablecoin' && isStablecoinArticle(article));
+        const matchSource = !selectedSource || article.source === selectedSource;
+        const matchKeyword = !keyword || fintechSearchText(article).includes(keyword);
+        return matchMode && matchSource && matchKeyword;
+    });
+
+    const visible = filtered.slice(0, fintechPage * FINTECH_PER_PAGE);
+    resultCount.textContent = '顯示 ' + visible.length + '／' + filtered.length + ' 篇已驗證 RSS 新聞';
+    grid.replaceChildren();
+    if (!filtered.length) {
+        grid.appendChild(makeFintechEmptyState(
+            '🔍',
+            '目前沒有符合條件的已驗證新聞',
+            '請調整監測分類、媒體來源或搜尋條件；頁面不會以展示資料補足結果。'
+        ));
+    } else {
+        visible.forEach((article) => grid.appendChild(createFintechArticleCard(article)));
+    }
+    loadMore.hidden = visible.length >= filtered.length;
+}
+
+function initFintechMonitoringPage() {
+    const modeButtons = document.getElementById('fintechModeButtons');
+    const sourceFilter = document.getElementById('fintechSourceFilter');
+    const keywordFilter = document.getElementById('fintechKeywordFilter');
+    const loadMoreButton = document.getElementById('fintechLoadMoreBtn');
+
+    if (modeButtons && !modeButtons.dataset.bound) {
+        modeButtons.dataset.bound = 'true';
+        modeButtons.querySelectorAll('[data-fintech-mode]').forEach((button) => {
+            button.addEventListener('click', () => {
+                fintechMode = button.getAttribute('data-fintech-mode') || 'all';
+                fintechPage = 1;
+                renderFintechMonitoring();
+            });
+        });
+    }
+    if (sourceFilter && !sourceFilter.dataset.bound) {
+        sourceFilter.dataset.bound = 'true';
+        sourceFilter.addEventListener('change', () => {
+            fintechPage = 1;
+            renderFintechMonitoring();
+        });
+    }
+    if (keywordFilter && !keywordFilter.dataset.bound) {
+        keywordFilter.dataset.bound = 'true';
+        keywordFilter.addEventListener('input', () => {
+            fintechPage = 1;
+            renderFintechMonitoring();
+        });
+    }
+    if (loadMoreButton && !loadMoreButton.dataset.bound) {
+        loadMoreButton.dataset.bound = 'true';
+        loadMoreButton.addEventListener('click', () => {
+            fintechPage++;
+            renderFintechMonitoring();
+        });
+    }
+    renderFintechMonitoring();
 }
 
 // 初始化 2025 智冠慧科五大監測分類導航

@@ -1,21 +1,24 @@
 {
-  "version": "2026-09-15-source-expansion",
-  "source_document": "【For慧科】智冠2025年監測關鍵字及媒體.docx",
+  "version": "2026-09-15-fintech-stablecoin",
+  "source_document": "【For慧科】智冠2025年監測關鍵字及媒體.docx；金融科技&穩定幣監測/關鍵字清單.xlsx；金融科技&穩定幣監測/監測關鍵字及媒體.docx",
   "matching_capability": "僅比對已授權 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容；不擷取原新聞網站頁面。",
-  "description": "依原始 Word 文件完整資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。",
-  "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","newebpay-brand","international-fintech"],
+  "description": "依原始 Word、金融科技關鍵字清單與媒體清單資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。穩定幣採獨立高精準規則，不把泛稱加密貨幣直接視為穩定幣。",
+  "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","newebpay-brand","international-fintech","stablecoin-core","stablecoin-settlement"],
   "automatic_publication_allowed_terms": {
     "softworld-brand": ["智冠科技","智冠集團","智冠","台灣淘米","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團"],
-    "international-fintech": ["third party payment","online payment","payment gateway","BNPL","Buy Now Pay Later","Paypal","Stripe","Block Inc","Adyen","visa","mastercard"]
+    "international-fintech": ["third party payment","online payment","payment gateway","BNPL","Buy Now Pay Later","Paypal","Stripe","Block Inc","Adyen","visa","mastercard"],
+    "stablecoin-core": ["穩定幣","穩定幣支付","穩定幣結算","美元穩定幣","stablecoin","stable coin","USDT","USDC","USDe","PYUSD","RLUSD","FDUSD","EURC","USDG","GUSD","Tether"],
+    "stablecoin-settlement": ["鏈上結算","鏈上支付","代幣化存款","代幣化貨幣","tokenized deposit","tokenized deposits","stablecoin settlement","stablecoin payment","stablecoin payments"]
   },
-  "automatic_publication_note": "僅高精準品牌、產品/IP 與國際金融科技規則可自動公開；其中易產生歧義的別名（例如「台鋼」、「網龍」、「MyCard」與「Square」）仍會完整監測，但改列待覆核，避免把泛用詞誤報為真實監測新聞。",
+  "automatic_publication_note": "僅高精準品牌、產品/IP、國際金融科技與穩定幣／鏈上結算規則可自動公開；其中易產生歧義的別名（例如「台鋼」、「網龍」、「MyCard」與「Square」）仍會完整監測，但改列待覆核，避免把泛用詞誤報為真實監測新聞。",
   "retired_rule_ids": ["competitor-game","industry-market","industry-platform"],
   "folders": [
     {"id":"folder_1","name":"智冠集團","region_scope":["TW","CN","HK"],"priority":"high","description":"智冠集團、產品與 IP 授權"},
     {"id":"folder_2","name":"藍新科技","region_scope":["TW"],"priority":"high","description":"僅監測台灣媒體的支付與金融科技動態"},
     {"id":"folder_3","name":"競業新聞","region_scope":["TW","CN","HK"],"priority":"normal","description":"國內外遊戲同業動態"},
     {"id":"folder_4","name":"產業新聞","region_scope":["TW","CN","HK"],"priority":"normal","description":"遊戲、平台、發票與行銷產業動態"},
-    {"id":"folder_5","name":"藍新科技（國際新聞）","region_scope":["GLOBAL"],"priority":"normal","description":"國際金融科技與支付產業動態"}
+    {"id":"folder_5","name":"藍新科技（國際新聞）","region_scope":["GLOBAL"],"priority":"normal","description":"國際金融科技與支付產業動態"},
+    {"id":"folder_6","name":"穩定幣與鏈上結算","region_scope":["TW","CN","HK","GLOBAL"],"priority":"high","description":"穩定幣、代幣化貨幣與鏈上支付結算動態"}
   ],
   "rules": [
     {"id":"softworld-brand","folder_id":"folder_1","display_name":"智冠集團 單一關鍵字","scope":"full_text","scope_note":"RSS 標題與摘要","required_any_groups":[["智冠科技","智冠集團","智冠","MyCard","台灣淘米","中華網龍","網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團","台鋼"]],"exclude_any":[]},
@@ -32,7 +35,9 @@
     {"id":"industry-new-business","folder_id":"folder_4","display_name":"產業新聞 新商機與新服務","scope":"title_or_lead","scope_note":"RSS 標題或摘要；新商機詞 + 產業詞","required_any_groups":[["新商機","新服務","服務升級","藍海","新創","限時促銷","全新規劃","新建案","新產品"],["電商","金融","母嬰","醫美","美妝","房地產","保健"]],"exclude_any":[]},
     {"id":"industry-einvoice","folder_id":"folder_4","display_name":"產業新聞 雲端發票與載具","scope":"title_or_lead","scope_note":"RSS 標題或摘要；發票/載具詞 + 服務詞","required_any_groups":[["發票","發票載具","載具","雲端發票","手機條碼","載具中獎","記帳","歸戶"],["載具APP","發票+","發票怪獸","發票存摺","雲端發票集點王","i統一發票","發票載具","發票特務","水滴發票","aifian","對獎","抽獎","領獎","機率","登錄","記帳","發票大師"]],"exclude_any":[]},
     {"id":"industry-martech","folder_id":"folder_4","display_name":"產業新聞 數位廣告與行銷","scope":"title_or_lead","scope_note":"RSS 標題或摘要；行銷主題詞 + 平台/技術詞","required_any_groups":[["廣告","曝光","互動","轉換","品牌","媒體","行銷","社群","成效","優化"],["LINE","Google","Youtube","Facebook","Meta","FB","Instagram","IG","TikTok","抖音","cookieless","cookie","數位廣告","AI","廣告代理","Martech","機器學習","SEO","口碑","KOL","TTD","pDOOH","小紅書"]],"exclude_any":[]},
-    {"id":"international-fintech","folder_id":"folder_5","display_name":"國際金融科技 單一關鍵字","scope":"full_text","scope_note":"RSS 標題與摘要","required_any_groups":[["third party payment","online payment","payment gateway","BNPL","Buy Now Pay Later","Paypal","Stripe","Block Inc","Square","Adyen","visa","mastercard"]],"exclude_any":[]}
+    {"id":"international-fintech","folder_id":"folder_5","display_name":"國際金融科技 單一關鍵字","scope":"full_text","scope_note":"RSS 標題與摘要","required_any_groups":[["third party payment","online payment","payment gateway","BNPL","Buy Now Pay Later","Paypal","Stripe","Block Inc","Square","Adyen","visa","mastercard"]],"exclude_any":[]},
+    {"id":"stablecoin-core","folder_id":"folder_6","display_name":"穩定幣 核心詞","scope":"full_text","scope_note":"RSS 標題與摘要；精準穩定幣名稱或類別詞","required_any_groups":[["穩定幣","穩定幣支付","穩定幣結算","美元穩定幣","stablecoin","stable coin","USDT","USDC","USDe","PYUSD","RLUSD","FDUSD","EURC","USDG","GUSD","Tether"]],"exclude_any":[]},
+    {"id":"stablecoin-settlement","folder_id":"folder_6","display_name":"穩定幣 鏈上結算","scope":"full_text","scope_note":"RSS 標題與摘要；代幣化貨幣或鏈上支付結算","required_any_groups":[["鏈上結算","鏈上支付","代幣化存款","代幣化貨幣","tokenized deposit","tokenized deposits","stablecoin settlement","stablecoin payment","stablecoin payments"]],"exclude_any":[]}
   ],
   "global_exclude_any":["大宇紡織"]
 }
