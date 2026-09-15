@@ -492,7 +492,8 @@ let monitoringManifest = null;
 let monitoringRuntimeStatus = null;
 let monitoringLoadState = null;
 let monitoringDataMode = 'loading';
-let fintechMode = 'all';
+// 國內支付是此頁主要監測目的；首次進入與清除篩選都回到台灣支付視圖。
+let fintechMode = 'taiwan';
 let fintechPage = 1;
 const FINTECH_PER_PAGE = 12;
 const FINTECH_FOLDER_IDS = new Set(['folder_2', 'folder_5', 'folder_6']);
@@ -544,9 +545,28 @@ function renderGlobalDataStatusBar() {
     const range = monitoringLoadState?.range || getRollingMonitoringDateRange();
     const lastRun = formatMonitoringTimestamp(monitoringRuntimeStatus?.latest_run?.finished_at);
     const sources = Number(monitoringRuntimeStatus?.source_summary?.healthy || 0);
+    const enabledSources = Array.isArray(monitoringRuntimeStatus?.enabled_sources)
+        ? monitoringRuntimeStatus.enabled_sources
+        : [];
+    const healthyTaiwanNames = enabledSources
+        .filter((source) => source?.region === 'TW' && source?.health_status === 'healthy')
+        .map((source) => source.name)
+        .filter(Boolean);
+    const liveSourceNames = Array.isArray(monitoringRuntimeStatus?.live_fallback_sources)
+        ? monitoringRuntimeStatus.live_fallback_sources
+        : [];
+    const enabledSourceNames = new Set(enabledSources.map((source) => source?.name).filter(Boolean));
+    const taiwanSources = new Set([
+        ...healthyTaiwanNames,
+        ...liveSourceNames.filter((name) => !enabledSourceNames.has(name))
+    ]).size;
+    const liveSourceCount = Number(monitoringRuntimeStatus?.live_fallback_source_count || liveSourceNames.length || 0);
+    const liveFallback = Number(monitoringLoadState?.liveFallbackCount || 0);
     if (monitoringDataMode === 'verified') {
         const updated = lastRun ? `最後成功更新 ${lastRun}（台北時間）` : '最後成功更新時間待服務回報';
-        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜健康 RSS ${sources} 個｜${updated}；模擬圖表僅供教學比較。`;
+        const liveSourceText = liveSourceCount ? `；台灣即時補位來源設定 ${liveSourceCount} 個` : '';
+        const liveText = liveFallback ? `；新增台灣來源即時補位 ${liveFallback} 篇` : '';
+        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜健康 RSS ${sources} 個（台灣 ${taiwanSources} 個）｜${updated}${liveSourceText}${liveText}；模擬圖表僅供教學比較。`;
     } else if (monitoringDataMode === 'loading') {
         statusText.textContent = '真實新聞：正在確認 RSS 來源與近兩個月資料；模擬圖表僅供教學比較。';
     } else {
@@ -568,8 +588,12 @@ function setVerifiedMonitoringSourceTotal(status) {
     const element = document.getElementById('totalChannels');
     if (!element) return;
     const healthySources = Number(status?.source_summary?.healthy || 0);
-    element.textContent = healthySources.toLocaleString();
-    element.setAttribute('data-target', healthySources);
+    const configuredLiveNames = Array.isArray(status?.live_fallback_sources) ? status.live_fallback_sources : [];
+    const configuredNames = new Set((status?.enabled_sources || []).map((source) => source?.name).filter(Boolean));
+    const unseededLiveSources = configuredLiveNames.filter((name) => !configuredNames.has(name)).length;
+    const visibleSources = healthySources + unseededLiveSources;
+    element.textContent = visibleSources.toLocaleString();
+    element.setAttribute('data-target', visibleSources);
 }
 
 function hydrateMonitoringManifest(manifest) {
@@ -617,10 +641,16 @@ function renderMonitoringTransparency() {
     const loadText = monitoringLoadState && !monitoringLoadState.complete
         ? ` 公開結果目前僅完整載入 ${monitoringLoadState.loaded}/${monitoringLoadState.total} 篇，請重新整理後再確認。`
         : '';
+    const liveFallbackText = monitoringLoadState?.liveFallbackCount
+        ? ` 本次另有 ${monitoringLoadState.liveFallbackCount} 篇由新增台灣 RSS 即時唯讀補位，排程成功後會自動去重並寫入資料庫。`
+        : '';
+    const configSyncText = monitoringRuntimeStatus?.domestic_config?.pending
+        ? ' 台灣支付規則／來源尚有設定待同步，期間由唯讀即時補位維持資料可見。'
+        : '';
     const statusText = monitoringRuntimeStatus
-        ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個）；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇真實文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
+        ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個；台灣來源 ${Array.isArray(monitoringRuntimeStatus.enabled_sources) ? monitoringRuntimeStatus.enabled_sources.filter((source) => source?.region === 'TW' && source?.health_status === 'healthy').length : 0} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個台灣來源提供唯讀即時補位；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇真實文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
         : '正在讀取來源健康與收錄狀態。';
-    summary.textContent = `真實性原則：僅顯示已驗證公開 RSS 來源、命中年度監測規則且附原文連結的文章；不顯示展示資料。${statusText}${loadText}`;
+    summary.textContent = `真實性原則：僅顯示已驗證公開 RSS 來源、命中年度監測規則且附原文連結的文章；不顯示展示資料。${statusText}${loadText}${liveFallbackText}${configSyncText}`;
     panel.appendChild(summary);
 
     if (!monitoringManifest) return;
@@ -742,7 +772,8 @@ function initNewsSection() {
             total: result.total ?? monitoringNews.length,
             loaded: monitoringNews.length,
             complete: result.complete !== false,
-            range: result.range || getRollingMonitoringDateRange()
+            range: result.range || getRollingMonitoringDateRange(),
+            liveFallbackCount: result.liveFallbackCount || 0
         };
         setVerifiedNewsTotal(monitoringLoadState.total);
         setNewsDataMode('verified');
@@ -934,20 +965,24 @@ function renderFintechKeywordPills(articles) {
 function renderFintechSummary(summary, articles) {
     summary.replaceChildren();
     const range = monitoringLoadState?.range || getRollingMonitoringDateRange();
+    const taiwanPaymentCount = articles.filter((article) => articleHasMonitoringFolder(article, 'folder_2')).length;
     const stablecoinCount = articles.filter(isStablecoinArticle).length;
     const sources = new Set(articles.map((article) => article.source).filter(Boolean));
+    const taiwanSources = new Set(articles.filter((article) => article.sourceRegion === 'TW').map((article) => article.source).filter(Boolean));
 
     const state = document.createElement('p');
     state.className = 'fintech-summary-state';
-    state.textContent = '已驗證 RSS 資料。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留原文連結與命中證據。';
+    state.textContent = '已驗證 RSS 資料，台灣支付為預設視圖。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留原文連結與命中證據。';
     summary.appendChild(state);
 
     const grid = document.createElement('div');
     grid.className = 'fintech-stat-grid';
     [
-        [String(articles.length), '金融科技新聞'],
+        [String(taiwanPaymentCount), '台灣支付新聞（優先）'],
+        [String(articles.length), '全部金融科技新聞'],
         [String(stablecoinCount), '穩定幣相關'],
         [String(sources.size), '已驗證來源'],
+        [String(taiwanSources.size), '台灣 RSS 來源'],
         [range.from + ' 至 ' + range.to, '資料範圍']
     ].forEach(([value, label]) => {
         const item = document.createElement('div');
@@ -1044,7 +1079,7 @@ function createFintechArticleCard(news) {
     footer.className = 'fintech-card-footer';
     const source = document.createElement('span');
     source.className = 'fintech-card-source';
-    source.textContent = '📰 ' + (news.source || '來源未提供');
+    source.textContent = (news.sourceRegion === 'TW' ? '🇹🇼 台灣來源｜' : '📰 ') + (news.source || '來源未提供');
     const original = document.createElement('a');
     original.className = 'fintech-original-link';
     if (directUrl !== '#') {
@@ -1059,7 +1094,7 @@ function createFintechArticleCard(news) {
     footer.append(source, original);
     const provenance = document.createElement('div');
     provenance.className = 'fintech-card-provenance';
-    provenance.textContent = `原文發布：${news.date || '未提供'}｜本站收錄：${news.collectedDate || '未提供'}｜覆核狀態：${news.reviewState === 'approved' ? '自動通過' : '待人工覆核'}`;
+    provenance.textContent = `原文發布：${news.date || '未提供'}｜${news.liveFallback ? '即時 RSS 讀取' : `本站收錄：${news.collectedDate || '未提供'}`}｜覆核狀態：${news.reviewState === 'approved' ? '自動通過' : '待人工覆核'}`;
     const feedUrl = safeHttpUrl(news.sourceFeed);
     if (feedUrl !== '#') {
         const separator = document.createTextNode('｜');
@@ -1178,7 +1213,7 @@ function initFintechMonitoringPage() {
     if (clearButton && !clearButton.dataset.bound) {
         clearButton.dataset.bound = 'true';
         clearButton.addEventListener('click', () => {
-            fintechMode = 'all';
+            fintechMode = 'taiwan';
             fintechPage = 1;
             if (sourceFilter) sourceFilter.value = '';
             if (keywordFilter) keywordFilter.value = '';

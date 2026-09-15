@@ -27,7 +27,7 @@ function formatMonitoringDate(value) {
 }
 
 window.loadMonitoringManifest = async function loadMonitoringManifest() {
-    const response = await fetch('config/monitoring_rules.json?v=20260915_02', {
+    const response = await fetch('config/monitoring_rules.json?v=20260915_04', {
         cache: 'no-store', headers: { Accept: 'application/json' }
     });
     if (!response.ok) throw new Error(`Monitoring manifest returned ${response.status}`);
@@ -85,6 +85,7 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
         range,
         total: total ?? rawArticles.length,
         complete,
+        liveFallbackCount: rawArticles.filter((article) => article.live_fallback === true).length,
         articles: rawArticles.map((article) => {
             const evidenceList = parseEvidenceList(article);
             const matchedTerms = uniqueTerms(evidenceList.flatMap((evidence) => [
@@ -110,7 +111,9 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
                 collectedDate: formatMonitoringDate(article.fetched_at),
                 reviewState: article.review_status || 'approved',
                 source: article.source,
+                sourceRegion: article.source_region || '',
                 sourceFeed: article.source_feed,
+                liveFallback: article.live_fallback === true,
                 url: article.url,
                 synthetic: false,
                 verifiedMonitoring: true,

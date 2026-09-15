@@ -7,6 +7,55 @@ const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(d
 // recent feed entries so a newly enabled source cannot overwhelm D1.
 const MAX_RSS_ITEMS_PER_SOURCE = 200;
 
+// 新增的台灣支付來源先提供「即時唯讀」補位，避免來源已驗證但 D1
+// seed 尚未完成時，公開頁仍只看到舊資料。資料仍以 RSS 標題／摘要與
+// 原文 URL 為限，不在這條路徑寫入 D1；排程收集成功後會自動去重。
+const LIVE_DOMESTIC_SOURCES = [
+  { id: 'cna-finance', name: '中央社 產經證券', region: 'TW', type: 'editorial', feed_url: 'https://feeds.feedburner.com/rsscna/finance' },
+  { id: 'cna-technology', name: '中央社 科技', region: 'TW', type: 'editorial', feed_url: 'https://feeds.feedburner.com/rsscna/technology' },
+  { id: 'nccc-news', name: '聯合信用卡處理中心 最新消息', region: 'TW', type: 'official', feed_url: 'https://www.nccc.com.tw/wps/wcm/connect/zh/home/CNT_00_005_News?subType=xml' },
+  { id: 'nccc-member-activity', name: '聯卡中心 卡友活動', region: 'TW', type: 'official', feed_url: 'https://www.nccc.com.tw/wps/wcm/connect/zh/home/CNT_00_005_MemberActivity?subType=xml' },
+  { id: 'nccc-shop-news', name: '聯卡中心 特約商店公告', region: 'TW', type: 'official', feed_url: 'https://www.nccc.com.tw/wps/wcm/connect/zh/home/CNT_00_005_ShopNews?subType=xml' },
+  { id: 'cardu-hot', name: '卡優新聞網熱門新聞', region: 'TW', type: 'editorial', feed_url: 'https://www.cardu.com.tw/rss/cardurss.xml' },
+  { id: 'ltn-business', name: '自由電子報 財經', region: 'TW', type: 'editorial', feed_url: 'https://news.ltn.com.tw/rss/business.xml' },
+  { id: 'techorange', name: '科技報橘 TechOrange', region: 'TW', type: 'editorial', feed_url: 'https://techorange.com/feed/' },
+  { id: 'blocktempo', name: '動區動趨 BlockTempo', region: 'TW', type: 'editorial', feed_url: 'https://www.blocktempo.com/feed/' },
+  { id: 'abmedia', name: 'ABMedia 區塊鏈媒體', region: 'TW', type: 'editorial', feed_url: 'https://www.abmedia.io/feed/' }
+];
+
+const LIVE_DOMESTIC_RULES = [
+  {
+    id: 'newebpay-brand',
+    folder_id: 'folder_2',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','簡單行動支付','ezAIO簡單收','ezAIO','簡單收','歐付寶','O\'Pay','OPay','橘子支','橘子支付','樂點行動支付','GAMA PAY','街口支付','街口電子支付','綠界科技','ECPay','全支付','PXPay','全盈支付','全盈+PAY','台灣Pay','悠遊付','悠遊卡','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子票證','MaiCoin Pay','TWQR']),
+    all_of_json: '[]',
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','簡單行動支付','ezAIO簡單收','ezAIO','簡單收','歐付寶','O\'Pay','OPay','橘子支','橘子支付','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','全盈+PAY','台灣Pay','悠遊付','悠遊卡','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子票證','MaiCoin Pay','TWQR'])
+  },
+  {
+    id: 'taiwan-payment-core',
+    folder_id: 'folder_2',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['電支','電子支付','行動支付','數位支付','第三方支付','收單','代收付','電子票證','悠遊卡','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','街口支付','街口電子支付','全支付','全盈支付','台灣Pay','跨境支付','非現金支付','支付安全','支付基礎建設','支付機構','電支機構','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','卡友','特店','特約商店','BNPL','先買後付','MaiCoin Pay']),
+    all_of_json: JSON.stringify(['台灣','臺灣','國內','本土','台北','金管會','金融監督管理委員會','央行','中央銀行','財金公司','聯卡中心','聯合信用卡處理中心','數位發展部','數發部','經濟部','行政院','立法院','金融科技','數位金融','支付產業','支付市場','支付業者','支付機構','電支機構','電子支付機構','金融服務','信用卡市場','信用卡','卡友','特店','特約商店','台灣Pay','一卡通','悠遊卡','悠遊付','街口支付','全支付','全盈支付','LINE Pay','iPASS MONEY','藍新科技','NewebPay','TWQR']),
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['電支','電子支付','行動支付','數位支付','第三方支付','金流','收單','代收付','電子票證','悠遊卡','悠遊付','一卡通','iPASS MONEY','LINE Pay','街口支付','全支付','全盈支付','台灣Pay','跨境支付','非現金支付','支付安全','支付基礎建設','支付機構','電支機構','信用卡支付','信用卡','刷卡','TWQR','卡友','特店','MaiCoin Pay'])
+  },
+  {
+    id: 'taiwan-payment-authority',
+    folder_id: 'folder_2',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['聯卡中心','聯合信用卡處理中心','財金公司','金融資訊服務','金管會','金融監督管理委員會','中央銀行','央行','數位發展部','數發部','經濟部','銀行公會']),
+    all_of_json: JSON.stringify(['支付','電支','電子支付','行動支付','數位支付','電子票證','信用卡支付','非現金支付','支付安全','支付基礎建設','防詐','交易安全','收單','代收付','信用卡','刷卡','卡友','特店','特約商店','TWQR']),
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['支付','電支','電子支付','行動支付','數位支付','電子票證','信用卡支付','非現金支付','支付安全','支付基礎建設','聯卡中心','聯合信用卡處理中心'])
+  }
+];
+
 function cors(request, env) {
   const origin = request.headers.get('Origin');
   const allowed = env.CORS_ORIGIN || '';
@@ -168,6 +217,196 @@ function ruleAllowsSource(rule, source) {
   return allowedRegions.length === 0 || allowedRegions.includes(source.region);
 }
 
+function isPublishedInRange(publishedAt, from, to) {
+  const timestamp = new Date(publishedAt).getTime();
+  const fromTimestamp = new Date(from).getTime();
+  const toTimestamp = new Date(to).getTime();
+  return Number.isFinite(timestamp) && timestamp >= fromTimestamp && timestamp <= toTimestamp;
+}
+
+async function fetchLiveDomesticArticles(from, to) {
+  const fetchedAt = new Date().toISOString();
+  const perSource = await Promise.all(LIVE_DOMESTIC_SOURCES.map(async (source) => {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(source.feed_url, {
+        signal: controller.signal,
+        headers: {
+          'user-agent': 'SoftWorldMonitoring/1.0 (+https://yin0612.github.io/for_SoftWorld/)',
+          accept: 'application/rss+xml, application/xml, text/xml, */*;q=0.8'
+        }
+      });
+      if (!response.ok) return [];
+      const items = parseRss(await response.text());
+      return items.map((item) => {
+        const parsedDate = new Date(item.publishedAt);
+        if (Number.isNaN(parsedDate.getTime()) || !isPublishedInRange(parsedDate.toISOString(), from, to)) return null;
+        const article = { title: item.title, excerpt: item.excerpt, canonicalUrl: item.link };
+        const matches = LIVE_DOMESTIC_RULES
+          .map((rule) => ({ rule, result: evaluateRule(article, rule) }))
+          .filter(({ rule, result }) => result.matched && ruleAutoPublishes(rule, result.evidence));
+        if (!matches.length) return null;
+        return {
+          id: `live-${crypto.randomUUID()}`,
+          canonical_url: item.link,
+          source_id: source.id,
+          source: source.name,
+          source_region: source.region,
+          source_feed: source.feed_url,
+          title: item.title,
+          excerpt: item.excerpt || '此文章由已驗證公開 RSS 來源即時收錄。',
+          published_at: parsedDate.toISOString(),
+          fetched_at: fetchedAt,
+          review_status: 'approved',
+          folder_ids: 'folder_2',
+          rule_ids: matches.map(({ rule }) => rule.id).join(','),
+          evidence_jsons: matches.map(({ result }) => JSON.stringify(result.evidence)).join('|||')
+        };
+      }).filter(Boolean);
+    } catch (_) {
+      // 唯讀補位來源逾時或暫時不可用時，不影響 D1 已保存的公開結果。
+      return [];
+    } finally {
+      clearTimeout(timeout);
+    }
+  }));
+  const unique = new Map();
+  perSource.flat().forEach((article) => {
+    if (article?.canonical_url && !unique.has(article.canonical_url)) unique.set(article.canonical_url, article);
+  });
+  return [...unique.values()];
+}
+
+async function findExistingArticleUrls(env, urls) {
+  const existing = new Set();
+  const uniqueUrls = [...new Set(urls.filter(Boolean))];
+  for (let offset = 0; offset < uniqueUrls.length; offset += 80) {
+    const batch = uniqueUrls.slice(offset, offset + 80);
+    try {
+      const placeholders = batch.map(() => '?').join(',');
+      // 只把已公開的 D1 文章視為重複。舊規則留下的 pending／rejected
+      // 項目不應遮住目前已通過精準台灣支付規則的即時結果。
+      const result = await env.DB.prepare(`SELECT canonical_url FROM articles
+        WHERE review_status = 'approved' AND canonical_url IN (${placeholders})`).bind(...batch).all();
+      result.results.forEach((row) => existing.add(row.canonical_url));
+    } catch (_) {
+      // D1 讀取暫時失敗時仍可顯示即時來源，前端會以 URL 去重後呈現。
+    }
+  }
+  return existing;
+}
+
+const DOMESTIC_CATALOG_ENTRIES = [
+  { id: 'tw-fintech-official-001', name: '聯合信用卡處理中心', url: 'https://www.nccc.com.tw/wps/wcm/connect/zh/home/AboutNCCC/News', source_id: 'nccc-news' },
+  { id: 'tw-fintech-official-002', name: '卡優新聞網', url: 'https://www.cardu.com.tw/footer/about.php', source_id: 'cardu-hot' },
+  { id: 'tw-fintech-official-003', name: '自由電子報', url: 'https://service.ltn.com.tw/RSS', source_id: 'ltn-business' },
+  { id: 'tw-fintech-official-004', name: '動區動趨', url: 'https://www.blocktempo.com/', source_id: 'blocktempo' },
+  { id: 'tw-fintech-official-005', name: 'ABMedia', url: 'https://www.abmedia.io/', source_id: 'abmedia' }
+];
+
+async function syncDomesticConfig(env) {
+  // Seed 失敗或尚未完成時，排程會在下一次執行自動補齊設定；失敗只記錄
+  // 並繼續既有收集，避免一次 D1 寫入錯誤讓整個 Worker 中斷。
+  try {
+    const ruleIds = LIVE_DOMESTIC_RULES.map((rule) => rule.id);
+    const sourceIds = LIVE_DOMESTIC_SOURCES.map((source) => source.id);
+    const [folder, rules, sources, catalog] = await Promise.all([
+      env.DB.prepare('SELECT id, version, name, description FROM monitoring_folders WHERE id = ?').bind('folder_2').first(),
+      env.DB.prepare(`SELECT id, version FROM monitoring_rules WHERE id IN (${ruleIds.map(() => '?').join(',')})`).bind(...ruleIds).all(),
+      env.DB.prepare(`SELECT id, feed_url, enabled, auto_publish FROM media_sources WHERE id IN (${sourceIds.map(() => '?').join(',')})`).bind(...sourceIds).all(),
+      env.DB.prepare(`SELECT id, version, source_id FROM monitoring_media_catalog WHERE id IN (${DOMESTIC_CATALOG_ENTRIES.map(() => '?').join(',')})`).bind(...DOMESTIC_CATALOG_ENTRIES.map((entry) => entry.id)).all()
+    ]);
+    const existingRules = new Map((rules.results || []).map((rule) => [rule.id, rule]));
+    const existingSources = new Map((sources.results || []).map((source) => [source.id, source]));
+    const existingCatalog = new Map((catalog.results || []).map((entry) => [entry.id, entry]));
+    const statements = [];
+    const version = env.RULES_VERSION || '2026-09-15-domestic-tw-payment-v3';
+
+    if (!folder || folder.version !== version || folder.name !== '台灣支付與藍新科技') {
+      statements.push(env.DB.prepare(`INSERT INTO monitoring_folders
+        (id, name, region_scope_json, priority, description, version)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET name=excluded.name, region_scope_json=excluded.region_scope_json,
+          priority=excluded.priority, description=excluded.description, version=excluded.version`)
+        .bind('folder_2', '台灣支付與藍新科技', JSON.stringify(['TW']), 'high', '台灣媒體的支付、電子支付、行動支付、金流與支付監理動態；國內優先', version));
+    }
+
+    LIVE_DOMESTIC_RULES.forEach((rule) => {
+      if (existingRules.get(rule.id)?.version === version) return;
+      statements.push(env.DB.prepare(`INSERT INTO monitoring_rules
+        (id, folder_id, scope, any_of_json, all_of_json, exclude_any_json, version, auto_publish, auto_publish_allowed_terms_json, active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        ON CONFLICT(id) DO UPDATE SET folder_id=excluded.folder_id, scope=excluded.scope,
+          any_of_json=excluded.any_of_json, all_of_json=excluded.all_of_json,
+          exclude_any_json=excluded.exclude_any_json, version=excluded.version,
+          auto_publish=excluded.auto_publish, auto_publish_allowed_terms_json=excluded.auto_publish_allowed_terms_json,
+          active=excluded.active`)
+        .bind(rule.id, rule.folder_id, rule.scope, rule.any_of_json, rule.all_of_json,
+          rule.exclude_any_json, version, rule.auto_publish, rule.auto_publish_allowed_terms_json));
+    });
+
+    LIVE_DOMESTIC_SOURCES.forEach((source) => {
+      const current = existingSources.get(source.id);
+      if (current?.feed_url === source.feed_url && Number(current.enabled) === 1 && Number(current.auto_publish) === 1) return;
+      const domain = new URL(source.feed_url).hostname;
+      statements.push(env.DB.prepare(`INSERT INTO media_sources
+        (id, name, domain, region, type, access_mode, feed_url, tier, enabled, auto_publish)
+        VALUES (?, ?, ?, ?, ?, 'rss', ?, 'A', 1, 1)
+        ON CONFLICT(id) DO UPDATE SET name=excluded.name, domain=excluded.domain, region=excluded.region,
+          type=excluded.type, access_mode=excluded.access_mode, feed_url=excluded.feed_url,
+          tier=excluded.tier, enabled=excluded.enabled, auto_publish=excluded.auto_publish`)
+        .bind(source.id, source.name, domain, source.region, source.type || 'editorial', source.feed_url));
+    });
+
+    for (const entry of DOMESTIC_CATALOG_ENTRIES) {
+      if (existingCatalog.get(entry.id)?.version === version && existingCatalog.get(entry.id)?.source_id === entry.source_id) continue;
+      statements.push(env.DB.prepare(`INSERT INTO monitoring_media_catalog
+        (id, document_name, region, category, document_url, is_new_2025, onboarding_status, source_id, version)
+        VALUES (?, ?, 'TW', '台灣支付與金融科技專業來源', ?, 0, 'verified_rss', ?, ?)
+        ON CONFLICT(id) DO UPDATE SET document_name=excluded.document_name, region=excluded.region,
+          category=excluded.category, document_url=excluded.document_url, onboarding_status=excluded.onboarding_status,
+          source_id=excluded.source_id, version=excluded.version`)
+        .bind(entry.id, entry.name, entry.url, entry.source_id, version));
+    }
+
+    if (statements.length) await env.DB.batch(statements);
+    return { synced: true, statements: statements.length };
+  } catch (error) {
+    console.warn('Domestic monitoring config sync deferred:', String(error).slice(0, 300));
+    return { synced: false, deferred: true };
+  }
+}
+
+async function readDomesticConfigStatus(env) {
+  const ruleIds = LIVE_DOMESTIC_RULES.map((rule) => rule.id);
+  const sourceIds = LIVE_DOMESTIC_SOURCES.map((source) => source.id);
+  try {
+    const [folder, rules, sources] = await Promise.all([
+      env.DB.prepare('SELECT id, version, name FROM monitoring_folders WHERE id = ?').bind('folder_2').first(),
+      env.DB.prepare(`SELECT id, version FROM monitoring_rules WHERE id IN (${ruleIds.map(() => '?').join(',')})`).bind(...ruleIds).all(),
+      env.DB.prepare(`SELECT id, feed_url, enabled, auto_publish FROM media_sources WHERE id IN (${sourceIds.map(() => '?').join(',')})`).bind(...sourceIds).all()
+    ]);
+    const version = env.RULES_VERSION || '2026-09-15-domestic-tw-payment-v3';
+    const configuredRules = new Map((rules.results || []).map((rule) => [rule.id, rule]));
+    const configuredSources = new Map((sources.results || []).map((source) => [source.id, source]));
+    const missingRules = LIVE_DOMESTIC_RULES.filter((rule) => configuredRules.get(rule.id)?.version !== version).map((rule) => rule.id);
+    const missingSources = LIVE_DOMESTIC_SOURCES.filter((source) => {
+      const current = configuredSources.get(source.id);
+      return !current || current.feed_url !== source.feed_url || Number(current.enabled) !== 1 || Number(current.auto_publish) !== 1;
+    }).map((source) => source.id);
+    const folderReady = folder?.version === version && folder?.name === '台灣支付與藍新科技';
+    return {
+      pending: !folderReady || missingRules.length > 0 || missingSources.length > 0,
+      folder_ready: folderReady,
+      missing_rules: missingRules,
+      missing_sources: missingSources
+    };
+  } catch (_) {
+    return { pending: true, folder_ready: false, missing_rules: [], missing_sources: [] };
+  }
+}
+
 async function activeRules(env) {
   const result = await env.DB.prepare(`SELECT r.*, f.region_scope_json
     FROM monitoring_rules r
@@ -267,6 +506,7 @@ async function collectSource(source, rules, env) {
 }
 
 async function collectAll(env) {
+  await syncDomesticConfig(env);
   const [sources, rules] = await Promise.all([
     env.DB.prepare("SELECT * FROM media_sources WHERE enabled = 1 AND auto_publish = 1 AND access_mode = 'rss' AND feed_url IS NOT NULL").all(),
     activeRules(env)
@@ -275,7 +515,7 @@ async function collectAll(env) {
 }
 
 async function monitoringStatus(env) {
-  const [sources, articles, latestRun, catalog, ruleCount, enabledSources] = await Promise.all([
+  const [sources, articles, latestRun, catalog, ruleCount, enabledSources, domesticConfig] = await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) AS total, SUM(CASE WHEN enabled = 1 AND auto_publish = 1 THEN 1 ELSE 0 END) AS enabled,
       SUM(CASE WHEN enabled = 1 AND auto_publish = 1 AND health_status = 'healthy' THEN 1 ELSE 0 END) AS healthy,
       MAX(CASE WHEN enabled = 1 AND auto_publish = 1 THEN last_success_at END) AS latest_success FROM media_sources`).first(),
@@ -290,7 +530,8 @@ async function monitoringStatus(env) {
     env.DB.prepare(`SELECT id, name, region, health_status, last_success_at
       FROM media_sources
       WHERE enabled = 1 AND auto_publish = 1 AND access_mode = 'rss'
-      ORDER BY region, name`).all()
+      ORDER BY region, name`).all(),
+    readDomesticConfigStatus(env)
   ]);
   return {
     rules_version: env.RULES_VERSION || null,
@@ -298,6 +539,9 @@ async function monitoringStatus(env) {
     article_summary: articles,
     media_catalog_summary: catalog,
     enabled_sources: enabledSources.results,
+    live_fallback_sources: LIVE_DOMESTIC_SOURCES.map((source) => source.name),
+    live_fallback_source_count: LIVE_DOMESTIC_SOURCES.length,
+    domestic_config: domesticConfig,
     active_rule_count: ruleCount?.active || 0,
     auto_publish_rule_count: ruleCount?.auto_publish || 0,
     latest_run: latestRun || null,
@@ -347,25 +591,61 @@ export default {
       }
       const joins = 'FROM articles a JOIN media_sources s ON s.id = a.source_id JOIN article_matches m ON m.article_id = a.id JOIN monitoring_rules r ON r.id = m.rule_id';
       const whereSql = `WHERE ${where.join(' AND ')}`;
+      // 先讀取完整的近兩個月 D1 結果，再與唯讀即時補位合併後分頁，
+      // 避免新來源插在排序前端時造成 offset 分頁漏項。
       const articlesSql = `SELECT a.id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status,
-          s.name AS source, s.feed_url AS source_feed, GROUP_CONCAT(DISTINCT r.folder_id) AS folder_ids, GROUP_CONCAT(DISTINCT r.id) AS rule_ids,
+          s.name AS source, s.region AS source_region, s.feed_url AS source_feed, GROUP_CONCAT(DISTINCT r.folder_id) AS folder_ids, GROUP_CONCAT(DISTINCT r.id) AS rule_ids,
           GROUP_CONCAT(m.evidence_json, '|||') AS evidence_jsons
           ${joins} ${whereSql}
-          GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC LIMIT ? OFFSET ?`;
+          GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC LIMIT 5000`;
       const totalSql = `SELECT COUNT(DISTINCT a.id) AS total ${joins} ${whereSql}`;
-      const [result, totalResult] = await Promise.all([
-        env.DB.prepare(articlesSql).bind(...values, limit, offset).all(),
-        env.DB.prepare(totalSql).bind(...values).first()
+      const livePromise = !folder || folder === 'folder_2'
+        ? fetchLiveDomesticArticles(from, to)
+        : Promise.resolve([]);
+      const [result, totalResult, liveCandidates] = await Promise.all([
+        env.DB.prepare(articlesSql).bind(...values).all(),
+        env.DB.prepare(totalSql).bind(...values).first(),
+        livePromise
       ]);
-      const total = Number(totalResult?.total || 0);
-      const nextOffset = offset + result.results.length;
+      const existingLiveUrls = await findExistingArticleUrls(env, liveCandidates.map((article) => article.canonical_url));
+      const liveArticles = liveCandidates.filter((article) => !existingLiveUrls.has(article.canonical_url));
+      const persistedArticles = Array.isArray(result.results) ? result.results : [];
+      const merged = new Map();
+      persistedArticles.forEach((article) => {
+        if (article?.url) merged.set(article.url, article);
+      });
+      liveArticles.forEach((article) => {
+        if (article?.canonical_url && !merged.has(article.canonical_url)) merged.set(article.canonical_url, {
+          id: article.id,
+          title: article.title,
+          excerpt: article.excerpt,
+          url: article.canonical_url,
+          published_at: article.published_at,
+          fetched_at: article.fetched_at,
+          review_status: article.review_status,
+          source: article.source,
+          source_region: article.source_region,
+          source_feed: article.source_feed,
+          folder_ids: article.folder_ids,
+          rule_ids: article.rule_ids,
+          evidence_jsons: article.evidence_jsons,
+          live_fallback: true
+        });
+      });
+      const mergedArticles = [...merged.values()].sort((a, b) => String(b.published_at || b.fetched_at || '').localeCompare(String(a.published_at || a.fetched_at || '')));
+      const resultPage = mergedArticles.slice(offset, offset + limit);
+      const persistedTotal = Number(totalResult?.total || 0);
+      const total = persistedTotal + liveArticles.length;
+      const nextOffset = offset + resultPage.length;
       return json({
-        articles: result.results,
+        articles: resultPage,
         total,
         has_more: nextOffset < total,
         next_offset: nextOffset,
         data_mode: 'verified_rss_monitoring',
-        range: { from: fromDate, to: toDate }
+        range: { from: fromDate, to: toDate },
+        live_fallback_count: liveArticles.length,
+        live_fallback_sources: LIVE_DOMESTIC_SOURCES.map((source) => source.name)
       }, 200, headers);
     }
     return json({ error: 'Not found' }, 404, headers);

@@ -1,5 +1,5 @@
 {
-  "version": "2026-09-14-docx-complete",
+  "version": "2026-09-15-domestic-tw-payment",
   "source_document": "【For慧科】智冠2025年監測關鍵字及媒體.docx",
   "description": "文件列出的監測媒體候選清單。只有另列於 core_media_sources.json 且已驗證 RSS/API 或取得授權的來源，才會自動收錄新聞。",
   "groups": [
@@ -11,6 +11,13 @@
     {"id":"cnhkm-online-1","region":"CN_HK_MAC","category":"中港澳網路媒體","sources":["搜狐網","鳳凰網","中國新聞網","網易","騰訊網","中關村在線","中國台灣網","太平洋電腦網","ChinaByte比特網","新浪網","艾瑞網","中國經濟網","中國日報網","通信產業網","新華網","ZDNet China","通信世界網","環球網","電玩巴士","遊戲葡萄","4399手機遊戲網","遊戲陀螺","中華網遊戲"]},
     {"id":"cnhkm-online-2","region":"CN_HK_MAC","category":"中港澳網路媒體","sources":["GAMEAPPS","人民網","新華報業網","中國廣播網","IT168","17173新游頻道","07073游戲網","52pk遊戲網","電腦之家","樂古手遊網","香港高登","游迅網","cnbeta","驅動中國","UNWIRE.HK","SPILL","潮科技","手遊網","178遊戲網","遊戲狗","游俠網","搞趣網","今日頭條"]},
     {"id":"cnhkm-online-3","region":"CN_HK_MAC","category":"中港澳網路媒體","sources":["多玩遊戲網","遊久網","遊民星空","3dmgame","遊研社"]},
+    {"id":"tw-fintech-official","region":"TW","category":"台灣支付與金融科技專業來源","sources":[
+      {"name":"聯合信用卡處理中心","url":"https://www.nccc.com.tw/wps/wcm/connect/zh/home/AboutNCCC/News"},
+      {"name":"卡優新聞網","url":"https://www.cardu.com.tw/footer/about.php"},
+      {"name":"自由電子報","url":"https://service.ltn.com.tw/RSS"},
+      {"name":"動區動趨","url":"https://www.blocktempo.com/"},
+      {"name":"ABMedia","url":"https://www.abmedia.io/"}
+    ]},
     {"id":"global-fintech","region":"GLOBAL","category":"國際金融科技媒體","sources":[
       {"name":"Forbes","url":"http://www.forbes.com"},
       {"name":"The Independent","url":"https://www.independent.co.uk"},

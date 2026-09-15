@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="css/index.css?v=20260914_03">
     <link rel="stylesheet" href="css/components.css?v=20260914_03">
     <link rel="stylesheet" href="css/animations.css?v=20260914_03">
-    <link rel="stylesheet" href="css/enhancements.css?v=20260915_05">
+    <link rel="stylesheet" href="css/enhancements.css?v=20260915_06">
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
@@ -364,7 +364,7 @@
             <div class="section-header animate-on-scroll">
                 <span class="section-tag">FINTECH AND STABLECOIN MONITORING</span>
                 <h2 class="section-title">金融科技與<span class="text-gradient">穩定幣監測</span></h2>
-                <p class="section-subtitle">整合台灣支付、國際金融科技與穩定幣／鏈上結算規則；僅呈現近兩個月、已驗證 RSS 且可開啟原文的新聞</p>
+                <p class="section-subtitle">預設優先顯示台灣支付；整合國內支付、國際金融科技與穩定幣／鏈上結算規則。僅呈現近兩個月、已驗證 RSS 且可開啟原文的新聞</p>
             </div>
 
             <div class="fintech-monitoring-summary animate-on-scroll" id="fintechMonitoringSummary" aria-live="polite">
@@ -373,8 +373,8 @@
 
             <div class="fintech-toolbar animate-on-scroll">
                 <div class="fintech-mode-buttons" id="fintechModeButtons" role="group" aria-label="金融科技監測分類">
-                    <button class="fintech-mode-button active" type="button" data-fintech-mode="all">全部金融科技</button>
-                    <button class="fintech-mode-button" type="button" data-fintech-mode="taiwan">台灣支付</button>
+                    <button class="fintech-mode-button" type="button" data-fintech-mode="all">全部金融科技</button>
+                    <button class="fintech-mode-button active" type="button" data-fintech-mode="taiwan">台灣支付（優先）</button>
                     <button class="fintech-mode-button" type="button" data-fintech-mode="international">國際金融科技</button>
                     <button class="fintech-mode-button" type="button" data-fintech-mode="stablecoin">穩定幣與鏈上結算</button>
                 </div>
@@ -390,7 +390,7 @@
             </div>
 
             <div class="fintech-keyword-pills animate-on-scroll" id="fintechKeywordPills" aria-label="本頁監測範圍"></div>
-            <p class="fintech-glossary"><strong>名詞提示：</strong>本站將「穩定幣」視為獨立監測規則；一般加密貨幣或區塊鏈文章不會僅因泛稱自動歸入此分類。</p>
+            <p class="fintech-glossary"><strong>國內優先：</strong>台灣支付視圖涵蓋電子支付、行動支付、第三方支付、金流、收單、電子票證、信用卡、支付監理與防詐；來源包含中央社、聯卡中心多頻道、卡優、自由、TechNews、科技報橘等已驗證 RSS。台灣 RSS 來源即使文章未寫出「台灣」，仍會依來源區域納入國內監測。<strong>名詞提示：</strong>「穩定幣」仍是獨立規則，一般加密貨幣或區塊鏈文章不會僅因泛稱自動歸入穩定幣。</p>
             <p class="fintech-result-count" id="fintechResultCount">正在載入已驗證 RSS 新聞</p>
             <div class="fintech-news-grid" id="fintechNewsGrid"></div>
             <div class="fintech-load-more" id="fintechLoadMore" hidden>
@@ -835,12 +835,12 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="js/data.js?v=20260914_06"></script>
+    <script src="js/data.js?v=20260915_07"></script>
     <script src="js/animations.js?v=20260914_03"></script>
     <script src="js/charts.js?v=20260915_01"></script>
     <script src="js/compare.js?v=20260914_03"></script>
-    <script src="js/monitoring.js?v=20260915_02"></script>
-    <script src="js/app.js?v=20260915_04"></script>
+    <script src="js/monitoring.js?v=20260915_04"></script>
+    <script src="js/app.js?v=20260915_06"></script>
     <script src="js/enhancements.js?v=20260915_01"></script>
 </body>
 </html>
