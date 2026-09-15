@@ -28,7 +28,7 @@
     <link rel="stylesheet" href="css/index.css?v=20260914_03">
     <link rel="stylesheet" href="css/components.css?v=20260914_03">
     <link rel="stylesheet" href="css/animations.css?v=20260914_03">
-    <link rel="stylesheet" href="css/enhancements.css?v=20260915_04">
+    <link rel="stylesheet" href="css/enhancements.css?v=20260915_05">
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
@@ -63,6 +63,16 @@
         </div>
     </nav>
 
+    <!-- 全站資料狀態列：真實監測與模擬分析分開標示 -->
+    <div class="site-data-status" id="siteDataStatus" role="status" aria-live="polite">
+        <div class="container site-data-status-inner">
+            <span class="data-type-badge data-type-real">✓ 已驗證 RSS 真實新聞</span>
+            <span class="data-type-badge data-type-model">◆ 教學用模擬分析</span>
+            <span class="site-data-status-text" id="siteDataStatusText">正在確認監測服務與更新時間。</span>
+            <a class="site-data-status-link" href="#/methodology">查看資料限制與口徑</a>
+        </div>
+    </div>
+
     <!-- ======================================
          Hero 首頁區塊
     ====================================== -->
@@ -72,7 +82,7 @@
         <div class="hero-content">
             <div class="hero-badge animate-on-scroll">
                 <span class="hero-badge-dot"></span>
-                已驗證 RSS ・近兩個月即時更新
+                真實新聞監測｜已驗證 RSS｜近兩個月更新
             </div>
             <h1 class="hero-title animate-on-scroll">
                 智冠產業關鍵字<br>
@@ -80,23 +90,23 @@
             </h1>
             <p class="hero-subtitle animate-on-scroll animate-delay-1">
                 依據智冠年度監測規則，追蹤智冠集團、藍新科技、競業與遊戲／支付產業新聞<br>
-                每篇公開資料均來自已驗證 RSS，並保留原文連結與關鍵字命中證據
+                新聞監測採已驗證 RSS；產業比較圖表為教學用模擬數據，兩者分開標示
             </p>
             <div class="hero-cta animate-on-scroll animate-delay-2">
                 <a href="#/news" class="btn btn-primary">
                     <span>查看真實新聞監測</span>
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                 </a>
-                <a href="#/companies" class="btn btn-secondary">
-                    <span>瀏覽產業概覽</span>
+                <a href="#/methodology" class="btn btn-secondary">
+                    <span>了解資料怎麼來</span>
                 </a>
             </div>
             
             <!-- 核心指標數據區 -->
             <div class="hero-stats animate-on-scroll animate-delay-3">
                 <div class="hero-stat">
-                    <span class="hero-stat-number" data-target="5">5</span>
-                    <span class="hero-stat-label">Word 監測分類</span>
+                    <span class="hero-stat-number" data-target="6" id="totalRuleGroups">6</span>
+                    <span class="hero-stat-label">監測規則分類</span>
                 </div>
                 <div class="hero-stat">
                     <span class="hero-stat-number" data-target="0" id="totalPressReleases">0</span>
@@ -104,7 +114,7 @@
                 </div>
                 <div class="hero-stat">
                     <span class="hero-stat-number" data-target="2">2</span>
-                    <span class="hero-stat-label">資料回溯月份</span>
+                    <span class="hero-stat-label">監測資料期間（月）</span>
                 </div>
                 <div class="hero-stat">
                     <span class="hero-stat-number" data-target="0" id="totalChannels">0</span>
@@ -128,30 +138,34 @@
             <div class="section-header animate-on-scroll">
                 <span class="section-tag">INDUSTRY OVERVIEW</span>
                 <h2 class="section-title">產業概覽與<span class="text-gradient">公司動態對照</span></h2>
-                <p class="section-subtitle">作為關鍵字監測的延伸參考，匯整台灣主要遊戲與數位娛樂企業的經營定位、代表作品與重要事件</p>
+                <p class="section-subtitle">快速認識 8 家指標企業、代表作品與近期事件；公司資料為人工整理，事件來源仍需逐筆查核</p>
             </div>
 
             <!-- 全站數據總覽卡片 -->
-            <div class="stats-grid animate-on-scroll">
+            <div class="stats-grid animate-on-scroll" aria-label="資料類型分區：第一張為真實監測，其餘為教學用模擬分析">
                 <div class="stat-card">
                     <div class="stat-card-icon">📊</div>
                     <div class="stat-card-number" data-target="0" id="statTotalNews">0</div>
                     <div class="stat-card-label">已驗證 RSS 新聞</div>
+                    <span class="data-type-badge data-type-real">✓ 真實監測</span>
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-icon">📰</div>
                     <div class="stat-card-number" data-target="0" id="statTotalCoverage">0</div>
-                    <div class="stat-card-label">媒體報導總篇數</div>
+                    <div class="stat-card-label">模擬媒體報導量（非實測）</div>
+                    <span class="data-type-badge data-type-model">◆ 模擬數據</span>
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-icon">💬</div>
                     <div class="stat-card-number" data-target="0" id="statTotalSocial">0</div>
-                    <div class="stat-card-label">社群網路聲量提及</div>
+                    <div class="stat-card-label">模擬社群提及（非實測）</div>
+                    <span class="data-type-badge data-type-model">◆ 模擬數據</span>
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-icon">🤝</div>
                     <div class="stat-card-number" data-target="0" id="statTotalKol">0</div>
-                    <div class="stat-card-label">KOL 實況主合作數</div>
+                    <div class="stat-card-label">模擬 KOL 合作（非實測）</div>
+                    <span class="data-type-badge data-type-model">◆ 模擬數據</span>
                 </div>
             </div>
 
@@ -170,7 +184,7 @@
             <div class="section-header animate-on-scroll">
                 <span class="section-tag">VERIFIED NEWS MONITORING</span>
                 <h2 class="section-title">關鍵字新聞<span class="text-gradient">真實監測時間軸</span></h2>
-                <p class="section-subtitle">依 Word 監測規則，僅顯示已驗證公開 RSS 來源、近兩個月內且附原文連結的命中文章</p>
+                <p class="section-subtitle">依「智冠 2025 年監測關鍵字清單」比對標題與摘要，只顯示已驗證 RSS、近兩個月且附原文連結的文章</p>
             </div>
 
             <div id="monitoringTransparency" class="animate-on-scroll" style="margin: 0 0 20px; padding: 14px 18px; background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px;">
@@ -371,10 +385,12 @@
                     </select>
                     <label class="sr-only" for="fintechKeywordFilter">搜尋金融科技新聞</label>
                     <input class="filter-input fintech-keyword-input" id="fintechKeywordFilter" type="search" placeholder="搜尋標題、摘要或命中詞">
+                    <button class="btn btn-ghost btn-sm fintech-clear-button" id="fintechClearFilters" type="button">清除篩選</button>
                 </div>
             </div>
 
             <div class="fintech-keyword-pills animate-on-scroll" id="fintechKeywordPills" aria-label="本頁監測範圍"></div>
+            <p class="fintech-glossary"><strong>名詞提示：</strong>本站將「穩定幣」視為獨立監測規則；一般加密貨幣或區塊鏈文章不會僅因泛稱自動歸入此分類。</p>
             <p class="fintech-result-count" id="fintechResultCount">正在載入已驗證 RSS 新聞</p>
             <div class="fintech-news-grid" id="fintechNewsGrid"></div>
             <div class="fintech-load-more" id="fintechLoadMore" hidden>
@@ -391,8 +407,8 @@
         <div class="container">
             <div class="section-header animate-on-scroll">
                 <span class="section-tag">DATA ANALYTICS</span>
-                <h2 class="section-title">媒體聲量與曝光<span class="text-gradient">數據視覺化</span></h2>
-                <p class="section-subtitle">透過多維度圖表分析各家遊戲企業在媒體報導、社群討論與 KOL 合作上的行銷力道</p>
+                <h2 class="section-title">模擬媒體聲量與曝光<span class="text-gradient">數據視覺化</span></h2>
+                <p class="section-subtitle">以下圖表為教學用模型輸出，協助理解比較方法；不得引用為實際聲量、合作數或市場占有率</p>
             </div>
 
             <!-- 自動洞察摘要（由 enhancements.js 依實際數據計算） -->
@@ -403,9 +419,9 @@
                 <div class="chart-card-header">
                     <h3 class="chart-card-title">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        8 大企業 月度媒體報導曝光量趨勢
+                        模擬：8 大企業月度媒體報導量趨勢
                     </h3>
-                    <span class="chart-card-subtitle" id="trendRangeLabel">監測區間：2024/01 — 2026/08</span>
+                    <span class="chart-card-subtitle" id="trendRangeLabel">模型月份：載入中</span>
                 </div>
                 <div class="year-filter" id="trendYearFilter" role="group" aria-label="趨勢圖年度區間"></div>
                 <div class="chart-card-body">
@@ -425,7 +441,7 @@
                     <div class="chart-card-header">
                         <h3 class="chart-card-title">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            各公司 媒體曝光通路分佈比例
+                            模擬：各公司媒體曝光通路分佈比例
                         </h3>
                         <select class="chart-company-select" id="channelCompanySelect">
                             <!-- 由 JavaScript 動態渲染 -->
@@ -441,7 +457,7 @@
                     <div class="chart-card-header">
                         <h3 class="chart-card-title">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            KOL 實況主合作宣傳排行榜
+                            模擬：KOL 實況主合作排序
                         </h3>
                     </div>
                     <div class="chart-card-body">
@@ -455,7 +471,7 @@
                 <div class="chart-card-header">
                     <h3 class="chart-card-title">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                        官方公關新聞稿 發布總篇數排行榜
+                        模擬：官方公關新聞稿發布排序
                     </h3>
                 </div>
                 <div class="chart-card-body">
@@ -591,7 +607,7 @@
             </div>
 
             <div class="method-notice animate-on-scroll">
-                <h3>⚠️ 資料性質聲明</h3>
+                <h3>⚠️ 資料性質聲明（先看這裡）</h3>
                 <p>本站為<strong>媒體曝光比較方法的展示與教學平台</strong>，並非商業或官方統計服務。頁面上的資料分為兩類，請務必分開理解：</p>
                 <p><strong>一、公司基本資料與重大事件</strong>（公司簡介、代表作品、近期重大動態、新聞稿標題與發布日期）為人工整理自公開資訊，可對照官方新聞頁與公開資訊觀測站查核。</p>
                 <p><strong>二、月度量化指標</strong>（媒體報導篇數、社群聲量、KOL 合作數、媒體通路佔比）為<strong>依產業特性參數建模產生的模擬數據</strong>，用於示範比較方法與視覺化呈現，<strong>不得作為各公司實際媒體聲量的量測結果引用</strong>。</p>
@@ -619,12 +635,19 @@
                 <div class="method-card">
                     <h3>🔄 更新機制</h3>
                     <ul>
-                        <li>由 GitHub Actions 每天自動推進監測月份</li>
+                        <li>真實 RSS：Cloudflare Worker 每小時第 17 分鐘收集，頁面顯示最後成功更新時間</li>
+                        <li>監測窗口：台北時間今天往前兩個月，發布日與本站收錄日分開保存</li>
                         <li>自動產生的項目一律標示「🤖 模擬資料」且來源記為「系統模擬」</li>
                         <li>模擬項目設有 12 筆上限，避免資料無限膨脹</li>
                         <li>人工資料以 commit 方式維護，可完整追溯修改歷程</li>
                     </ul>
                 </div>
+            </div>
+
+            <div class="method-update-log animate-on-scroll" aria-live="polite">
+                <h3>🗓️ 公開更新紀錄</h3>
+                <p><strong>2026-09-15｜v1.1</strong>：新增全站資料狀態列、模擬資料常駐標示、金融科技與穩定幣監測頁、來源命中證據與更新狀態揭露。</p>
+                <p class="method-muted">程式提交可於 GitHub 追溯；本區只呈現使用者需要知道的資料口徑與介面變更。</p>
             </div>
 
             <div class="method-table-wrap animate-on-scroll">
@@ -814,10 +837,10 @@
     <!-- JavaScript -->
     <script src="js/data.js?v=20260914_06"></script>
     <script src="js/animations.js?v=20260914_03"></script>
-    <script src="js/charts.js?v=20260914_03"></script>
+    <script src="js/charts.js?v=20260915_01"></script>
     <script src="js/compare.js?v=20260914_03"></script>
     <script src="js/monitoring.js?v=20260915_02"></script>
-    <script src="js/app.js?v=20260915_03"></script>
-    <script src="js/enhancements.js?v=20260914_04"></script>
+    <script src="js/app.js?v=20260915_04"></script>
+    <script src="js/enhancements.js?v=20260915_01"></script>
 </body>
 </html>

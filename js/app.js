@@ -55,10 +55,13 @@ function initHashRouter() {
         // 2. 高亮頂部導覽列 active 狀態
         document.querySelectorAll('.navbar-link').forEach(link => {
             const href = link.getAttribute('href') || '';
-            if (href.includes(targetPage)) {
+            const isActive = href.includes(targetPage);
+            if (isActive) {
                 link.classList.add('active');
+                link.setAttribute('aria-current', 'page');
             } else {
                 link.classList.remove('active');
+                link.removeAttribute('aria-current');
             }
         });
 
@@ -148,6 +151,8 @@ function renderCompanyCards() {
         const productsList = company.products || company.keyProducts || [];
         const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
         const newsText = company.latestNews || company.recentNews || '2024-2026 營運與公關動態彙整中';
+        const eventSourceUrl = safeHttpUrl(company.eventSourceUrl || company.newsUrl || company.mopsUrl);
+        const eventSourceLabel = company.eventSourceLabel || (company.newsUrl ? '官方新聞專區' : 'MOPS 公開資訊觀測站');
         
         // 判斷新聞來源按鈕
         let newsBtnHtml = '';
@@ -173,9 +178,13 @@ function renderCompanyCards() {
                 <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">核心代表作品：</div>
                 <div class="company-tags">${tagsHtml}</div>
             </div>
-            <div style="background: #f8faf9; border-left: 3px solid ${company.brandColor || company.color}; padding: 10px 12px; border-radius: 4px; font-size: 0.8rem; margin-bottom: var(--spacing-md);">
-                <span style="font-weight: 700; color: ${company.brandColor || company.color}; display: block; margin-bottom: 2px;">2024-2026 重大動態：</span>
+            <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
+                <div class="company-event-heading">
+                    <span style="font-weight: 700; color: ${company.brandColor || company.color};">近期重要事件</span>
+                    <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
+                </div>
                 <span style="color: #475569; line-height: 1.5; display: block;">${newsText}</span>
+                <span class="company-event-source">來源入口：<a href="${eventSourceUrl}" target="_blank" rel="noopener">${eventSourceLabel} ↗</a>｜最後查核：待補</span>
             </div>
             <div class="company-card-footer" style="flex-wrap: wrap;">
                 <a href="${company.website || company.officialWebsite}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
@@ -211,6 +220,8 @@ function showCompanyModal(companyId) {
 
     const productsList = company.products || company.keyProducts || [];
     const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
+    const eventSourceUrl = safeHttpUrl(company.eventSourceUrl || company.newsUrl || company.mopsUrl);
+    const eventSourceLabel = company.eventSourceLabel || (company.newsUrl ? '官方新聞專區' : 'MOPS 公開資訊觀測站');
 
     let newsBtnHtml = '';
     if (company.newsUrl) {
@@ -231,9 +242,13 @@ function showCompanyModal(companyId) {
             <h4 style="font-size: 1rem; margin-bottom: 6px;">主要代表作品</h4>
             <div class="company-tags">${tagsHtml}</div>
         </div>
-        <div style="margin-bottom: 20px; background: var(--bg-tertiary); padding: 14px; border-radius: var(--radius-sm);">
-            <h4 style="font-size: 0.9rem; color: var(--primary); margin-bottom: 4px;">近期關鍵動態</h4>
+        <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
+            <div class="company-event-heading">
+                <h4 style="font-size: 0.9rem; color: var(--primary); margin: 0;">近期重要事件</h4>
+                <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
+            </div>
             <p style="font-size: 0.9rem; color: var(--text-primary);">${company.latestNews || company.recentNews || '資料彙整中'}</p>
+            <p class="company-event-source">來源入口：<a href="${eventSourceUrl}" target="_blank" rel="noopener">${eventSourceLabel} ↗</a>；請逐筆查核｜最後查核：待補</p>
         </div>
         <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
             <a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">🏛️ MOPS 公開資訊觀測站 ↗</a>
@@ -510,6 +525,33 @@ function setNewsDataMode(mode) {
     monitoringDataMode = mode;
     const resultEl = document.getElementById('filterResultCount');
     if (resultEl) resultEl.dataset.dataMode = mode;
+    renderGlobalDataStatusBar();
+}
+
+function formatMonitoringTimestamp(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return '';
+    return new Intl.DateTimeFormat('zh-TW', {
+        timeZone: 'Asia/Taipei',
+        year: 'numeric', month: '2-digit', day: '2-digit',
+        hour: '2-digit', minute: '2-digit', hour12: false
+    }).format(date).replace(/\//g, '-');
+}
+
+function renderGlobalDataStatusBar() {
+    const statusText = document.getElementById('siteDataStatusText');
+    if (!statusText) return;
+    const range = monitoringLoadState?.range || getRollingMonitoringDateRange();
+    const lastRun = formatMonitoringTimestamp(monitoringRuntimeStatus?.latest_run?.finished_at);
+    const sources = Number(monitoringRuntimeStatus?.source_summary?.healthy || 0);
+    if (monitoringDataMode === 'verified') {
+        const updated = lastRun ? `最後成功更新 ${lastRun}（台北時間）` : '最後成功更新時間待服務回報';
+        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜健康 RSS ${sources} 個｜${updated}；模擬圖表僅供教學比較。`;
+    } else if (monitoringDataMode === 'loading') {
+        statusText.textContent = '真實新聞：正在確認 RSS 來源與近兩個月資料；模擬圖表僅供教學比較。';
+    } else {
+        statusText.textContent = '真實新聞服務目前無法驗證；頁面不會以模擬內容補足。模擬圖表仍標示為教學資料。';
+    }
 }
 
 function setVerifiedNewsTotal(total) {
@@ -533,6 +575,11 @@ function setVerifiedMonitoringSourceTotal(status) {
 function hydrateMonitoringManifest(manifest) {
     if (!manifest || !Array.isArray(manifest.rules) || !Array.isArray(manifest.folders)) return;
     monitoringManifest = manifest;
+    const ruleGroups = document.getElementById('totalRuleGroups');
+    if (ruleGroups) {
+        ruleGroups.textContent = manifest.folders.length.toLocaleString();
+        ruleGroups.setAttribute('data-target', manifest.folders.length);
+    }
     const rulesByFolder = new Map();
     manifest.rules.forEach((rule) => {
         const terms = (rule.required_any_groups || []).flat();
@@ -573,7 +620,7 @@ function renderMonitoringTransparency() {
     const statusText = monitoringRuntimeStatus
         ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個）；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇真實文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
         : '正在讀取來源健康與收錄狀態。';
-    summary.textContent = `真實性原則：僅顯示已驗證公開 RSS 來源、命中 Word 規則且附原文連結的文章；不顯示展示資料。${statusText}${loadText}`;
+    summary.textContent = `真實性原則：僅顯示已驗證公開 RSS 來源、命中年度監測規則且附原文連結的文章；不顯示展示資料。${statusText}${loadText}`;
     panel.appendChild(summary);
 
     if (!monitoringManifest) return;
@@ -586,7 +633,7 @@ function renderMonitoringTransparency() {
     const details = document.createElement('details');
     details.style.marginTop = '10px';
     const title = document.createElement('summary');
-    title.textContent = '查看 Word 文件完整監測規則與關鍵字';
+    title.textContent = '查看監測文件完整規則與關鍵字';
     title.style.cssText = 'cursor:pointer; font-weight:700; color:#0f766e;';
     details.appendChild(title);
 
@@ -608,6 +655,7 @@ function renderMonitoringTransparency() {
         details.appendChild(section);
     });
     panel.appendChild(details);
+    renderGlobalDataStatusBar();
 }
 
 function getRollingMonitoringDateRange() {
@@ -655,6 +703,7 @@ function initNewsSection() {
     setupNewsFilters();
     // 公開新聞頁絕不回退到展示資料，避免未驗證內容被當作真實新聞。
     monitoringNews = [];
+    monitoringRuntimeStatus = null;
     monitoringLoadState = null;
     setVerifiedNewsTotal(0);
     setVerifiedMonitoringSourceTotal(null);
@@ -1008,7 +1057,20 @@ function createFintechArticleCard(news) {
         original.textContent = '原文連結不可用';
     }
     footer.append(source, original);
-    card.append(header, title, excerpt, evidence, footer);
+    const provenance = document.createElement('div');
+    provenance.className = 'fintech-card-provenance';
+    provenance.textContent = `原文發布：${news.date || '未提供'}｜本站收錄：${news.collectedDate || '未提供'}｜覆核狀態：${news.reviewState === 'approved' ? '自動通過' : '待人工覆核'}`;
+    const feedUrl = safeHttpUrl(news.sourceFeed);
+    if (feedUrl !== '#') {
+        const separator = document.createTextNode('｜');
+        const feedLink = document.createElement('a');
+        feedLink.href = feedUrl;
+        feedLink.target = '_blank';
+        feedLink.rel = 'noopener';
+        feedLink.textContent = 'RSS 來源';
+        provenance.append(separator, feedLink);
+    }
+    card.append(header, title, excerpt, evidence, footer, provenance);
     return card;
 }
 
@@ -1050,6 +1112,8 @@ function renderFintechMonitoring() {
 
     const selectedSource = document.getElementById('fintechSourceFilter')?.value || '';
     const keyword = document.getElementById('fintechKeywordFilter')?.value.trim().toLowerCase() || '';
+    const clearButton = document.getElementById('fintechClearFilters');
+    if (clearButton) clearButton.disabled = fintechMode === 'all' && !selectedSource && !keyword;
     const filtered = allArticles.filter((article) => {
         const matchMode = fintechMode === 'all'
             || (fintechMode === 'taiwan' && articleHasMonitoringFolder(article, 'folder_2'))
@@ -1064,10 +1128,15 @@ function renderFintechMonitoring() {
     resultCount.textContent = '顯示 ' + visible.length + '／' + filtered.length + ' 篇已驗證 RSS 新聞';
     grid.replaceChildren();
     if (!filtered.length) {
+        const emptyMessage = !allArticles.length
+            ? '近兩個月目前沒有符合金融科技規則的文章；資料服務正常，請稍後再查看。'
+            : (selectedSource || keyword || fintechMode !== 'all'
+                ? '目前篩選條件沒有命中；請調整分類、來源或搜尋文字。'
+                : '資料服務已連線，但目前沒有可公開的已驗證文章。');
         grid.appendChild(makeFintechEmptyState(
             '🔍',
             '目前沒有符合條件的已驗證新聞',
-            '請調整監測分類、媒體來源或搜尋條件；頁面不會以展示資料補足結果。'
+            emptyMessage + ' 頁面不會以展示資料補足結果。'
         ));
     } else {
         visible.forEach((article) => grid.appendChild(createFintechArticleCard(article)));
@@ -1079,6 +1148,7 @@ function initFintechMonitoringPage() {
     const modeButtons = document.getElementById('fintechModeButtons');
     const sourceFilter = document.getElementById('fintechSourceFilter');
     const keywordFilter = document.getElementById('fintechKeywordFilter');
+    const clearButton = document.getElementById('fintechClearFilters');
     const loadMoreButton = document.getElementById('fintechLoadMoreBtn');
 
     if (modeButtons && !modeButtons.dataset.bound) {
@@ -1102,6 +1172,16 @@ function initFintechMonitoringPage() {
         keywordFilter.dataset.bound = 'true';
         keywordFilter.addEventListener('input', () => {
             fintechPage = 1;
+            renderFintechMonitoring();
+        });
+    }
+    if (clearButton && !clearButton.dataset.bound) {
+        clearButton.dataset.bound = 'true';
+        clearButton.addEventListener('click', () => {
+            fintechMode = 'all';
+            fintechPage = 1;
+            if (sourceFilter) sourceFilter.value = '';
+            if (keywordFilter) keywordFilter.value = '';
             renderFintechMonitoring();
         });
     }
@@ -1471,6 +1551,8 @@ function renderNews(append = false) {
         const category = escapeHtml(news.category || '關鍵字監測');
         const source = escapeHtml(news.source || '來源未提供');
         const date = escapeHtml(news.date || '日期未提供');
+        const collectedDate = escapeHtml(news.collectedDate || '未提供');
+        const reviewLabel = news.reviewState === 'approved' ? '自動通過' : '待人工覆核';
         const huikeKeyword = escapeHtml(news.huikeKeyword || '');
         item.style.setProperty('--item-brand-color', brandColor);
         
@@ -1524,6 +1606,7 @@ function renderNews(append = false) {
                     </div>
                     ${originalLink}
                 </div>
+                <div class="timeline-provenance">原文發布：${date}｜本站收錄：${collectedDate}｜覆核狀態：${reviewLabel}</div>
             </div>
         `;
 

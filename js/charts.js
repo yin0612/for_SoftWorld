@@ -49,7 +49,7 @@ function initExposureTrendChart(canvasId) {
     const datasets = COMPANIES.map((company, idx) => {
         const data = monthIndexes.map(i => MONTHLY_STATS[company.id][i].mediaCoverage);
         return {
-            label: company.name,
+            label: `${company.name}（模擬）`,
             data: data,
             borderColor: company.brandColor,
             backgroundColor: company.brandColor,
@@ -99,7 +99,7 @@ function initExposureTrendChart(canvasId) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.dataset.label}: ${context.parsed.y} 則 (點擊檢視原始新聞連結)`;
+                            return `${context.dataset.label}: ${context.parsed.y} 則（模型值，非實測）`;
                         }
                     }
                 }
@@ -251,7 +251,7 @@ function initKolRankChart(canvasId) {
         data: {
             labels: kolData.map(d => d.name),
             datasets: [{
-                label: 'KOL 合作總數',
+                label: '模擬 KOL 合作總數',
                 data: kolData.map(d => d.total),
                 backgroundColor: kolData.map(d => d.color || '#3a86ff'),
                 borderRadius: 6,
@@ -271,7 +271,7 @@ function initKolRankChart(canvasId) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.parsed.x} 次合作`;
+                            return `${context.parsed.x} 次合作（模型值，非實測）`;
                         }
                     }
                 }
@@ -317,7 +317,7 @@ function initPressReleaseChart(canvasId) {
         data: {
             labels: prData.map(d => d.name),
             datasets: [{
-                label: '新聞稿總數',
+                label: '模擬新聞稿總數',
                 data: prData.map(d => d.total),
                 backgroundColor: prData.map(d => d.color),
                 borderRadius: 6,
@@ -332,7 +332,7 @@ function initPressReleaseChart(canvasId) {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            return `${context.parsed.y} 篇新聞稿`;
+                            return `${context.parsed.y} 篇新聞稿（模型值，非實測）`;
                         }
                     }
                 }

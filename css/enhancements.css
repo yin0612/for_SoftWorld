@@ -800,3 +800,191 @@ mark {
   }
 }
 
+/* --------------------------------------------------------------------------
+   全站資料狀態與資料性質標籤
+   -------------------------------------------------------------------------- */
+
+.site-data-status {
+  position: sticky;
+  top: 72px;
+  z-index: 900;
+  margin-top: 72px;
+  border-bottom: 1px solid #dbe4ee;
+  background: rgba(248, 250, 252, 0.96);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.site-data-status-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  min-height: 42px;
+  flex-wrap: wrap;
+  padding-top: 7px;
+  padding-bottom: 7px;
+}
+
+.site-data-status-text {
+  flex: 1 1 320px;
+  color: #475569;
+  font-size: 0.76rem;
+  line-height: 1.45;
+}
+
+.site-data-status-link {
+  color: #0f766e;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.data-type-badge {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 21px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: nowrap;
+}
+
+.data-type-real {
+  border: 1px solid #99f6e4;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.data-type-model {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #9a3412;
+}
+
+.data-type-curated {
+  border: 1px solid #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.company-event-summary {
+  margin-bottom: var(--spacing-md);
+  padding: 10px 12px;
+  border-left: 3px solid #94a3b8;
+  border-radius: 4px;
+  background: #f8faf9;
+  font-size: 0.8rem;
+}
+
+.company-event-heading {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+  flex-wrap: wrap;
+}
+
+.company-event-source {
+  display: block;
+  margin-top: 7px;
+  color: #64748b;
+  font-size: 0.73rem;
+  line-height: 1.5;
+}
+
+.company-event-source a {
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.timeline-provenance,
+.fintech-card-provenance {
+  margin-top: 8px;
+  color: #64748b;
+  font-size: 0.7rem;
+  line-height: 1.45;
+}
+
+.fintech-card-provenance a {
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.method-update-log {
+  margin-top: var(--spacing-2xl);
+  padding: 16px 18px;
+  border: 1px solid #dbe4ee;
+  border-left: 4px solid #0f766e;
+  border-radius: var(--radius-md);
+  background: #f8fafc;
+}
+
+.method-update-log h3 {
+  margin-bottom: 6px;
+  color: #1e293b;
+  font-size: 1rem;
+}
+
+.method-update-log p {
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.65;
+}
+
+.method-update-log .method-muted {
+  margin-top: 4px;
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.fintech-glossary {
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fbff;
+  color: #475569;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.fintech-clear-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+@media (max-width: 768px) {
+  .site-data-status {
+    top: 72px;
+  }
+
+  .site-data-status-inner {
+    align-items: flex-start;
+  }
+
+  .site-data-status-text {
+    flex-basis: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+

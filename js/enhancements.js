@@ -58,6 +58,20 @@ function chartToRows(chart) {
     return rows;
 }
 
+const SYNTHETIC_MODEL_VERSION = 'synthetic-v1.1';
+
+function chartExportRows(chart, definition) {
+    return [
+        ['data_type', 'synthetic_model'],
+        ['model_version', SYNTHETIC_MODEL_VERSION],
+        ['generated_at', new Date().toISOString()],
+        ['definition', definition],
+        ['citation_note', '僅供教學比較，不代表實際媒體監測值'],
+        [],
+        ...chartToRows(chart)
+    ];
+}
+
 /* ==========================================================================
    1. 洞察摘要卡
    ========================================================================== */
@@ -107,31 +121,31 @@ function buildInsights() {
     return [
         {
             icon: '📣',
-            label: '媒體聲量冠軍',
+            label: '模擬模型排序第 1',
             company: topMedia.company,
             value: topMedia.totals.media.toLocaleString() + ' 則',
-            note: '2024–2026 累計媒體報導篇數最高'
+            note: '模型月份累計值最高，非實際媒體監測'
         },
         {
             icon: '📈',
-            label: '聲量成長最快',
+            label: '模擬增幅最高',
             company: fastest.company,
             value: (fastest.growth >= 0 ? '+' : '') + fastest.growth.toFixed(1) + '%',
             note: '近 6 個月平均相對前 6 個月的變化'
         },
         {
             icon: '📰',
-            label: '新聞稿最積極',
+            label: '模擬新聞稿排序第 1',
             company: topPr.company,
             value: topPr.totals.pr.toLocaleString() + ' 篇',
-            note: '官方公關新聞稿累計發布量最高'
+            note: '模型月份累計值最高，非實際發布統計'
         },
         {
             icon: '🤝',
-            label: 'KOL 佈局最深',
+            label: '模擬 KOL 排序第 1',
             company: topKol.company,
             value: topKol.totals.kol.toLocaleString() + ' 次',
-            note: '實況主與網紅合作次數累計最高'
+            note: '模型月份累計值最高，非實際合作統計'
         }
     ];
 }
@@ -166,7 +180,7 @@ function initTrendYearFilter() {
 
     const availableMonths = typeof MONTHS_LIST === 'undefined' ? [] : MONTHS_LIST;
     const years = ['all', ...Array.from(new Set(availableMonths.map(m => m.slice(0, 4))))];
-    const labelOf = y => (y === 'all' ? '近兩個月' : y + ' 年');
+    const labelOf = y => (y === 'all' ? '全部模型月份' : y + ' 年模型月份');
 
     host.innerHTML = years.map(y => `
         <button type="button" class="year-chip${y === 'all' ? ' is-active' : ''}"
@@ -204,8 +218,8 @@ function initTrendYearFilter() {
                     ? MONTHS_LIST.filter(m => m.startsWith(year))
                     : [];
                 subtitle.textContent = inYear.length
-                    ? '監測區間：' + inYear[0].replace('-', '/') + ' — ' + inYear[inYear.length - 1].replace('-', '/')
-                    : '監測區間：' + year;
+                    ? '模型月份：' + inYear[0].replace('-', '/') + ' — ' + inYear[inYear.length - 1].replace('-', '/')
+                    : '模型月份：' + year;
             }
         }
 
@@ -290,7 +304,7 @@ function initChartTools() {
                 alert('圖表尚未載入完成，請稍候再試。');
                 return;
             }
-            downloadCsv(`${target.name}_${todayStamp()}.csv`, chartToRows(chart));
+            downloadCsv(`${target.name}_synthetic_${todayStamp()}.csv`, chartExportRows(chart, target.name));
         });
 
         card.dataset.toolsReady = 'true';
@@ -320,7 +334,15 @@ function exportCompareCsv() {
         rows.push([label].concat(statsByCompany.map(s => s[key])));
     });
 
-    downloadCsv(`企業對比數據_${todayStamp()}.csv`, rows);
+    downloadCsv(`企業對比數據_synthetic_${todayStamp()}.csv`, [
+        ['data_type', 'synthetic_model'],
+        ['model_version', SYNTHETIC_MODEL_VERSION],
+        ['generated_at', new Date().toISOString()],
+        ['definition', '企業四項指標比較'],
+        ['citation_note', '僅供教學比較，不代表實際媒體監測值'],
+        [],
+        ...rows
+    ]);
 }
 
 function initCompareExport() {
@@ -348,7 +370,7 @@ function initSkipLink() {
 
     link.addEventListener('click', event => {
         event.preventDefault();
-        const pages = ['companies', 'news', 'analytics', 'compare', 'trends', 'methodology'];
+        const pages = ['companies', 'news', 'fintech', 'analytics', 'compare', 'trends', 'methodology'];
         const active = pages
             .map(id => document.getElementById(id))
             .find(el => el && window.getComputedStyle(el).display !== 'none');
@@ -378,7 +400,7 @@ function syncDateRanges() {
     const last = MONTHS_LIST[MONTHS_LIST.length - 1];
     const label = document.getElementById('trendRangeLabel');
     if (label && (!window.TREND_YEAR || window.TREND_YEAR === 'all')) {
-        label.textContent = '監測區間：' + first.replace('-', '/') + ' — ' + last.replace('-', '/');
+        label.textContent = '模型月份：' + first.replace('-', '/') + ' — ' + last.replace('-', '/');
     }
 }
 

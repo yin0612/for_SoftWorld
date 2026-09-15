@@ -348,7 +348,7 @@ export default {
       const joins = 'FROM articles a JOIN media_sources s ON s.id = a.source_id JOIN article_matches m ON m.article_id = a.id JOIN monitoring_rules r ON r.id = m.rule_id';
       const whereSql = `WHERE ${where.join(' AND ')}`;
       const articlesSql = `SELECT a.id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status,
-          s.name AS source, GROUP_CONCAT(DISTINCT r.folder_id) AS folder_ids, GROUP_CONCAT(DISTINCT r.id) AS rule_ids,
+          s.name AS source, s.feed_url AS source_feed, GROUP_CONCAT(DISTINCT r.folder_id) AS folder_ids, GROUP_CONCAT(DISTINCT r.id) AS rule_ids,
           GROUP_CONCAT(m.evidence_json, '|||') AS evidence_jsons
           ${joins} ${whereSql}
           GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC LIMIT ? OFFSET ?`;

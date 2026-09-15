@@ -4,8 +4,8 @@
 本專案以智冠年度關鍵字規則為核心，監測智冠集團、藍新科技、競業與遊戲／支付產業的已驗證 RSS 真實新聞；同時保留台灣遊戲產業概覽、比較與視覺化工具作為延伸參考。
 
 ## ⚠️ 資料說明與規範
-- **公司主檔與重大動態**：整理自 TWSE/TPEx 公開資訊觀測站 (MOPS) 與各公司官方新聞專區。
-- **媒體曝光與聲量數據**：依據 `COMPANY_PROFILES` 參數與公司發稿權重生成，呈現月度趨勢、通路分佈與比對雷達圖。
+- **公司主檔與重大動態**：人工整理自 TWSE/TPEx 公開資訊觀測站 (MOPS) 與各公司官方新聞專區，介面標示「人工整理・待查核」與來源入口。
+- **媒體曝光與聲量數據**：依據 `COMPANY_PROFILES` 參數與公司發稿權重生成，呈現月度趨勢、通路分佈與比對雷達圖；所有圖表與匯出檔標示為教學用模擬數據。
 - **下鑽溯源 (Data Provenance)**：點擊數據分析頁面之曝光趨勢圖資料點，可彈出原始新聞來源清單與可點擊連結。
 
 ## 🚀 本機開發與預覽
@@ -18,12 +18,12 @@ http://127.0.0.1:8765/
 ```
 
 ## 📁 專案檔案結構
-- `index.html` — 主網頁 HTML 結構與五大獨立區塊
+- `index.html` — 主網頁 HTML 結構與七大獨立區塊
 - `css/` — 核心樣式表 (index.css, components.css, animations.css)
 - `js/data.js` — 8 大公司主檔、媒體與指標數據集
 - `js/charts.js` — 數據分析圖表模組 (Chart.js v4)
 - `js/compare.js` — 企業 PK 多維度雷達圖與比對工具
-- `js/app.js` — SPA Hash 切頁路由器 (`#/companies`, `#/news`, `#/analytics`, `#/compare`, `#/trends`) 與 UI 邏輯
+- `js/app.js` — SPA Hash 切頁路由器 (`#/companies`, `#/news`, `#/fintech`, `#/analytics`, `#/compare`, `#/trends`, `#/methodology`) 與 UI 邏輯
 - `config/` — `companies.yml` 公司主檔與 `sources.yml` 觀測媒體清單
 
 ## 🌐 部署
@@ -32,10 +32,10 @@ http://127.0.0.1:8765/
 
 ## 🔎 已驗證真實新聞監測
 
-`#/news` 是與既有視覺化展示資料分離的真實監測頁。它只會顯示「已驗證公開 RSS、近兩個月、命中 Word 規則、附原文連結」的文章；服務不可用時會明確顯示不可驗證狀態，絕不以展示資料替代。
+`#/news` 是與既有視覺化展示資料分離的真實監測頁。它只會顯示「已驗證公開 RSS、近兩個月、命中『智冠 2025 年監測關鍵字清單』、附原文連結」的文章；服務不可用時會明確顯示不可驗證狀態，絕不以展示資料替代。
 
-- `config/monitoring_rules.json`：Word 文件完整的 5 個資料夾、15 組規則與關鍵字別名；A+B 條件以兩組皆命中實作，並套用「大宇紡織」排除詞。
-- `config/media_catalog.json`：Word 文件的完整 171 家媒體候選清單（148 家在地、23 家國際金融科技媒體）。它是覆蓋範圍清單，不代表所有媒體都已自動擷取。
+- `config/monitoring_rules.json`：監測文件完整的 6 個資料夾、17 組規則與關鍵字別名；A+B 條件以兩組皆命中實作，並套用「大宇紡織」排除詞；穩定幣另有高精準規則。
+- `config/media_catalog.json`：監測文件的完整 171 家媒體候選清單（148 家在地、23 家國際金融科技媒體）。它是覆蓋範圍清單，不代表所有媒體都已自動擷取。
 - `config/core_media_sources.json`：目前實測可用、近期仍更新且獲准自動收錄的官方 RSS 白名單。其他媒體保留為 `manual_or_authorized`，必須先完成 RSS/API、條款或授權檢查。
 - `worker/schema.sql`：媒體、規則、媒體清單、文章、命中證據、審核與收集執行紀錄。
 - `worker/README.md`：D1 migration、部署、收集與資料品質政策。
