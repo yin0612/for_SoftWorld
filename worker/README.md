@@ -1,12 +1,13 @@
 # 真實新聞監測 Worker
 
-此 Worker 將公開 RSS 的標題與摘要（不擷取全文）套用 Word 監測規則，保存原文連結與命中證據。GitHub Pages 的 `#/news` 只讀取可公開的已驗證結果。
+此 Worker 將公開 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容（不擷取原新聞網站頁面）套用 Word 監測規則，保存原文連結與命中證據。GitHub Pages 的 `#/news` 只讀取可公開的已驗證結果。
 
 ## 資料品質政策
 
 - 收集和公開 API 都硬性限制在台北時間「今天往前兩個月」。無發布日期或超出區間的 RSS 項目不會入庫。
 - 媒體來源必須同時是 `enabled=1`、`auto_publish=1`、`access_mode='rss'`，才會收集並自動公開。
-- 規則也有獨立的 `auto_publish` 保護。只有 `monitoring_rules.json` 中列出的高精準規則會自動公開；較寬鬆的規則以 `pending` 儲存，避免泛用詞誤報。
+- 每個來源每次最多處理 RSS 提供的前 200 個條目，避免剛啟用且保留大量歷史項目的來源壓垮資料庫；後續排程會持續補入新條目。
+- 規則也有獨立的 `auto_publish` 與精準詞保護。只有 `monitoring_rules.json` 中列出的高精準規則，且命中指定的高信心別名，才會自動公開；較寬鬆或易歧義的詞仍會以 `pending` 儲存，避免泛用詞誤報。
 - 公開 API 固定只回傳 `articles.review_status='approved'` 且 `article_matches.status='approved'` 的資料，忽略外部傳入的 `status` 參數。
 - 不鏡像未取得授權的全文。資料庫僅保存原始 URL、標題、RSS 摘要、發布／擷取時間與規則命中證據。
 
@@ -18,15 +19,18 @@
 ```bash
 npx wrangler d1 execute softworld-monitoring --remote --file=./migrations/0001_add_auto_publish.sql
 npx wrangler d1 execute softworld-monitoring --remote --file=./migrations/0002_add_rule_auto_publish.sql
+npx wrangler d1 execute softworld-monitoring --remote --file=./migrations/0003_add_rule_auto_publish_terms.sql
 ```
 
 3. 建立新表、產生設定 seed，並匯入：
 
 ```bash
 npx wrangler d1 execute softworld-monitoring --remote --file=./schema.sql
-python ./scripts/build_seed_sql.py > ./seed.sql
+python -X utf8 ./scripts/build_seed_sql.py > ./seed.sql
 npx wrangler d1 execute softworld-monitoring --remote --file=./seed.sql
 ```
+
+在 Windows PowerShell 執行時務必保留 `-X utf8`，避免中文關鍵字被舊版主控台編碼轉成亂碼。
 
 4. 設定僅供管理者立即收集用的 secret，然後部署：
 

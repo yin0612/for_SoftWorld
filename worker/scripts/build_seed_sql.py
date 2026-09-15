@@ -1,10 +1,11 @@
 """Generate idempotent D1 seed SQL from the versioned monitoring configuration.
 
 Run from the repository root:
-  python worker/scripts/build_seed_sql.py > worker/seed.sql
+  python -X utf8 worker/scripts/build_seed_sql.py > worker/seed.sql
   npx wrangler d1 execute softworld-monitoring --remote --file=worker/seed.sql
 """
 import json
+import sys
 from pathlib import Path
 
 
@@ -12,6 +13,11 @@ ROOT = Path(__file__).resolve().parents[2]
 RULES = json.loads((ROOT / 'config' / 'monitoring_rules.json').read_text(encoding='utf-8'))
 SOURCES = json.loads((ROOT / 'config' / 'core_media_sources.json').read_text(encoding='utf-8'))
 CATALOG = json.loads((ROOT / 'config' / 'media_catalog.json').read_text(encoding='utf-8'))
+
+# Keep generated SQL UTF-8 when invoked from Windows PowerShell. Without this,
+# the shell can convert Chinese keyword data through its legacy console codepage.
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 
 def sql_string(value):
@@ -46,11 +52,13 @@ for rule in RULES['rules']:
     any_of = groups[0]
     all_of = groups[1] if len(groups) == 2 else []
     exclude = list(dict.fromkeys([*RULES.get('global_exclude_any', []), *rule.get('exclude_any', [])]))
-    columns = ['id', 'folder_id', 'scope', 'any_of_json', 'all_of_json', 'exclude_any_json', 'version', 'auto_publish', 'active']
+    columns = ['id', 'folder_id', 'scope', 'any_of_json', 'all_of_json', 'exclude_any_json', 'version', 'auto_publish', 'auto_publish_allowed_terms_json', 'active']
     values = [
         rule['id'], rule['folder_id'], rule['scope'], json.dumps(any_of, ensure_ascii=False),
         json.dumps(all_of, ensure_ascii=False), json.dumps(exclude, ensure_ascii=False), RULES['version'],
-        int(rule['id'] in RULES.get('automatic_publication_rule_ids', [])), 1
+        int(rule['id'] in RULES.get('automatic_publication_rule_ids', [])),
+        json.dumps(RULES.get('automatic_publication_allowed_terms', {}).get(rule['id'], []), ensure_ascii=False),
+        1
     ]
     emit_upsert('monitoring_rules', columns, values, columns[1:])
 

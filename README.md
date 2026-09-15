@@ -36,8 +36,8 @@ http://127.0.0.1:8765/
 
 - `config/monitoring_rules.json`：Word 文件完整的 5 個資料夾、15 組規則與關鍵字別名；A+B 條件以兩組皆命中實作，並套用「大宇紡織」排除詞。
 - `config/media_catalog.json`：Word 文件的完整 171 家媒體候選清單（148 家在地、23 家國際金融科技媒體）。它是覆蓋範圍清單，不代表所有媒體都已自動擷取。
-- `config/core_media_sources.json`：目前實測可用且獲准自動收錄的官方 RSS 白名單。其他媒體保留為 `manual_or_authorized`，必須先完成 RSS/API、條款或授權檢查。
+- `config/core_media_sources.json`：目前實測可用、近期仍更新且獲准自動收錄的官方 RSS 白名單。其他媒體保留為 `manual_or_authorized`，必須先完成 RSS/API、條款或授權檢查。
 - `worker/schema.sql`：媒體、規則、媒體清單、文章、命中證據、審核與收集執行紀錄。
 - `worker/README.md`：D1 migration、部署、收集與資料品質政策。
 
-為降低泛用詞誤報，只有高精準的品牌、產品/IP 與國際金融科技規則會自動公開；支付生態、競業與產業寬鬆規則仍會保留為待覆核資料，而不會出現在公開新聞頁。
+為降低泛用詞誤報，只有高精準的品牌、產品/IP 與國際金融科技規則會自動公開；易歧義別名則完整保留為待覆核資料。支付生態、競業與產業寬鬆規則也不會直接出現在公開新聞頁。

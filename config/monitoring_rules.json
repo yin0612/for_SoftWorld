@@ -1,10 +1,14 @@
 {
-  "version": "2026-09-14-docx-complete",
+  "version": "2026-09-15-source-expansion",
   "source_document": "【For慧科】智冠2025年監測關鍵字及媒體.docx",
-  "matching_capability": "僅比對已授權 RSS 的標題與摘要；不宣稱擷取或比對新聞全文。",
+  "matching_capability": "僅比對已授權 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容；不擷取原新聞網站頁面。",
   "description": "依原始 Word 文件完整資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。",
   "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","newebpay-brand","international-fintech"],
-  "automatic_publication_note": "僅高精準品牌、產品/IP 與國際金融科技規則可自動公開；競業、支付生態與產業寬鬆規則會保留為待覆核資料，避免把泛用詞誤報為真實監測新聞。",
+  "automatic_publication_allowed_terms": {
+    "softworld-brand": ["智冠科技","智冠集團","智冠","台灣淘米","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團"],
+    "international-fintech": ["third party payment","online payment","payment gateway","BNPL","Buy Now Pay Later","Paypal","Stripe","Block Inc","Adyen","visa","mastercard"]
+  },
+  "automatic_publication_note": "僅高精準品牌、產品/IP 與國際金融科技規則可自動公開；其中易產生歧義的別名（例如「台鋼」、「網龍」、「MyCard」與「Square」）仍會完整監測，但改列待覆核，避免把泛用詞誤報為真實監測新聞。",
   "retired_rule_ids": ["competitor-game","industry-market","industry-platform"],
   "folders": [
     {"id":"folder_1","name":"智冠集團","region_scope":["TW","CN","HK"],"priority":"high","description":"智冠集團、產品與 IP 授權"},

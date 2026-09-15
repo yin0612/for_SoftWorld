@@ -3,6 +3,10 @@ const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(d
   headers: { 'content-type': 'application/json; charset=utf-8', ...headers }
 });
 
+// Some publisher feeds retain years of entries. Bound each run to the most
+// recent feed entries so a newly enabled source cannot overwhelm D1.
+const MAX_RSS_ITEMS_PER_SOURCE = 200;
+
 function cors(request, env) {
   const origin = request.headers.get('Origin');
   const allowed = env.CORS_ORIGIN || '';
@@ -42,14 +46,23 @@ function extractTag(block, tag) {
 function parseRss(xml) {
   const entries = xml.match(/<item\b[\s\S]*?<\/item>|<entry\b[\s\S]*?<\/entry>/gi) || [];
   return entries.map((entry) => {
-    const rawLink = (entry.match(/<link[^>]*href=["']([^"']+)/i) || entry.match(/<link[^>]*>([^<]+)<\/link>/i) || [])[1] || '';
+    // RSS publishers commonly wrap links in CDATA, while Atom uses href.
+    // extractTag handles both plain and CDATA-wrapped RSS text links.
+    const rawLink = (entry.match(/<link[^>]*href=["']([^"']+)/i) || [])[1] || extractTag(entry, 'link');
+    const textParts = [
+      extractTag(entry, 'description'),
+      extractTag(entry, 'summary'),
+      extractTag(entry, 'content:encoded')
+    ].filter(Boolean);
     return {
       title: extractTag(entry, 'title'),
       link: decodeEntities(rawLink).trim(),
       publishedAt: extractTag(entry, 'pubDate') || extractTag(entry, 'published') || extractTag(entry, 'updated'),
-      excerpt: extractTag(entry, 'description') || extractTag(entry, 'summary') || extractTag(entry, 'content:encoded')
+      // A number of publishers put their useful lead in description and the
+      // attributable RSS body in content:encoded. Keep both for matching.
+      excerpt: [...new Set(textParts)].join('\n\n')
     };
-  }).filter((item) => item.title && item.link);
+  }).filter((item) => item.title && item.link).slice(0, MAX_RSS_ITEMS_PER_SOURCE);
 }
 
 function taipeiDate(date = new Date()) {
@@ -139,6 +152,17 @@ function evaluateRule(article, rule) {
   return { matched: false };
 }
 
+function ruleAutoPublishes(rule, evidence) {
+  if (Number(rule.auto_publish) !== 1) return false;
+  const allowedTerms = parseJson(rule.auto_publish_allowed_terms_json, []);
+  if (!Array.isArray(allowedTerms) || allowedTerms.length === 0) return true;
+  const allowed = new Set(allowedTerms.map(normalize));
+  const groupHits = Array.isArray(evidence?.required_any_group_hits)
+    ? evidence.required_any_group_hits.flat()
+    : [];
+  return groupHits.some((term) => allowed.has(normalize(term)));
+}
+
 function ruleAllowsSource(rule, source) {
   const allowedRegions = parseJson(rule.region_scope_json || '[]', []);
   return allowedRegions.length === 0 || allowedRegions.includes(source.region);
@@ -180,7 +204,7 @@ async function collectSource(source, rules, env) {
       const article = { title: item.title, excerpt: item.excerpt, canonicalUrl };
       const matches = sourceRules.map((rule) => ({ rule, result: evaluateRule(article, rule) })).filter(({ result }) => result.matched);
       if (!matches.length) continue;
-      const hasPublishableMatch = matches.some(({ rule }) => Number(rule.auto_publish) === 1);
+      const hasPublishableMatch = matches.some(({ rule, result }) => ruleAutoPublishes(rule, result.evidence));
 
       const existing = await env.DB.prepare('SELECT id FROM articles WHERE canonical_url = ?').bind(canonicalUrl).first();
       const articleId = existing?.id || crypto.randomUUID();
@@ -189,19 +213,18 @@ async function collectSource(source, rules, env) {
           SET title = ?, excerpt = ?, published_at = COALESCE(?, published_at), fetched_at = ?,
               review_status = CASE
                 WHEN review_status = 'rejected' THEN 'rejected'
-                WHEN ? = 1 THEN 'approved'
                 ELSE review_status
               END
-          WHERE id = ?`).bind(item.title, item.excerpt || null, publishedAt, now, hasPublishableMatch ? 1 : 0, articleId).run();
+          WHERE id = ?`).bind(item.title, item.excerpt || null, publishedAt, now, articleId).run();
       } else {
         await env.DB.prepare(`INSERT INTO articles
           (id, canonical_url, source_id, title, excerpt, published_at, fetched_at, review_status)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).bind(articleId, canonicalUrl, source.id, item.title, item.excerpt || null, publishedAt, now, hasPublishableMatch ? 'approved' : 'pending').run();
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)`).bind(articleId, canonicalUrl, source.id, item.title, item.excerpt || null, publishedAt, now, 'pending').run();
         added++;
       }
 
       await env.DB.batch(matches.map(({ rule, result }) => {
-        const autoPublish = Number(rule.auto_publish) === 1;
+        const autoPublish = ruleAutoPublishes(rule, result.evidence);
         return env.DB.prepare(`INSERT INTO article_matches
         (article_id, rule_id, evidence_json, status, reviewed_by, reviewed_at)
         VALUES (?, ?, ?, ?, ?, ?)
@@ -214,6 +237,19 @@ async function collectSource(source, rules, env) {
           autoPublish ? 'system:verified-rss' : null, autoPublish ? now : null
         );
       }));
+
+      // Recompute the article status after the match upsert. This lets a
+      // precision-policy update safely demote former system approvals while
+      // preserving an explicitly rejected article.
+      if (existing || hasPublishableMatch) {
+        const approval = await env.DB.prepare(`SELECT COUNT(*) AS approved_matches
+          FROM article_matches WHERE article_id = ? AND status = 'approved'`).bind(articleId).first();
+        await env.DB.prepare(`UPDATE articles SET review_status = CASE
+          WHEN review_status = 'rejected' THEN 'rejected'
+          WHEN ? = 1 THEN 'approved'
+          ELSE 'pending'
+        END WHERE id = ?`).bind(Number(approval?.approved_matches || 0) > 0 ? 1 : 0, articleId).run();
+      }
     }
 
     await env.DB.batch([

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS monitoring_rules (
   exclude_any_json TEXT NOT NULL,
   version TEXT NOT NULL,
   auto_publish INTEGER NOT NULL DEFAULT 0 CHECK (auto_publish IN (0, 1)),
+  auto_publish_allowed_terms_json TEXT NOT NULL DEFAULT '[]',
   active INTEGER NOT NULL DEFAULT 1 CHECK (active IN (0, 1))
 );
 
