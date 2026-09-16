@@ -634,7 +634,20 @@ function hydrateMonitoringManifest(manifest) {
 function renderMonitoringTransparency() {
     const panel = document.getElementById('monitoringTransparency');
     if (!panel) return;
+    const previousDisclosure = panel.querySelector('details[data-monitoring-disclosure]');
+    const wasOpen = Boolean(previousDisclosure?.open);
     panel.innerHTML = '';
+
+    const disclosure = document.createElement('details');
+    disclosure.dataset.monitoringDisclosure = 'true';
+    disclosure.open = wasOpen;
+    const disclosureToggle = document.createElement('summary');
+    disclosureToggle.className = 'monitoring-disclosure-toggle';
+    disclosureToggle.textContent = '查看資料來源與監測狀態';
+    const disclosureContent = document.createElement('div');
+    disclosureContent.className = 'monitoring-disclosure-content';
+    disclosure.append(disclosureToggle, disclosureContent);
+    panel.appendChild(disclosure);
 
     const summary = document.createElement('p');
     summary.style.cssText = 'margin:0; font-size:0.86rem; line-height:1.6; color:#334155;';
@@ -660,14 +673,17 @@ function renderMonitoringTransparency() {
         ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個；台灣來源 ${Array.isArray(monitoringRuntimeStatus.enabled_sources) ? monitoringRuntimeStatus.enabled_sources.filter((source) => source?.region === 'TW' && source?.health_status === 'healthy').length : 0} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個台灣來源提供唯讀即時補位；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇真實文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
         : '正在讀取來源健康與收錄狀態。';
     summary.textContent = `真實性原則：僅顯示已驗證公開 RSS 來源、命中年度監測規則且附原文連結的文章；不顯示展示資料。${statusText}${loadText}${liveFallbackText}${configSyncText}`;
-    panel.appendChild(summary);
+    disclosureContent.appendChild(summary);
 
-    if (!monitoringManifest) return;
+    if (!monitoringManifest) {
+        renderGlobalDataStatusBar();
+        return;
+    }
     if (monitoringManifest.automatic_publication_note) {
         const note = document.createElement('p');
         note.style.cssText = 'margin:8px 0 0; font-size:0.82rem; line-height:1.55; color:#0f766e;';
         note.textContent = `發布保護：${monitoringManifest.automatic_publication_note}`;
-        panel.appendChild(note);
+        disclosureContent.appendChild(note);
     }
     const details = document.createElement('details');
     details.style.marginTop = '10px';
@@ -693,7 +709,7 @@ function renderMonitoringTransparency() {
         section.appendChild(list);
         details.appendChild(section);
     });
-    panel.appendChild(details);
+    disclosureContent.appendChild(details);
     renderGlobalDataStatusBar();
 }
 
@@ -1008,14 +1024,22 @@ function renderFintechSummary(summary, articles) {
     const sources = new Set(articles.map((article) => article.source).filter(Boolean));
     const taiwanSources = new Set(articles.filter((article) => article.sourceRegion === 'TW').map((article) => article.source).filter(Boolean));
 
+    const contextDetails = document.createElement('details');
+    contextDetails.className = 'fintech-summary-details';
+    const contextToggle = document.createElement('summary');
+    contextToggle.textContent = '查看資料範圍與監測口徑';
+    const contextContent = document.createElement('div');
+    contextContent.className = 'fintech-summary-details-content';
+    contextDetails.append(contextToggle, contextContent);
+    summary.appendChild(contextDetails);
     const state = document.createElement('p');
     state.className = 'fintech-summary-state';
     state.textContent = '已驗證 RSS 資料，台灣支付為預設視圖。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留原文連結與命中證據。';
-    summary.appendChild(state);
+    contextContent.appendChild(state);
     const priorityNote = document.createElement('p');
     priorityNote.className = 'fintech-priority-note';
     priorityNote.textContent = `穩定幣頁優先：奧丁丁／OwlPay ${owlPayPriorityCount} 篇；僅在同時具穩定幣、鏈上支付、加密資產或金融科技語境時列入。`;
-    summary.appendChild(priorityNote);
+    contextContent.appendChild(priorityNote);
 
     const grid = document.createElement('div');
     grid.className = 'fintech-stat-grid';
@@ -1140,6 +1164,11 @@ function createFintechArticleCard(news) {
         original.textContent = '原文連結不可用';
     }
     footer.append(source, original);
+    const provenanceDetails = document.createElement('details');
+    provenanceDetails.className = 'fintech-card-provenance-details';
+    const provenanceToggle = document.createElement('summary');
+    provenanceToggle.className = 'fintech-provenance-toggle';
+    provenanceToggle.textContent = '查看來源與驗證資訊';
     const provenance = document.createElement('div');
     provenance.className = 'fintech-card-provenance';
     provenance.textContent = `原文發布：${news.date || '未提供'}｜${news.liveFallback ? '即時 RSS 讀取' : `本站收錄：${news.collectedDate || '未提供'}`}｜覆核狀態：${news.reviewState === 'approved' ? '自動通過' : '待人工覆核'}`;
@@ -1153,7 +1182,8 @@ function createFintechArticleCard(news) {
         feedLink.textContent = 'RSS 來源';
         provenance.append(separator, feedLink);
     }
-    card.append(header, title, excerpt, evidence, footer, provenance);
+    provenanceDetails.append(provenanceToggle, provenance);
+    card.append(header, title, excerpt, evidence, footer, provenanceDetails);
     return card;
 }
 
@@ -1695,7 +1725,10 @@ function renderNews(append = false) {
                     </div>
                     ${originalLink}
                 </div>
-                <div class="timeline-provenance">原文發布：${date}｜本站收錄：${collectedDate}｜覆核狀態：${reviewLabel}</div>
+                <details class="timeline-provenance-details">
+                    <summary class="timeline-provenance-toggle">查看來源與驗證資訊</summary>
+                    <div class="timeline-provenance">原文發布：${date}｜本站收錄：${collectedDate}｜覆核狀態：${reviewLabel}</div>
+                </details>
             </div>
         `;
 

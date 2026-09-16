@@ -507,6 +507,116 @@ mark {
   line-height: 1.65;
 }
 
+.fintech-summary-details {
+  margin-bottom: 12px;
+}
+
+.fintech-summary-details > summary,
+.fintech-glossary-toggle,
+.monitoring-disclosure-toggle,
+.site-data-status-toggle,
+.fintech-provenance-toggle,
+.timeline-provenance-toggle {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 1px solid #99f6e4;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #0f766e;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+  list-style: none;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.fintech-summary-details > summary::-webkit-details-marker,
+.fintech-glossary-toggle::-webkit-details-marker,
+.monitoring-disclosure-toggle::-webkit-details-marker,
+.site-data-status-toggle::-webkit-details-marker,
+.fintech-provenance-toggle::-webkit-details-marker,
+.timeline-provenance-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.fintech-summary-details > summary::before,
+.fintech-glossary-toggle::before,
+.monitoring-disclosure-toggle::before,
+.site-data-status-toggle::before,
+.fintech-provenance-toggle::before,
+.timeline-provenance-toggle::before {
+  content: '＋';
+  margin-right: 5px;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.fintech-summary-details[open] > summary::before,
+.fintech-glossary[open] > .fintech-glossary-toggle::before,
+#monitoringTransparency details[data-monitoring-disclosure][open] > .monitoring-disclosure-toggle::before,
+.site-data-status-details[open] > .site-data-status-toggle::before,
+.fintech-card-provenance-details[open] > .fintech-provenance-toggle::before,
+.timeline-provenance-details[open] > .timeline-provenance-toggle::before {
+  content: '−';
+}
+
+.fintech-summary-details > summary:hover,
+.fintech-glossary-toggle:hover,
+.monitoring-disclosure-toggle:hover,
+.site-data-status-toggle:hover,
+.fintech-provenance-toggle:hover,
+.timeline-provenance-toggle:hover,
+.fintech-summary-details > summary:focus-visible,
+.fintech-glossary-toggle:focus-visible,
+.monitoring-disclosure-toggle:focus-visible,
+.site-data-status-toggle:focus-visible,
+.fintech-provenance-toggle:focus-visible,
+.timeline-provenance-toggle:focus-visible {
+  border-color: #0f766e;
+  background: #ecfdf5;
+  color: #115e59;
+  outline: 2px solid rgba(20, 184, 166, 0.25);
+  outline-offset: 2px;
+}
+
+.fintech-summary-details-content {
+  margin-top: 10px;
+}
+
+.fintech-card-provenance-details,
+.timeline-provenance-details {
+  margin-top: 8px;
+}
+
+.fintech-provenance-toggle,
+.timeline-provenance-toggle {
+  min-height: 24px;
+  padding: 3px 8px;
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.fintech-provenance-toggle:hover,
+.timeline-provenance-toggle:hover,
+.fintech-provenance-toggle:focus-visible,
+.timeline-provenance-toggle:focus-visible {
+  border-color: #0f766e;
+  background: #f0fdfa;
+  color: #0f766e;
+}
+
+.fintech-card-provenance-details > .fintech-card-provenance,
+.timeline-provenance-details > .timeline-provenance {
+  margin-top: 6px;
+}
+
 .fintech-priority-note {
   margin: 8px 0 0;
   color: #9a3412;
@@ -852,12 +962,28 @@ mark {
   line-height: 1.45;
 }
 
+.site-data-status-details {
+  flex: 0 1 auto;
+  min-width: 0;
+}
+
+.site-data-status-extra {
+  display: flex;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 6px;
+}
+
 .site-data-status-link {
   color: #0f766e;
   font-size: 0.76rem;
   font-weight: 800;
   text-decoration: underline;
   white-space: nowrap;
+}
+
+.monitoring-disclosure-content {
+  margin-top: 12px;
 }
 
 .data-type-badge {
@@ -974,6 +1100,10 @@ mark {
   line-height: 1.6;
 }
 
+.fintech-glossary-content {
+  margin-top: 10px;
+}
+
 .fintech-clear-button:disabled {
   cursor: not-allowed;
   opacity: 0.5;
@@ -988,8 +1118,13 @@ mark {
     align-items: flex-start;
   }
 
-  .site-data-status-text {
+  .site-data-status-details {
     flex-basis: 100%;
+  }
+
+  .site-data-status-extra {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
