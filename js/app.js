@@ -876,9 +876,16 @@ function articleHasStablecoinRule(news) {
     return ruleIds.some((ruleId) => STABLECOIN_RULE_IDS.has(String(ruleId || '').trim()));
 }
 
+function hasStablecoinContext(news) {
+    if (articleHasMonitoringFolder(news, 'folder_6') || articleHasStablecoinRule(news)) return true;
+    const target = stablecoinSearchText(news);
+    return STABLECOIN_TERM_GROUPS
+        .slice(0, -1)
+        .some((group) => group.terms.some((term) => matchesStablecoinTerm(target, term)));
+}
+
 function isOwlPayPriorityArticle(news) {
-    const hasStablecoinContext = articleHasMonitoringFolder(news, 'folder_6') || articleHasStablecoinRule(news);
-    if (!hasStablecoinContext) return false;
+    if (!hasStablecoinContext(news)) return false;
     const target = stablecoinSearchText(news);
     return STABLECOIN_PRIORITY_TERMS.some((term) => matchesStablecoinTerm(target, term));
 }
@@ -886,11 +893,11 @@ function isOwlPayPriorityArticle(news) {
 function getStablecoinTermMatches(news) {
     const target = stablecoinSearchText(news);
     const matches = [];
-    const hasStablecoinContext = articleHasMonitoringFolder(news, 'folder_6') || articleHasStablecoinRule(news);
+    const stablecoinContext = hasStablecoinContext(news);
     STABLECOIN_TERM_GROUPS.forEach((group, index) => {
         // 奧丁丁／OwlPay 是穩定幣頁面的優先標籤；只有文章已經命中
-        // folder_6 或穩定幣規則時才加入，避免台灣支付頁的一般品牌新聞被誤標。
-        if (index === STABLECOIN_TERM_GROUPS.length - 1 && !hasStablecoinContext) return;
+        // folder_6、穩定幣規則或明確穩定幣詞時才加入，避免一般品牌新聞被誤標。
+        if (index === STABLECOIN_TERM_GROUPS.length - 1 && !stablecoinContext) return;
         group.terms.forEach((term) => {
             if (matchesStablecoinTerm(target, term)) matches.push(term);
         });
