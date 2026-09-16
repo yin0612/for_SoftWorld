@@ -77,7 +77,11 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
   { id: 'bnext-google-news', name: '數位時代', region: 'TW', type: 'editorial', domain: 'bnext.com.tw', homepage: 'https://www.bnext.com.tw/' },
   { id: 'setn-google-news', name: '三立新聞網', region: 'TW', type: 'editorial', domain: 'setn.com', homepage: 'https://www.setn.com/' },
   { id: 'tvbs-google-news', name: 'TVBS新聞網', region: 'TW', type: 'editorial', domain: 'news.tvbs.com.tw', homepage: 'https://news.tvbs.com.tw/' },
-  { id: 'chinatimes-google-news', name: '中國時報／中時新聞網', region: 'TW', type: 'editorial', domain: 'chinatimes.com', homepage: 'https://www.chinatimes.com/' }
+  { id: 'ftv-google-news', name: '民視新聞網', region: 'TW', type: 'editorial', domain: 'ftvnews.com.tw', homepage: 'https://www.ftvnews.com.tw/' },
+  { id: 'chinatimes-google-news', name: '中國時報／中時新聞網', region: 'TW', type: 'editorial', domain: 'chinatimes.com', homepage: 'https://www.chinatimes.com/' },
+  { id: 'nownews-google-news', name: 'NOWnews今日新聞', region: 'TW', type: 'editorial', domain: 'nownews.com', homepage: 'https://www.nownews.com/' },
+  { id: 'mirrormedia-google-news', name: '鏡傳媒／鏡週刊', region: 'TW', type: 'editorial', domain: 'mirrormedia.mg', homepage: 'https://www.mirrormedia.mg/' },
+  { id: 'newtalk-google-news', name: '新頭殼', region: 'TW', type: 'editorial', domain: 'newtalk.tw', homepage: 'https://newtalk.tw/' }
 ];
 
 // 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
