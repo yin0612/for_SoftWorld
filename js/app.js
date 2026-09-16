@@ -564,7 +564,7 @@ function renderGlobalDataStatusBar() {
         ...liveSourceNames.filter((name) => !enabledSourceNames.has(name))
     ]).size;
     const liveSourceCount = Number(monitoringRuntimeStatus?.live_fallback_source_count || liveSourceNames.length || 0);
-    const liveFallback = Number(monitoringLoadState?.liveFallbackCount || 0);
+    const liveFallback = Number(monitoringLoadState?.officialLiveFallbackCount || 0);
     const aggregatedSourceCount = Number(monitoringRuntimeStatus?.aggregated_source_count || 0);
     const aggregatedCount = Number(monitoringLoadState?.aggregatedCount || 0);
     if (monitoringDataMode === 'verified') {
@@ -660,8 +660,8 @@ function renderMonitoringTransparency() {
     const loadText = monitoringLoadState && !monitoringLoadState.complete
         ? ` 公開結果目前僅完整載入 ${monitoringLoadState.loaded}/${monitoringLoadState.total} 篇，請重新整理後再確認。`
         : '';
-    const liveFallbackText = monitoringLoadState?.liveFallbackCount
-        ? ` 本次另有 ${monitoringLoadState.liveFallbackCount} 篇由即時唯讀補位取得；官方 RSS 會在排程成功後自動去重並寫入資料庫。`
+    const liveFallbackText = monitoringLoadState?.officialLiveFallbackCount
+        ? ` 本次另有 ${monitoringLoadState.officialLiveFallbackCount} 篇由官方 RSS 即時唯讀補位取得；排程成功後會自動去重並寫入資料庫。`
         : '';
     const aggregatedText = monitoringLoadState?.aggregatedCount
         ? ` 其中 ${monitoringLoadState.aggregatedCount} 篇為 Google News RSS 聚合（非媒體官方 RSS），僅保留標題、發布時間與原文跳轉連結。`
@@ -805,6 +805,7 @@ function initNewsSection() {
             complete: result.complete !== false,
             range: result.range || getRollingMonitoringDateRange(),
             liveFallbackCount: result.liveFallbackCount || 0,
+            officialLiveFallbackCount: result.officialLiveFallbackCount || 0,
             aggregatedCount: result.aggregatedCount || 0,
             officialRssCount: result.officialRssCount || 0
         };

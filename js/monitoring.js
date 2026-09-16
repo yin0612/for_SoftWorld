@@ -87,6 +87,7 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
         total: total ?? rawArticles.length,
         complete,
         liveFallbackCount: rawArticles.filter((article) => article.live_fallback === true).length,
+        officialLiveFallbackCount: rawArticles.filter((article) => article.live_fallback === true && article.source_kind !== 'google_news_rss').length,
         aggregatedCount: rawArticles.filter((article) => article.source_kind === 'google_news_rss').length,
         officialRssCount: rawArticles.filter((article) => article.source_kind !== 'google_news_rss').length,
         articles: rawArticles.map((article) => {
