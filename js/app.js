@@ -497,10 +497,13 @@ let fintechMode = 'taiwan';
 let fintechPage = 1;
 const FINTECH_PER_PAGE = 12;
 const FINTECH_FOLDER_IDS = new Set(['folder_2', 'folder_5', 'folder_6']);
+const STABLECOIN_RULE_IDS = new Set(['stablecoin-core', 'stablecoin-settlement', 'stablecoin-brand']);
+const STABLECOIN_PRIORITY_TERMS = ['奧丁丁', 'OwlPay'];
 const STABLECOIN_TERM_GROUPS = [
     { label: '穩定幣類別', terms: ['穩定幣', 'stablecoin', 'stable coin'] },
     { label: '穩定幣資產', terms: ['USDT', 'USDC', 'USDe', 'PYUSD', 'RLUSD', 'FDUSD', 'EURC', 'USDG', 'GUSD'] },
-    { label: '發行與結算', terms: ['Tether', '鏈上結算', '鏈上支付', '代幣化存款', '代幣化貨幣', 'tokenized deposit', 'tokenized deposits', 'stablecoin settlement', 'stablecoin payment', 'stablecoin payments'] }
+    { label: '發行與結算', terms: ['Tether', '鏈上結算', '鏈上支付', '代幣化存款', '代幣化貨幣', 'tokenized deposit', 'tokenized deposits', 'stablecoin settlement', 'stablecoin payment', 'stablecoin payments'] },
+    { label: '奧丁丁／OwlPay 優先', terms: STABLECOIN_PRIORITY_TERMS }
 ];
 
 function escapeHtml(value = '') {
@@ -644,9 +647,15 @@ function renderMonitoringTransparency() {
     const liveFallbackText = monitoringLoadState?.liveFallbackCount
         ? ` 本次另有 ${monitoringLoadState.liveFallbackCount} 篇由新增台灣 RSS 即時唯讀補位，排程成功後會自動去重並寫入資料庫。`
         : '';
-    const configSyncText = monitoringRuntimeStatus?.domestic_config?.pending
-        ? ' 台灣支付規則／來源尚有設定待同步，期間由唯讀即時補位維持資料可見。'
-        : '';
+    const pendingConfigMessages = [
+        monitoringRuntimeStatus?.domestic_config?.pending
+            ? '台灣支付規則／來源尚有設定待同步，期間由唯讀即時補位維持資料可見。'
+            : '',
+        monitoringRuntimeStatus?.stablecoin_config?.pending
+            ? '穩定幣（含奧丁丁／OwlPay）規則尚有設定待同步，期間由即時 RSS 補位維持資料可見。'
+            : ''
+    ].filter(Boolean);
+    const configSyncText = pendingConfigMessages.length ? ' ' + pendingConfigMessages.join(' ') : '';
     const statusText = monitoringRuntimeStatus
         ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個；台灣來源 ${Array.isArray(monitoringRuntimeStatus.enabled_sources) ? monitoringRuntimeStatus.enabled_sources.filter((source) => source?.region === 'TW' && source?.health_status === 'healthy').length : 0} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個台灣來源提供唯讀即時補位；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇真實文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
         : '正在讀取來源健康與收錄狀態。';
@@ -860,10 +869,28 @@ function matchesStablecoinTerm(target, term) {
     return text.toLowerCase().includes(query.toLowerCase());
 }
 
+function articleHasStablecoinRule(news) {
+    const ruleIds = Array.isArray(news?.ruleIds)
+        ? news.ruleIds
+        : String(news?.ruleIds || '').split(',');
+    return ruleIds.some((ruleId) => STABLECOIN_RULE_IDS.has(String(ruleId || '').trim()));
+}
+
+function isOwlPayPriorityArticle(news) {
+    const hasStablecoinContext = articleHasMonitoringFolder(news, 'folder_6') || articleHasStablecoinRule(news);
+    if (!hasStablecoinContext) return false;
+    const target = stablecoinSearchText(news);
+    return STABLECOIN_PRIORITY_TERMS.some((term) => matchesStablecoinTerm(target, term));
+}
+
 function getStablecoinTermMatches(news) {
     const target = stablecoinSearchText(news);
     const matches = [];
-    STABLECOIN_TERM_GROUPS.forEach((group) => {
+    const hasStablecoinContext = articleHasMonitoringFolder(news, 'folder_6') || articleHasStablecoinRule(news);
+    STABLECOIN_TERM_GROUPS.forEach((group, index) => {
+        // 奧丁丁／OwlPay 是穩定幣頁面的優先標籤；只有文章已經命中
+        // folder_6 或穩定幣規則時才加入，避免台灣支付頁的一般品牌新聞被誤標。
+        if (index === STABLECOIN_TERM_GROUPS.length - 1 && !hasStablecoinContext) return;
         group.terms.forEach((term) => {
             if (matchesStablecoinTerm(target, term)) matches.push(term);
         });
@@ -872,7 +899,9 @@ function getStablecoinTermMatches(news) {
 }
 
 function isStablecoinArticle(news) {
-    return articleHasMonitoringFolder(news, 'folder_6') || getStablecoinTermMatches(news).length > 0;
+    return articleHasMonitoringFolder(news, 'folder_6')
+        || articleHasStablecoinRule(news)
+        || getStablecoinTermMatches(news).length > 0;
 }
 
 function isFintechMonitoringArticle(news) {
@@ -952,11 +981,12 @@ function renderFintechKeywordPills(articles) {
     const scopes = [
         { label: '台灣支付與藍新科技', count: articles.filter((article) => articleHasMonitoringFolder(article, 'folder_2')).length },
         { label: '國際支付與金融科技', count: articles.filter((article) => articleHasMonitoringFolder(article, 'folder_5')).length },
-        { label: '穩定幣與鏈上結算', count: articles.filter(isStablecoinArticle).length }
+        { label: '穩定幣與鏈上結算', count: articles.filter(isStablecoinArticle).length },
+        { label: '奧丁丁／OwlPay 優先', count: articles.filter(isOwlPayPriorityArticle).length }
     ];
     scopes.forEach((scope) => {
         const pill = document.createElement('span');
-        pill.className = 'fintech-scope-pill';
+        pill.className = 'fintech-scope-pill' + (scope.label.includes('奧丁丁') ? ' fintech-priority-pill' : '');
         pill.textContent = scope.label + ' ' + scope.count + ' 篇';
         container.appendChild(pill);
     });
@@ -967,6 +997,7 @@ function renderFintechSummary(summary, articles) {
     const range = monitoringLoadState?.range || getRollingMonitoringDateRange();
     const taiwanPaymentCount = articles.filter((article) => articleHasMonitoringFolder(article, 'folder_2')).length;
     const stablecoinCount = articles.filter(isStablecoinArticle).length;
+    const owlPayPriorityCount = articles.filter(isOwlPayPriorityArticle).length;
     const sources = new Set(articles.map((article) => article.source).filter(Boolean));
     const taiwanSources = new Set(articles.filter((article) => article.sourceRegion === 'TW').map((article) => article.source).filter(Boolean));
 
@@ -974,6 +1005,10 @@ function renderFintechSummary(summary, articles) {
     state.className = 'fintech-summary-state';
     state.textContent = '已驗證 RSS 資料，台灣支付為預設視圖。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留原文連結與命中證據。';
     summary.appendChild(state);
+    const priorityNote = document.createElement('p');
+    priorityNote.className = 'fintech-priority-note';
+    priorityNote.textContent = `穩定幣頁優先：奧丁丁／OwlPay ${owlPayPriorityCount} 篇；僅在同時具穩定幣、鏈上支付、加密資產或金融科技語境時列入。`;
+    summary.appendChild(priorityNote);
 
     const grid = document.createElement('div');
     grid.className = 'fintech-stat-grid';
@@ -1027,6 +1062,12 @@ function createFintechArticleCard(news) {
         badge.textContent = label;
         badges.appendChild(badge);
     });
+    if (isOwlPayPriorityArticle(news)) {
+        const priorityBadge = document.createElement('span');
+        priorityBadge.className = 'fintech-category-badge fintech-priority-badge';
+        priorityBadge.textContent = '⭐ 奧丁丁優先';
+        badges.appendChild(priorityBadge);
+    }
     const date = document.createElement('time');
     date.className = 'fintech-card-date';
     date.textContent = '📅 ' + (news.date || '日期未提供');
@@ -1158,6 +1199,12 @@ function renderFintechMonitoring() {
         const matchKeyword = !keyword || fintechSearchText(article).includes(keyword);
         return matchMode && matchSource && matchKeyword;
     });
+    if (fintechMode === 'stablecoin') {
+        filtered.sort((a, b) => {
+            const priorityDelta = Number(isOwlPayPriorityArticle(b)) - Number(isOwlPayPriorityArticle(a));
+            return priorityDelta || String(b.date || '').localeCompare(String(a.date || ''));
+        });
+    }
 
     const visible = filtered.slice(0, fintechPage * FINTECH_PER_PAGE);
     resultCount.textContent = '顯示 ' + visible.length + '／' + filtered.length + ' 篇已驗證 RSS 新聞';

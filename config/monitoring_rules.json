@@ -1,9 +1,9 @@
 {
-  "version": "2026-09-15-domestic-tw-payment-v3",
+  "version": "2026-09-16-owlpay-priority-v1",
   "source_document": "【For慧科】智冠2025年監測關鍵字及媒體.docx；金融科技&穩定幣監測/關鍵字清單.xlsx；金融科技&穩定幣監測/監測關鍵字及媒體.docx",
   "matching_capability": "僅比對已授權 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容；不擷取原新聞網站頁面。",
-  "description": "依原始 Word、金融科技關鍵字清單與媒體清單資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。穩定幣採獨立高精準規則，不把泛稱加密貨幣直接視為穩定幣。",
-  "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","newebpay-brand","taiwan-payment-core","taiwan-payment-authority","international-fintech","stablecoin-core","stablecoin-settlement"],
+  "description": "依原始 Word、金融科技關鍵字清單與媒體清單資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。穩定幣採獨立高精準規則；奧丁丁／OwlPay 需搭配穩定幣、鏈上支付、加密資產或金融科技語境，不把泛稱加密貨幣直接視為穩定幣。",
+  "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","newebpay-brand","taiwan-payment-core","taiwan-payment-authority","international-fintech","stablecoin-core","stablecoin-settlement","stablecoin-brand"],
   "automatic_publication_allowed_terms": {
     "softworld-brand": ["智冠科技","智冠集團","智冠","台灣淘米","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團"],
     "newebpay-brand": ["藍新科技","藍新金流","NewebPay","簡單付","ezPay","簡單行動支付","ezAIO簡單收","ezAIO","簡單收","歐付寶","O'Pay","OPay","橘子支","橘子支付","街口支付","街口電子支付","綠界科技","ECPay","全支付","全盈支付","全盈+PAY","台灣Pay","悠遊付","悠遊卡","一卡通","iPASS MONEY","LINE Pay","LINE Pay Money","Pi拍錢包","PChomepay","Hami Pay","friDay錢包","蝦皮支付","電子票證","MaiCoin Pay","TWQR"],
@@ -11,9 +11,10 @@
     "taiwan-payment-authority": ["支付","電支","電子支付","行動支付","數位支付","電子票證","信用卡支付","非現金支付","支付安全","支付基礎建設","聯卡中心","聯合信用卡處理中心","信用卡","刷卡","TWQR"],
     "international-fintech": ["third party payment","online payment","payment gateway","BNPL","Buy Now Pay Later","Paypal","Stripe","Block Inc","Adyen","visa","mastercard"],
     "stablecoin-core": ["穩定幣","穩定幣支付","穩定幣結算","美元穩定幣","stablecoin","stable coin","USDT","USDC","USDe","PYUSD","RLUSD","FDUSD","EURC","USDG","GUSD","Tether"],
-    "stablecoin-settlement": ["鏈上結算","鏈上支付","代幣化存款","代幣化貨幣","tokenized deposit","tokenized deposits","stablecoin settlement","stablecoin payment","stablecoin payments"]
+    "stablecoin-settlement": ["鏈上結算","鏈上支付","代幣化存款","代幣化貨幣","tokenized deposit","tokenized deposits","stablecoin settlement","stablecoin payment","stablecoin payments"],
+    "stablecoin-brand": ["奧丁丁","OwlPay"]
   },
-  "automatic_publication_note": "台灣支付優先：核心規則限定台灣 RSS 來源，並命中明確支付／卡片／票證詞；主管機關與支付基礎建設另設高精準規則。僅高精準品牌、台灣支付、產品/IP、國際金融科技與穩定幣／鏈上結算規則可自動公開；易產生歧義的別名仍列待覆核。",
+  "automatic_publication_note": "台灣支付優先：核心規則限定台灣 RSS 來源，並命中明確支付／卡片／票證詞；主管機關與支付基礎建設另設高精準規則。穩定幣頁優先辨識奧丁丁／OwlPay，但必須同時出現穩定幣、鏈上結算、加密支付或金融科技語境；一般奧丁丁商業新聞不會直接歸入穩定幣。僅高精準品牌、台灣支付、產品/IP、國際金融科技與穩定幣／鏈上結算規則可自動公開；易產生歧義的別名仍列待覆核。",
   "retired_rule_ids": ["competitor-game","industry-market","industry-platform"],
   "folders": [
     {"id":"folder_1","name":"智冠集團","region_scope":["TW","CN","HK"],"priority":"high","description":"智冠集團、產品與 IP 授權"},
@@ -42,7 +43,8 @@
     {"id":"industry-martech","folder_id":"folder_4","display_name":"產業新聞 數位廣告與行銷","scope":"title_or_lead","scope_note":"RSS 標題或摘要；行銷主題詞 + 平台/技術詞","required_any_groups":[["廣告","曝光","互動","轉換","品牌","媒體","行銷","社群","成效","優化"],["LINE","Google","Youtube","Facebook","Meta","FB","Instagram","IG","TikTok","抖音","cookieless","cookie","數位廣告","AI","廣告代理","Martech","機器學習","SEO","口碑","KOL","TTD","pDOOH","小紅書"]],"exclude_any":[]},
     {"id":"international-fintech","folder_id":"folder_5","display_name":"國際金融科技 單一關鍵字","scope":"full_text","scope_note":"RSS 標題與摘要","required_any_groups":[["third party payment","online payment","payment gateway","BNPL","Buy Now Pay Later","Paypal","Stripe","Block Inc","Square","Adyen","visa","mastercard"]],"exclude_any":[]},
     {"id":"stablecoin-core","folder_id":"folder_6","display_name":"穩定幣 核心詞","scope":"full_text","scope_note":"RSS 標題與摘要；精準穩定幣名稱或類別詞","required_any_groups":[["穩定幣","穩定幣支付","穩定幣結算","美元穩定幣","stablecoin","stable coin","USDT","USDC","USDe","PYUSD","RLUSD","FDUSD","EURC","USDG","GUSD","Tether"]],"exclude_any":[]},
-    {"id":"stablecoin-settlement","folder_id":"folder_6","display_name":"穩定幣 鏈上結算","scope":"full_text","scope_note":"RSS 標題與摘要；代幣化貨幣或鏈上支付結算","required_any_groups":[["鏈上結算","鏈上支付","代幣化存款","代幣化貨幣","tokenized deposit","tokenized deposits","stablecoin settlement","stablecoin payment","stablecoin payments"]],"exclude_any":[]}
+    {"id":"stablecoin-settlement","folder_id":"folder_6","display_name":"穩定幣 鏈上結算","scope":"full_text","scope_note":"RSS 標題與摘要；代幣化貨幣或鏈上支付結算","required_any_groups":[["鏈上結算","鏈上支付","代幣化存款","代幣化貨幣","tokenized deposit","tokenized deposits","stablecoin settlement","stablecoin payment","stablecoin payments"]],"exclude_any":[]},
+    {"id":"stablecoin-brand","folder_id":"folder_6","display_name":"穩定幣 奧丁丁／OwlPay 優先","scope":"full_text","scope_note":"RSS 標題與摘要；奧丁丁／OwlPay 且同時具穩定幣、鏈上支付、加密資產或金融科技語境","required_any_groups":[["奧丁丁","OwlPay"],["穩定幣","穩定幣支付","穩定幣結算","美元穩定幣","stablecoin","stable coin","USDT","USDC","USDe","PYUSD","RLUSD","FDUSD","EURC","USDG","GUSD","Tether","鏈上結算","鏈上支付","代幣化存款","代幣化貨幣","tokenized deposit","tokenized deposits","stablecoin settlement","stablecoin payment","stablecoin payments","數位資產","加密資產","虛擬資產","加密貨幣","區塊鏈","支付","付款","結算","錢包","入金","出金","金融科技"]],"exclude_any":[]}
   ],
   "global_exclude_any":["大宇紡織"]
 }

@@ -507,6 +507,14 @@ mark {
   line-height: 1.65;
 }
 
+.fintech-priority-note {
+  margin: 8px 0 0;
+  color: #9a3412;
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
 .fintech-stat-grid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -607,6 +615,12 @@ mark {
   font-weight: 700;
 }
 
+.fintech-priority-pill {
+  border-color: #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
+}
+
 .fintech-result-count {
   margin: 0 0 16px;
   color: #475569;
@@ -660,6 +674,12 @@ mark {
   color: #047857;
   font-size: 0.71rem;
   font-weight: 800;
+}
+
+.fintech-priority-badge {
+  border: 1px solid #fed7aa;
+  background: #fff7ed;
+  color: #c2410c;
 }
 
 .fintech-card-date,

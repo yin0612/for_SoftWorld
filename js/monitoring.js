@@ -27,7 +27,7 @@ function formatMonitoringDate(value) {
 }
 
 window.loadMonitoringManifest = async function loadMonitoringManifest() {
-    const response = await fetch('config/monitoring_rules.json?v=20260915_04', {
+    const response = await fetch('config/monitoring_rules.json?v=20260916_01', {
         cache: 'no-store', headers: { Accept: 'application/json' }
     });
     if (!response.ok) throw new Error(`Monitoring manifest returned ${response.status}`);

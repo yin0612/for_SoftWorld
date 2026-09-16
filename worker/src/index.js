@@ -56,6 +56,46 @@ const LIVE_DOMESTIC_RULES = [
   }
 ];
 
+// 穩定幣頁面的即時唯讀補位優先使用台灣金融、區塊鏈與科技媒體；
+// 奧丁丁／OwlPay 必須再搭配穩定幣、鏈上支付、加密資產或金融科技語境，
+// 避免一般品牌或商業新聞被誤歸入穩定幣。
+const LIVE_STABLECOIN_SOURCES = LIVE_DOMESTIC_SOURCES.filter((source) => [
+  'cna-finance', 'cna-technology', 'ltn-business', 'techorange', 'blocktempo', 'abmedia'
+].includes(source.id));
+
+const LIVE_STABLECOIN_RULES = [
+  {
+    id: 'stablecoin-core',
+    folder_id: 'folder_6',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['穩定幣','穩定幣支付','穩定幣結算','美元穩定幣','stablecoin','stable coin','USDT','USDC','USDe','PYUSD','RLUSD','FDUSD','EURC','USDG','GUSD','Tether']),
+    all_of_json: '[]',
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['穩定幣','穩定幣支付','穩定幣結算','美元穩定幣','stablecoin','stable coin','USDT','USDC','USDe','PYUSD','RLUSD','FDUSD','EURC','USDG','GUSD','Tether'])
+  },
+  {
+    id: 'stablecoin-settlement',
+    folder_id: 'folder_6',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['鏈上結算','鏈上支付','代幣化存款','代幣化貨幣','tokenized deposit','tokenized deposits','stablecoin settlement','stablecoin payment','stablecoin payments']),
+    all_of_json: '[]',
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['鏈上結算','鏈上支付','代幣化存款','代幣化貨幣','tokenized deposit','tokenized deposits','stablecoin settlement','stablecoin payment','stablecoin payments'])
+  },
+  {
+    id: 'stablecoin-brand',
+    folder_id: 'folder_6',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['奧丁丁','OwlPay']),
+    all_of_json: JSON.stringify(['穩定幣','穩定幣支付','穩定幣結算','美元穩定幣','stablecoin','stable coin','USDT','USDC','USDe','PYUSD','RLUSD','FDUSD','EURC','USDG','GUSD','Tether','鏈上結算','鏈上支付','代幣化存款','代幣化貨幣','tokenized deposit','tokenized deposits','stablecoin settlement','stablecoin payment','stablecoin payments','數位資產','加密資產','虛擬資產','加密貨幣','區塊鏈','支付','付款','結算','錢包','入金','出金','金融科技']),
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['奧丁丁','OwlPay'])
+  }
+];
+
 function cors(request, env) {
   const origin = request.headers.get('Origin');
   const allowed = env.CORS_ORIGIN || '';
@@ -224,9 +264,9 @@ function isPublishedInRange(publishedAt, from, to) {
   return Number.isFinite(timestamp) && timestamp >= fromTimestamp && timestamp <= toTimestamp;
 }
 
-async function fetchLiveDomesticArticles(from, to) {
+async function fetchLiveArticles(from, to, { sources, rules, folderId }) {
   const fetchedAt = new Date().toISOString();
-  const perSource = await Promise.all(LIVE_DOMESTIC_SOURCES.map(async (source) => {
+  const perSource = await Promise.all(sources.map(async (source) => {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 8000);
     try {
@@ -243,7 +283,7 @@ async function fetchLiveDomesticArticles(from, to) {
         const parsedDate = new Date(item.publishedAt);
         if (Number.isNaN(parsedDate.getTime()) || !isPublishedInRange(parsedDate.toISOString(), from, to)) return null;
         const article = { title: item.title, excerpt: item.excerpt, canonicalUrl: item.link };
-        const matches = LIVE_DOMESTIC_RULES
+        const matches = rules
           .map((rule) => ({ rule, result: evaluateRule(article, rule) }))
           .filter(({ rule, result }) => result.matched && ruleAutoPublishes(rule, result.evidence));
         if (!matches.length) return null;
@@ -259,7 +299,7 @@ async function fetchLiveDomesticArticles(from, to) {
           published_at: parsedDate.toISOString(),
           fetched_at: fetchedAt,
           review_status: 'approved',
-          folder_ids: 'folder_2',
+          folder_ids: folderId,
           rule_ids: matches.map(({ rule }) => rule.id).join(','),
           evidence_jsons: matches.map(({ result }) => JSON.stringify(result.evidence)).join('|||')
         };
@@ -276,6 +316,22 @@ async function fetchLiveDomesticArticles(from, to) {
     if (article?.canonical_url && !unique.has(article.canonical_url)) unique.set(article.canonical_url, article);
   });
   return [...unique.values()];
+}
+
+async function fetchLiveDomesticArticles(from, to) {
+  return fetchLiveArticles(from, to, {
+    sources: LIVE_DOMESTIC_SOURCES,
+    rules: LIVE_DOMESTIC_RULES,
+    folderId: 'folder_2'
+  });
+}
+
+async function fetchLiveStablecoinArticles(from, to) {
+  return fetchLiveArticles(from, to, {
+    sources: LIVE_STABLECOIN_SOURCES,
+    rules: LIVE_STABLECOIN_RULES,
+    folderId: 'folder_6'
+  });
 }
 
 async function findExistingArticleUrls(env, urls) {
@@ -310,18 +366,22 @@ async function syncDomesticConfig(env) {
   // 並繼續既有收集，避免一次 D1 寫入錯誤讓整個 Worker 中斷。
   try {
     const ruleIds = LIVE_DOMESTIC_RULES.map((rule) => rule.id);
+    const stablecoinRuleIds = LIVE_STABLECOIN_RULES.map((rule) => rule.id);
     const sourceIds = LIVE_DOMESTIC_SOURCES.map((source) => source.id);
-    const [folder, rules, sources, catalog] = await Promise.all([
+    const [folder, rules, sources, catalog, stablecoinFolder, stablecoinRules] = await Promise.all([
       env.DB.prepare('SELECT id, version, name, description FROM monitoring_folders WHERE id = ?').bind('folder_2').first(),
       env.DB.prepare(`SELECT id, version FROM monitoring_rules WHERE id IN (${ruleIds.map(() => '?').join(',')})`).bind(...ruleIds).all(),
       env.DB.prepare(`SELECT id, feed_url, enabled, auto_publish FROM media_sources WHERE id IN (${sourceIds.map(() => '?').join(',')})`).bind(...sourceIds).all(),
-      env.DB.prepare(`SELECT id, version, source_id FROM monitoring_media_catalog WHERE id IN (${DOMESTIC_CATALOG_ENTRIES.map(() => '?').join(',')})`).bind(...DOMESTIC_CATALOG_ENTRIES.map((entry) => entry.id)).all()
+      env.DB.prepare(`SELECT id, version, source_id FROM monitoring_media_catalog WHERE id IN (${DOMESTIC_CATALOG_ENTRIES.map(() => '?').join(',')})`).bind(...DOMESTIC_CATALOG_ENTRIES.map((entry) => entry.id)).all(),
+      env.DB.prepare('SELECT id, version, name, description FROM monitoring_folders WHERE id = ?').bind('folder_6').first(),
+      env.DB.prepare(`SELECT id, version FROM monitoring_rules WHERE id IN (${stablecoinRuleIds.map(() => '?').join(',')})`).bind(...stablecoinRuleIds).all()
     ]);
     const existingRules = new Map((rules.results || []).map((rule) => [rule.id, rule]));
+    const existingStablecoinRules = new Map((stablecoinRules.results || []).map((rule) => [rule.id, rule]));
     const existingSources = new Map((sources.results || []).map((source) => [source.id, source]));
     const existingCatalog = new Map((catalog.results || []).map((entry) => [entry.id, entry]));
     const statements = [];
-    const version = env.RULES_VERSION || '2026-09-15-domestic-tw-payment-v3';
+    const version = env.RULES_VERSION || '2026-09-16-owlpay-priority-v1';
 
     if (!folder || folder.version !== version || folder.name !== '台灣支付與藍新科技') {
       statements.push(env.DB.prepare(`INSERT INTO monitoring_folders
@@ -332,8 +392,31 @@ async function syncDomesticConfig(env) {
         .bind('folder_2', '台灣支付與藍新科技', JSON.stringify(['TW']), 'high', '台灣媒體的支付、電子支付、行動支付、金流與支付監理動態；國內優先', version));
     }
 
+    if (!stablecoinFolder || stablecoinFolder.version !== version || stablecoinFolder.name !== '穩定幣與鏈上結算') {
+      statements.push(env.DB.prepare(`INSERT INTO monitoring_folders
+        (id, name, region_scope_json, priority, description, version)
+        VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(id) DO UPDATE SET name=excluded.name, region_scope_json=excluded.region_scope_json,
+          priority=excluded.priority, description=excluded.description, version=excluded.version`)
+        .bind('folder_6', '穩定幣與鏈上結算', JSON.stringify(['TW', 'CN', 'HK', 'GLOBAL']), 'high', '穩定幣、代幣化貨幣與鏈上支付結算；奧丁丁／OwlPay 優先', version));
+    }
+
     LIVE_DOMESTIC_RULES.forEach((rule) => {
       if (existingRules.get(rule.id)?.version === version) return;
+      statements.push(env.DB.prepare(`INSERT INTO monitoring_rules
+        (id, folder_id, scope, any_of_json, all_of_json, exclude_any_json, version, auto_publish, auto_publish_allowed_terms_json, active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
+        ON CONFLICT(id) DO UPDATE SET folder_id=excluded.folder_id, scope=excluded.scope,
+          any_of_json=excluded.any_of_json, all_of_json=excluded.all_of_json,
+          exclude_any_json=excluded.exclude_any_json, version=excluded.version,
+          auto_publish=excluded.auto_publish, auto_publish_allowed_terms_json=excluded.auto_publish_allowed_terms_json,
+          active=excluded.active`)
+        .bind(rule.id, rule.folder_id, rule.scope, rule.any_of_json, rule.all_of_json,
+          rule.exclude_any_json, version, rule.auto_publish, rule.auto_publish_allowed_terms_json));
+    });
+
+    LIVE_STABLECOIN_RULES.forEach((rule) => {
+      if (existingStablecoinRules.get(rule.id)?.version === version) return;
       statements.push(env.DB.prepare(`INSERT INTO monitoring_rules
         (id, folder_id, scope, any_of_json, all_of_json, exclude_any_json, version, auto_publish, auto_publish_allowed_terms_json, active)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)
@@ -387,7 +470,7 @@ async function readDomesticConfigStatus(env) {
       env.DB.prepare(`SELECT id, version FROM monitoring_rules WHERE id IN (${ruleIds.map(() => '?').join(',')})`).bind(...ruleIds).all(),
       env.DB.prepare(`SELECT id, feed_url, enabled, auto_publish FROM media_sources WHERE id IN (${sourceIds.map(() => '?').join(',')})`).bind(...sourceIds).all()
     ]);
-    const version = env.RULES_VERSION || '2026-09-15-domestic-tw-payment-v3';
+    const version = env.RULES_VERSION || '2026-09-16-owlpay-priority-v1';
     const configuredRules = new Map((rules.results || []).map((rule) => [rule.id, rule]));
     const configuredSources = new Map((sources.results || []).map((source) => [source.id, source]));
     const missingRules = LIVE_DOMESTIC_RULES.filter((rule) => configuredRules.get(rule.id)?.version !== version).map((rule) => rule.id);
@@ -404,6 +487,29 @@ async function readDomesticConfigStatus(env) {
     };
   } catch (_) {
     return { pending: true, folder_ready: false, missing_rules: [], missing_sources: [] };
+  }
+}
+
+async function readStablecoinConfigStatus(env) {
+  const ruleIds = LIVE_STABLECOIN_RULES.map((rule) => rule.id);
+  try {
+    const [folder, rules] = await Promise.all([
+      env.DB.prepare('SELECT id, version, name FROM monitoring_folders WHERE id = ?').bind('folder_6').first(),
+      env.DB.prepare(`SELECT id, version FROM monitoring_rules WHERE id IN (${ruleIds.map(() => '?').join(',')})`).bind(...ruleIds).all()
+    ]);
+    const version = env.RULES_VERSION || '2026-09-16-owlpay-priority-v1';
+    const configuredRules = new Map((rules.results || []).map((rule) => [rule.id, rule]));
+    const missingRules = LIVE_STABLECOIN_RULES
+      .filter((rule) => configuredRules.get(rule.id)?.version !== version)
+      .map((rule) => rule.id);
+    const folderReady = folder?.version === version && folder?.name === '穩定幣與鏈上結算';
+    return {
+      pending: !folderReady || missingRules.length > 0,
+      folder_ready: folderReady,
+      missing_rules: missingRules
+    };
+  } catch (_) {
+    return { pending: true, folder_ready: false, missing_rules: [] };
   }
 }
 
@@ -515,7 +621,7 @@ async function collectAll(env) {
 }
 
 async function monitoringStatus(env) {
-  const [sources, articles, latestRun, catalog, ruleCount, enabledSources, domesticConfig] = await Promise.all([
+  const [sources, articles, latestRun, catalog, ruleCount, enabledSources, domesticConfig, stablecoinConfig] = await Promise.all([
     env.DB.prepare(`SELECT COUNT(*) AS total, SUM(CASE WHEN enabled = 1 AND auto_publish = 1 THEN 1 ELSE 0 END) AS enabled,
       SUM(CASE WHEN enabled = 1 AND auto_publish = 1 AND health_status = 'healthy' THEN 1 ELSE 0 END) AS healthy,
       MAX(CASE WHEN enabled = 1 AND auto_publish = 1 THEN last_success_at END) AS latest_success FROM media_sources`).first(),
@@ -531,7 +637,8 @@ async function monitoringStatus(env) {
       FROM media_sources
       WHERE enabled = 1 AND auto_publish = 1 AND access_mode = 'rss'
       ORDER BY region, name`).all(),
-    readDomesticConfigStatus(env)
+    readDomesticConfigStatus(env),
+    readStablecoinConfigStatus(env)
   ]);
   return {
     rules_version: env.RULES_VERSION || null,
@@ -542,6 +649,7 @@ async function monitoringStatus(env) {
     live_fallback_sources: LIVE_DOMESTIC_SOURCES.map((source) => source.name),
     live_fallback_source_count: LIVE_DOMESTIC_SOURCES.length,
     domestic_config: domesticConfig,
+    stablecoin_config: stablecoinConfig,
     active_rule_count: ruleCount?.active || 0,
     auto_publish_rule_count: ruleCount?.auto_publish || 0,
     latest_run: latestRun || null,
@@ -599,16 +707,27 @@ export default {
           ${joins} ${whereSql}
           GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC LIMIT 5000`;
       const totalSql = `SELECT COUNT(DISTINCT a.id) AS total ${joins} ${whereSql}`;
-      const livePromise = !folder || folder === 'folder_2'
-        ? fetchLiveDomesticArticles(from, to)
-        : Promise.resolve([]);
+      const livePromise = !folder
+        ? Promise.all([
+          fetchLiveDomesticArticles(from, to),
+          fetchLiveStablecoinArticles(from, to)
+        ]).then((groups) => groups.flat())
+        : folder === 'folder_2'
+          ? fetchLiveDomesticArticles(from, to)
+          : folder === 'folder_6'
+            ? fetchLiveStablecoinArticles(from, to)
+            : Promise.resolve([]);
       const [result, totalResult, liveCandidates] = await Promise.all([
         env.DB.prepare(articlesSql).bind(...values).all(),
         env.DB.prepare(totalSql).bind(...values).first(),
         livePromise
       ]);
       const existingLiveUrls = await findExistingArticleUrls(env, liveCandidates.map((article) => article.canonical_url));
-      const liveArticles = liveCandidates.filter((article) => !existingLiveUrls.has(article.canonical_url));
+      const liveArticles = [...new Map(
+        liveCandidates
+          .filter((article) => !existingLiveUrls.has(article.canonical_url))
+          .map((article) => [article.canonical_url, article])
+      ).values()];
       const persistedArticles = Array.isArray(result.results) ? result.results : [];
       const merged = new Map();
       persistedArticles.forEach((article) => {

@@ -12,6 +12,6 @@
   ],
   "vars": {
     "CORS_ORIGIN": "https://yin0612.github.io",
-    "RULES_VERSION": "2026-09-15-domestic-tw-payment-v3"
+    "RULES_VERSION": "2026-09-16-owlpay-priority-v1"
   }
 }
