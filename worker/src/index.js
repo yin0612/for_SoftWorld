@@ -866,23 +866,23 @@ export default {
           GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC LIMIT 5000`;
       const totalSql = `SELECT COUNT(DISTINCT a.id) AS total ${joins} ${whereSql}`;
       const aggregateDiagnostics = [];
+      // Google News RSS 聚合改由 GitHub Actions 產出的公開快照提供。
+      // Worker 不在每次頁面請求時重新查詢 Google，避免被節流／503 拖慢整個頁面，
+      // 同時保留上一份可追溯資料；快照每 6 小時更新一次，官方 RSS 仍維持即時唯讀補位。
       const livePromise = !folder
         ? Promise.all([
           fetchLiveDomesticArticles(from, to),
           fetchLiveStablecoinArticles(from, to),
-          fetchLiveAggregatedFintechArticles(from, to, undefined, aggregateDiagnostics),
           fetchStaticAggregatedArticles(from, to, '', aggregateDiagnostics)
         ]).then((groups) => groups.flat())
         : folder === 'folder_2'
           ? Promise.all([
             fetchLiveDomesticArticles(from, to),
-            fetchLiveAggregatedFintechArticles(from, to, LIVE_AGGREGATED_DOMESTIC_RULES, aggregateDiagnostics),
             fetchStaticAggregatedArticles(from, to, 'folder_2', aggregateDiagnostics)
           ]).then((groups) => groups.flat())
           : folder === 'folder_6'
             ? Promise.all([
               fetchLiveStablecoinArticles(from, to),
-              fetchLiveAggregatedStablecoinArticles(from, to, aggregateDiagnostics),
               fetchStaticAggregatedArticles(from, to, 'folder_6', aggregateDiagnostics)
             ]).then((groups) => groups.flat())
             : Promise.resolve([]);
