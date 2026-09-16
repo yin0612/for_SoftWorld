@@ -1,6 +1,6 @@
 {
   "version": "2026-09-15-domestic-tw-payment",
-  "source_document": "【For慧科】智冠2025年監測關鍵字及媒體.docx",
+  "source_document": "智冠年度監測關鍵字及媒體文件",
   "description": "文件列出的監測媒體候選清單。只有另列於 core_media_sources.json 且已驗證 RSS/API 或取得授權的來源，才會自動收錄新聞。",
   "groups": [
     {"id":"tw-paper","region":"TW","category":"台灣報紙","sources":["聯合報","中國時報","工商時報","經濟日報","英文台北時報","中華日報","台灣時報","台灣新生報","民眾日報","太平洋日報","真晨報","台灣醒報","更生日報","自由電子報"]},

@@ -1,6 +1,6 @@
 {
   "version": "2026-09-16-owlpay-priority-v1",
-  "source_document": "【For慧科】智冠2025年監測關鍵字及媒體.docx；金融科技&穩定幣監測/關鍵字清單.xlsx；金融科技&穩定幣監測/監測關鍵字及媒體.docx",
+  "source_document": "智冠年度監測關鍵字與媒體文件；金融科技&穩定幣監測/關鍵字清單.xlsx；金融科技&穩定幣監測/監測關鍵字及媒體.docx",
   "matching_capability": "僅比對已授權 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容；不擷取原新聞網站頁面。",
   "description": "依原始 Word、金融科技關鍵字清單與媒體清單資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。穩定幣採獨立高精準規則；奧丁丁／OwlPay 需搭配穩定幣、鏈上支付、加密資產或金融科技語境，不把泛稱加密貨幣直接視為穩定幣。",
   "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","newebpay-brand","taiwan-payment-core","taiwan-payment-authority","international-fintech","stablecoin-core","stablecoin-settlement","stablecoin-brand"],
