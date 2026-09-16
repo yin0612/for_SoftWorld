@@ -63,6 +63,27 @@ const LIVE_STABLECOIN_SOURCES = LIVE_DOMESTIC_SOURCES.filter((source) => [
   'cna-finance', 'cna-technology', 'ltn-business', 'techorange', 'blocktempo', 'abmedia'
 ].includes(source.id));
 
+// 監測文件列出的主流財經／新聞媒體中，有些沒有可穩定驗證的官方 RSS。
+// 這些來源不寫入 D1，也不冒充官方 RSS；只用官方網域的 Google News RSS
+// 取得公開 metadata，並在 API／前端明確標示為「聚合來源」。
+const LIVE_AGGREGATED_FINTECH_SOURCES = [
+  { id: 'cnyes-google-news', name: '鉅亨網', region: 'TW', type: 'editorial', domain: 'news.cnyes.com', homepage: 'https://news.cnyes.com/' },
+  { id: 'ebc-google-news', name: '東森財經／東森新聞', region: 'TW', type: 'editorial', domain: 'news.ebc.net.tw', homepage: 'https://news.ebc.net.tw/' },
+  { id: 'ctee-google-news', name: '工商時報', region: 'TW', type: 'editorial', domain: 'ctee.com.tw', homepage: 'https://www.ctee.com.tw/' },
+  { id: 'moneydj-google-news', name: 'MoneyDJ 理財網', region: 'TW', type: 'editorial', domain: 'moneydj.com', homepage: 'https://www.moneydj.com/' },
+  { id: 'businesstoday-google-news', name: '今周刊', region: 'TW', type: 'editorial', domain: 'businesstoday.com.tw', homepage: 'https://www.businesstoday.com.tw/' },
+  { id: 'wealth-google-news', name: '財訊', region: 'TW', type: 'editorial', domain: 'wealth.com.tw', homepage: 'https://www.wealth.com.tw/' },
+  { id: 'businessweekly-google-news', name: '商業周刊', region: 'TW', type: 'editorial', domain: 'businessweekly.com.tw', homepage: 'https://www.businessweekly.com.tw/' },
+  { id: 'bnext-google-news', name: '數位時代', region: 'TW', type: 'editorial', domain: 'bnext.com.tw', homepage: 'https://www.bnext.com.tw/' },
+  { id: 'setn-google-news', name: '三立新聞網', region: 'TW', type: 'editorial', domain: 'setn.com', homepage: 'https://www.setn.com/' },
+  { id: 'tvbs-google-news', name: 'TVBS新聞網', region: 'TW', type: 'editorial', domain: 'news.tvbs.com.tw', homepage: 'https://news.tvbs.com.tw/' },
+  { id: 'chinatimes-google-news', name: '中國時報／中時新聞網', region: 'TW', type: 'editorial', domain: 'chinatimes.com', homepage: 'https://www.chinatimes.com/' }
+];
+
+// 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
+const LIVE_AGGREGATED_STABLECOIN_SOURCES = LIVE_AGGREGATED_FINTECH_SOURCES;
+const AGGREGATED_STATIC_URL = 'https://yin0612.github.io/for_SoftWorld/data/fintech-aggregated.json';
+
 const LIVE_STABLECOIN_RULES = [
   {
     id: 'stablecoin-core',
@@ -93,6 +114,21 @@ const LIVE_STABLECOIN_RULES = [
     exclude_any_json: JSON.stringify(['大宇紡織']),
     auto_publish: 1,
     auto_publish_allowed_terms_json: JSON.stringify(['奧丁丁','OwlPay'])
+  }
+];
+
+// 聚合來源已先限定在台灣媒體官方網域，因此不再要求標題一定出現「台灣」；
+// 仍只接受支付／金流／卡片／票證等明確詞，避免把泛財經標題整批帶入。
+const LIVE_AGGREGATED_DOMESTIC_RULES = [
+  {
+    id: 'taiwan-payment-google-news',
+    folder_id: 'folder_2',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','歐付寶','O\'Pay','OPay','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','台灣Pay','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子支付','行動支付','數位支付','第三方支付','支付基礎設施','跨境支付','金流','收單','代收付','電子票證','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','BNPL','先買後付']),
+    all_of_json: '[]',
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','歐付寶','O\'Pay','OPay','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','台灣Pay','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子支付','行動支付','數位支付','第三方支付','支付基礎設施','跨境支付','金流','收單','代收付','電子票證','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','BNPL','先買後付'])
   }
 ];
 
@@ -152,6 +188,33 @@ function parseRss(xml) {
       excerpt: [...new Set(textParts)].join('\n\n')
     };
   }).filter((item) => item.title && item.link).slice(0, MAX_RSS_ITEMS_PER_SOURCE);
+}
+
+function addCalendarDays(dateString, days) {
+  const date = new Date(`${dateString}T00:00:00+08:00`);
+  if (Number.isNaN(date.getTime())) return dateString;
+  date.setUTCDate(date.getUTCDate() + days);
+  return taipeiDate(date);
+}
+
+function googleNewsRssUrl(source, from, to) {
+  const domain = String(source?.domain || '').trim();
+  const fromDate = taipeiDate(new Date(from));
+  const toDate = taipeiDate(new Date(to));
+  const query = `site:${domain} after:${fromDate} before:${addCalendarDays(toDate, 1)}`;
+  return `https://news.google.com/rss/search?q=${encodeURIComponent(query)}&hl=zh-TW&gl=TW&ceid=TW:zh-Hant`;
+}
+
+function cleanGoogleNewsTitle(title, source) {
+  const value = String(title || '').trim();
+  const suffixes = [source?.name, source?.domain, ...(source?.aliases || [])]
+    .filter(Boolean)
+    .map((suffix) => String(suffix).trim())
+    .filter(Boolean);
+  for (const suffix of suffixes) {
+    if (value.endsWith(` - ${suffix}`)) return value.slice(0, -(suffix.length + 3)).trim();
+  }
+  return value;
 }
 
 function taipeiDate(date = new Date()) {
@@ -264,25 +327,40 @@ function isPublishedInRange(publishedAt, from, to) {
   return Number.isFinite(timestamp) && timestamp >= fromTimestamp && timestamp <= toTimestamp;
 }
 
-async function fetchLiveArticles(from, to, { sources, rules, folderId }) {
+async function fetchLiveArticles(from, to, { sources, rules, folderId, sourceKind = 'official_rss', diagnostics = null }) {
   const fetchedAt = new Date().toISOString();
-  const perSource = await Promise.all(sources.map(async (source) => {
+  const fetchOne = async (source) => {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    // Google News 對同一來源的多個查詢偶爾需要較長 TLS／XML 回應時間；
+    // 官方 RSS 維持 8 秒，聚合查詢給 12 秒；聚合來源數量有限以控制延遲。
+    const timeout = setTimeout(() => controller.abort(), sourceKind === 'google_news_rss' ? 12000 : 8000);
     try {
-      const response = await fetch(source.feed_url, {
+      const sourceIsAggregated = sourceKind === 'google_news_rss';
+      const feedUrl = sourceIsAggregated ? googleNewsRssUrl(source, from, to) : source.feed_url;
+      if (!feedUrl) {
+        diagnostics?.push({ source_id: source.id, result: 'missing_feed_url' });
+        return [];
+      }
+      const response = await fetch(feedUrl, {
         signal: controller.signal,
         headers: {
           'user-agent': 'SoftWorldMonitoring/1.0 (+https://yin0612.github.io/for_SoftWorld/)',
           accept: 'application/rss+xml, application/xml, text/xml, */*;q=0.8'
         }
       });
-      if (!response.ok) return [];
+      if (!response.ok) {
+        diagnostics?.push({ source_id: source.id, result: 'http_error', status: response.status, feed_url: feedUrl });
+        return [];
+      }
       const items = parseRss(await response.text());
       return items.map((item) => {
         const parsedDate = new Date(item.publishedAt);
         if (Number.isNaN(parsedDate.getTime()) || !isPublishedInRange(parsedDate.toISOString(), from, to)) return null;
-        const article = { title: item.title, excerpt: item.excerpt, canonicalUrl: item.link };
+        // Google News RSS 的 description 主要是導流連結與媒體名稱，不當作摘要，
+        // 只以標題套用規則；原始 Google News wrapper URL 會保留供使用者跳轉。
+        const title = sourceIsAggregated ? cleanGoogleNewsTitle(item.title, source) : item.title;
+        const excerpt = sourceIsAggregated ? '' : item.excerpt;
+        const article = { title, excerpt, canonicalUrl: item.link };
         const matches = rules
           .map((rule) => ({ rule, result: evaluateRule(article, rule) }))
           .filter(({ rule, result }) => result.matched && ruleAutoPublishes(rule, result.evidence));
@@ -293,24 +371,38 @@ async function fetchLiveArticles(from, to, { sources, rules, folderId }) {
           source_id: source.id,
           source: source.name,
           source_region: source.region,
-          source_feed: source.feed_url,
-          title: item.title,
-          excerpt: item.excerpt || '此文章由已驗證公開 RSS 來源即時收錄。',
+          source_feed: feedUrl,
+          source_homepage: source.homepage || null,
+          source_kind: sourceIsAggregated ? 'google_news_rss' : 'official_rss',
+          source_access_mode: sourceIsAggregated ? 'google_news_rss' : 'rss',
+          verification_status: sourceIsAggregated ? 'aggregated' : 'verified_rss',
+          url_kind: sourceIsAggregated ? 'google_news_redirect' : 'publisher_url',
+          title,
+          excerpt: excerpt || (sourceIsAggregated
+            ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文查看完整內容。'
+            : '此文章由已驗證公開 RSS 來源即時收錄。'),
           published_at: parsedDate.toISOString(),
           fetched_at: fetchedAt,
           review_status: 'approved',
-          folder_ids: folderId,
+          folder_ids: [...new Set(matches.map(({ rule }) => rule.folder_id).filter(Boolean))].join(',') || folderId,
           rule_ids: matches.map(({ rule }) => rule.id).join(','),
           evidence_jsons: matches.map(({ result }) => JSON.stringify(result.evidence)).join('|||')
         };
       }).filter(Boolean);
-    } catch (_) {
+    } catch (error) {
       // 唯讀補位來源逾時或暫時不可用時，不影響 D1 已保存的公開結果。
+      diagnostics?.push({ source_id: source.id, result: 'fetch_error', error: String(error).slice(0, 160) });
       return [];
     } finally {
       clearTimeout(timeout);
     }
-  }));
+  };
+  const perSource = [];
+  const batchSize = sources.length;
+  for (let offset = 0; offset < sources.length; offset += batchSize) {
+    const batch = await Promise.all(sources.slice(offset, offset + batchSize).map(fetchOne));
+    perSource.push(...batch);
+  }
   const unique = new Map();
   perSource.flat().forEach((article) => {
     if (article?.canonical_url && !unique.has(article.canonical_url)) unique.set(article.canonical_url, article);
@@ -332,6 +424,53 @@ async function fetchLiveStablecoinArticles(from, to) {
     rules: LIVE_STABLECOIN_RULES,
     folderId: 'folder_6'
   });
+}
+
+async function fetchLiveAggregatedFintechArticles(from, to, rules = [...LIVE_AGGREGATED_DOMESTIC_RULES, ...LIVE_STABLECOIN_RULES], diagnostics = null) {
+  return fetchLiveArticles(from, to, {
+    sources: LIVE_AGGREGATED_FINTECH_SOURCES,
+    rules,
+    folderId: 'folder_2,folder_6',
+    sourceKind: 'google_news_rss',
+    diagnostics
+  });
+}
+
+async function fetchLiveAggregatedStablecoinArticles(from, to, diagnostics = null) {
+  return fetchLiveArticles(from, to, {
+    sources: LIVE_AGGREGATED_STABLECOIN_SOURCES,
+    rules: LIVE_STABLECOIN_RULES,
+    folderId: 'folder_6',
+    sourceKind: 'google_news_rss',
+    diagnostics
+  });
+}
+
+async function fetchStaticAggregatedArticles(from, to, folderId, diagnostics = null) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const response = await fetch(AGGREGATED_STATIC_URL, {
+      signal: controller.signal,
+      headers: { 'user-agent': 'SoftWorldMonitoring/1.0 (+https://yin0612.github.io/for_SoftWorld/)', accept: 'application/json' }
+    });
+    if (!response.ok) {
+      diagnostics?.push({ source_id: 'fintech-aggregated-static', result: 'http_error', status: response.status });
+      return [];
+    }
+    const payload = await response.json();
+    const rows = Array.isArray(payload?.articles) ? payload.articles : [];
+    return rows
+      .filter((article) => article?.source_kind === 'google_news_rss')
+      .filter((article) => !folderId || String(article.folder_ids || '').split(',').includes(folderId))
+      .filter((article) => isPublishedInRange(article.published_at, from, to))
+      .map((article) => ({ ...article, live_fallback: true }));
+  } catch (error) {
+    diagnostics?.push({ source_id: 'fintech-aggregated-static', result: 'fetch_error', error: String(error).slice(0, 160) });
+    return [];
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function findExistingArticleUrls(env, urls) {
@@ -648,12 +787,23 @@ async function monitoringStatus(env) {
     enabled_sources: enabledSources.results,
     live_fallback_sources: LIVE_DOMESTIC_SOURCES.map((source) => source.name),
     live_fallback_source_count: LIVE_DOMESTIC_SOURCES.length,
+    aggregated_sources: LIVE_AGGREGATED_FINTECH_SOURCES.map((source) => ({
+      id: source.id,
+      name: source.name,
+      region: source.region,
+      domain: source.domain,
+      homepage: source.homepage,
+      access_mode: 'google_news_rss',
+      source_kind: 'aggregated',
+      auto_publish: true
+    })),
+    aggregated_source_count: LIVE_AGGREGATED_FINTECH_SOURCES.length,
     domestic_config: domesticConfig,
     stablecoin_config: stablecoinConfig,
     active_rule_count: ruleCount?.active || 0,
     auto_publish_rule_count: ruleCount?.auto_publish || 0,
     latest_run: latestRun || null,
-    publication_policy: '只顯示已驗證公開 RSS 且命中高精準自動發布規則的文章；不顯示展示資料或待覆核內容。'
+    publication_policy: '官方 RSS 文章須通過來源與規則驗證；無官方 RSS 的白名單媒體可由官方網域的 Google News RSS 補位，僅保存公開 metadata 並標示為聚合來源；不顯示展示資料或待覆核內容。'
   };
 }
 
@@ -702,20 +852,33 @@ export default {
       // 先讀取完整的近兩個月 D1 結果，再與唯讀即時補位合併後分頁，
       // 避免新來源插在排序前端時造成 offset 分頁漏項。
       const articlesSql = `SELECT a.id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status,
-          s.name AS source, s.region AS source_region, s.feed_url AS source_feed, GROUP_CONCAT(DISTINCT r.folder_id) AS folder_ids, GROUP_CONCAT(DISTINCT r.id) AS rule_ids,
+          s.name AS source, s.region AS source_region, s.feed_url AS source_feed, s.access_mode AS source_access_mode,
+          'official_rss' AS source_kind, 'verified_rss' AS verification_status, 'publisher_url' AS url_kind,
+          GROUP_CONCAT(DISTINCT r.folder_id) AS folder_ids, GROUP_CONCAT(DISTINCT r.id) AS rule_ids,
           GROUP_CONCAT(m.evidence_json, '|||') AS evidence_jsons
           ${joins} ${whereSql}
           GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC LIMIT 5000`;
       const totalSql = `SELECT COUNT(DISTINCT a.id) AS total ${joins} ${whereSql}`;
+      const aggregateDiagnostics = [];
       const livePromise = !folder
         ? Promise.all([
           fetchLiveDomesticArticles(from, to),
-          fetchLiveStablecoinArticles(from, to)
+          fetchLiveStablecoinArticles(from, to),
+          fetchLiveAggregatedFintechArticles(from, to, undefined, aggregateDiagnostics),
+          fetchStaticAggregatedArticles(from, to, '', aggregateDiagnostics)
         ]).then((groups) => groups.flat())
         : folder === 'folder_2'
-          ? fetchLiveDomesticArticles(from, to)
+          ? Promise.all([
+            fetchLiveDomesticArticles(from, to),
+            fetchLiveAggregatedFintechArticles(from, to, LIVE_AGGREGATED_DOMESTIC_RULES, aggregateDiagnostics),
+            fetchStaticAggregatedArticles(from, to, 'folder_2', aggregateDiagnostics)
+          ]).then((groups) => groups.flat())
           : folder === 'folder_6'
-            ? fetchLiveStablecoinArticles(from, to)
+            ? Promise.all([
+              fetchLiveStablecoinArticles(from, to),
+              fetchLiveAggregatedStablecoinArticles(from, to, aggregateDiagnostics),
+              fetchStaticAggregatedArticles(from, to, 'folder_6', aggregateDiagnostics)
+            ]).then((groups) => groups.flat())
             : Promise.resolve([]);
       const [result, totalResult, liveCandidates] = await Promise.all([
         env.DB.prepare(articlesSql).bind(...values).all(),
@@ -745,6 +908,11 @@ export default {
           source: article.source,
           source_region: article.source_region,
           source_feed: article.source_feed,
+          source_homepage: article.source_homepage || null,
+          source_kind: article.source_kind || 'official_rss',
+          source_access_mode: article.source_access_mode || 'rss',
+          verification_status: article.verification_status || 'verified_rss',
+          url_kind: article.url_kind || 'publisher_url',
           folder_ids: article.folder_ids,
           rule_ids: article.rule_ids,
           evidence_jsons: article.evidence_jsons,
@@ -756,16 +924,20 @@ export default {
       const persistedTotal = Number(totalResult?.total || 0);
       const total = persistedTotal + liveArticles.length;
       const nextOffset = offset + resultPage.length;
-      return json({
+      const responsePayload = {
         articles: resultPage,
         total,
         has_more: nextOffset < total,
         next_offset: nextOffset,
-        data_mode: 'verified_rss_monitoring',
+        data_mode: 'verified_rss_plus_google_news_aggregation',
         range: { from: fromDate, to: toDate },
         live_fallback_count: liveArticles.length,
-        live_fallback_sources: LIVE_DOMESTIC_SOURCES.map((source) => source.name)
-      }, 200, headers);
+        live_fallback_sources: LIVE_DOMESTIC_SOURCES.map((source) => source.name),
+        aggregated_count: liveArticles.filter((article) => article.source_kind === 'google_news_rss').length,
+        aggregated_sources: LIVE_AGGREGATED_FINTECH_SOURCES.map((source) => source.name)
+      };
+      if (url.searchParams.get('debug') === '1') responsePayload.aggregated_diagnostics = aggregateDiagnostics;
+      return json(responsePayload, 200, headers);
     }
     return json({ error: 'Not found' }, 404, headers);
   },

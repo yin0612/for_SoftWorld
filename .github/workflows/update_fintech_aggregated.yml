@@ -1,0 +1,34 @@
+name: 更新金融科技 Google News 聚合資料
+
+on:
+  schedule:
+    # 每 6 小時執行一次（UTC 00/06/12/18；台北 08/14/20/02）
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  update-fintech-aggregated:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 檢出專案程式碼
+        uses: actions/checkout@v4
+
+      - name: 設定 Python 環境
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: 讀取白名單媒體並更新 Google News RSS metadata
+        run: python scripts/update_fintech_aggregated.py
+
+      - name: 提交並推送聚合資料
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "auto: 更新金融科技 Google News RSS 聚合資料 [skip ci]"
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "actions@github.com"
+          branch: main
+          file_pattern: "data/fintech-aggregated.json"

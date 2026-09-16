@@ -565,13 +565,16 @@ function renderGlobalDataStatusBar() {
     ]).size;
     const liveSourceCount = Number(monitoringRuntimeStatus?.live_fallback_source_count || liveSourceNames.length || 0);
     const liveFallback = Number(monitoringLoadState?.liveFallbackCount || 0);
+    const aggregatedSourceCount = Number(monitoringRuntimeStatus?.aggregated_source_count || 0);
+    const aggregatedCount = Number(monitoringLoadState?.aggregatedCount || 0);
     if (monitoringDataMode === 'verified') {
         const updated = lastRun ? `最後成功更新 ${lastRun}（台北時間）` : '最後成功更新時間待服務回報';
         const liveSourceText = liveSourceCount ? `；台灣即時補位來源設定 ${liveSourceCount} 個` : '';
         const liveText = liveFallback ? `；新增台灣來源即時補位 ${liveFallback} 篇` : '';
-        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜健康 RSS ${sources} 個（台灣 ${taiwanSources} 個）｜${updated}${liveSourceText}${liveText}；模擬圖表僅供教學比較。`;
+        const aggregatedText = aggregatedSourceCount ? `；Google News RSS 聚合來源 ${aggregatedSourceCount} 個、目前 ${aggregatedCount} 篇` : '';
+        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜官方 RSS ${sources} 個（台灣 ${taiwanSources} 個）｜${updated}${liveSourceText}${aggregatedText}${liveText}；模擬圖表僅供教學比較。`;
     } else if (monitoringDataMode === 'loading') {
-        statusText.textContent = '真實新聞：正在確認 RSS 來源與近兩個月資料；模擬圖表僅供教學比較。';
+        statusText.textContent = '真實新聞：正在確認官方 RSS、Google News RSS 聚合來源與近兩個月資料；模擬圖表僅供教學比較。';
     } else {
         statusText.textContent = '真實新聞服務目前無法驗證；頁面不會以模擬內容補足。模擬圖表仍標示為教學資料。';
     }
@@ -658,7 +661,10 @@ function renderMonitoringTransparency() {
         ? ` 公開結果目前僅完整載入 ${monitoringLoadState.loaded}/${monitoringLoadState.total} 篇，請重新整理後再確認。`
         : '';
     const liveFallbackText = monitoringLoadState?.liveFallbackCount
-        ? ` 本次另有 ${monitoringLoadState.liveFallbackCount} 篇由新增台灣 RSS 即時唯讀補位，排程成功後會自動去重並寫入資料庫。`
+        ? ` 本次另有 ${monitoringLoadState.liveFallbackCount} 篇由即時唯讀補位取得；官方 RSS 會在排程成功後自動去重並寫入資料庫。`
+        : '';
+    const aggregatedText = monitoringLoadState?.aggregatedCount
+        ? ` 其中 ${monitoringLoadState.aggregatedCount} 篇為 Google News RSS 聚合（非媒體官方 RSS），僅保留標題、發布時間與原文跳轉連結。`
         : '';
     const pendingConfigMessages = [
         monitoringRuntimeStatus?.domestic_config?.pending
@@ -670,9 +676,9 @@ function renderMonitoringTransparency() {
     ].filter(Boolean);
     const configSyncText = pendingConfigMessages.length ? ' ' + pendingConfigMessages.join(' ') : '';
     const statusText = monitoringRuntimeStatus
-        ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個；台灣來源 ${Array.isArray(monitoringRuntimeStatus.enabled_sources) ? monitoringRuntimeStatus.enabled_sources.filter((source) => source?.region === 'TW' && source?.health_status === 'healthy').length : 0} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個台灣來源提供唯讀即時補位；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇真實文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
+        ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個；台灣來源 ${Array.isArray(monitoringRuntimeStatus.enabled_sources) ? monitoringRuntimeStatus.enabled_sources.filter((source) => source?.region === 'TW' && source?.health_status === 'healthy').length : 0} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個官方 RSS 即時唯讀補位來源與 ${monitoringRuntimeStatus.aggregated_source_count || 0} 個 Google News RSS 聚合來源；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇資料庫文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
         : '正在讀取來源健康與收錄狀態。';
-    summary.textContent = `真實性原則：僅顯示已驗證公開 RSS 來源、命中年度監測規則且附原文連結的文章；不顯示展示資料。${statusText}${loadText}${liveFallbackText}${configSyncText}`;
+    summary.textContent = `真實性原則：官方 RSS 與 Google News RSS 聚合來源分開標示；兩者都必須命中年度監測規則且附可開啟的原文跳轉連結，不顯示展示資料。${statusText}${loadText}${liveFallbackText}${aggregatedText}${configSyncText}`;
     disclosureContent.appendChild(summary);
 
     if (!monitoringManifest) {
@@ -798,11 +804,16 @@ function initNewsSection() {
             loaded: monitoringNews.length,
             complete: result.complete !== false,
             range: result.range || getRollingMonitoringDateRange(),
-            liveFallbackCount: result.liveFallbackCount || 0
+            liveFallbackCount: result.liveFallbackCount || 0,
+            aggregatedCount: result.aggregatedCount || 0,
+            officialRssCount: result.officialRssCount || 0
         };
         setVerifiedNewsTotal(monitoringLoadState.total);
         setNewsDataMode('verified');
-        refreshVerifiedSourceOptions(result.articles, status?.enabled_sources || []);
+        refreshVerifiedSourceOptions(result.articles, [
+            ...(status?.enabled_sources || []),
+            ...(status?.aggregated_sources || [])
+        ]);
         renderMonitoringTransparency();
         renderHuikeTabs();
         renderHuikeChips();
@@ -836,7 +847,7 @@ function refreshVerifiedSourceOptions(articles, sourceDetails) {
     sourceSelect.replaceChildren();
     const allOption = document.createElement('option');
     allOption.value = '';
-    allOption.textContent = '全部已驗證 RSS 來源';
+    allOption.textContent = '全部真實新聞來源';
     sourceSelect.appendChild(allOption);
 
     const details = Array.isArray(sourceDetails) && sourceDetails.length
@@ -848,8 +859,10 @@ function refreshVerifiedSourceOptions(articles, sourceDetails) {
         seen.add(source.name);
         const option = document.createElement('option');
         option.value = source.name;
+        const isAggregated = source.source_kind === 'aggregated' || source.access_mode === 'google_news_rss'
+            || articles.some((article) => article.source === source.name && article.sourceKind === 'google_news_rss');
         const health = source.health_status === 'healthy' ? '健康' : source.health_status ? '待確認' : '';
-        option.textContent = `📰 ${source.name}${health ? `（${health}）` : ''}`;
+        option.textContent = `📰 ${source.name}${isAggregated ? '（Google News 聚合）' : ''}${health ? `（${health}）` : ''}`;
         sourceSelect.appendChild(option);
     });
     if ([...sourceSelect.options].some((option) => option.value === previous)) sourceSelect.value = previous;
@@ -985,12 +998,13 @@ function refreshFintechSourceOptions(articles) {
     sourceSelect.replaceChildren();
     const allOption = document.createElement('option');
     allOption.value = '';
-    allOption.textContent = '全部已驗證 RSS 來源';
+    allOption.textContent = '全部真實新聞來源';
     sourceSelect.appendChild(allOption);
     sources.forEach((source) => {
         const option = document.createElement('option');
         option.value = source;
-        option.textContent = source;
+        const isAggregated = articles.some((article) => article.source === source && article.sourceKind === 'google_news_rss');
+        option.textContent = `${source}${isAggregated ? '（Google News 聚合）' : ''}`;
         sourceSelect.appendChild(option);
     });
     if (sources.includes(previous)) sourceSelect.value = previous;
@@ -1034,7 +1048,8 @@ function renderFintechSummary(summary, articles) {
     summary.appendChild(contextDetails);
     const state = document.createElement('p');
     state.className = 'fintech-summary-state';
-    state.textContent = '已驗證 RSS 資料，台灣支付為預設視圖。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留原文連結與命中證據。';
+    const aggregatedCount = Number(monitoringLoadState?.aggregatedCount || 0);
+    state.textContent = '官方 RSS＋Google News RSS 聚合資料，台灣支付為預設視圖。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留來源類型、原文跳轉連結與命中證據。' + (aggregatedCount ? ` 本次聚合來源 ${aggregatedCount} 篇，非媒體官方 RSS。` : '');
     contextContent.appendChild(state);
     const priorityNote = document.createElement('p');
     priorityNote.className = 'fintech-priority-note';
@@ -1047,8 +1062,8 @@ function renderFintechSummary(summary, articles) {
         [String(taiwanPaymentCount), '台灣支付新聞（優先）'],
         [String(articles.length), '全部金融科技新聞'],
         [String(stablecoinCount), '穩定幣相關'],
-        [String(sources.size), '已驗證來源'],
-        [String(taiwanSources.size), '台灣 RSS 來源'],
+        [String(sources.size), '真實新聞來源'],
+        [String(taiwanSources.size), '台灣來源'],
         [range.from + ' 至 ' + range.to, '資料範圍']
     ].forEach(([value, label]) => {
         const item = document.createElement('div');
@@ -1121,7 +1136,9 @@ function createFintechArticleCard(news) {
 
     const excerpt = document.createElement('p');
     excerpt.className = 'fintech-card-excerpt';
-    excerpt.textContent = truncateFintechText(news.excerpt || '此文章由已驗證公開 RSS 來源收錄。');
+    excerpt.textContent = truncateFintechText(news.excerpt || (news.sourceKind === 'google_news_rss'
+        ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文查看完整內容。'
+        : '此文章由已驗證公開 RSS 來源收錄。'));
 
     const matchedTerms = [...new Set([
         ...(news.matchedTerms || []),
@@ -1151,7 +1168,8 @@ function createFintechArticleCard(news) {
     footer.className = 'fintech-card-footer';
     const source = document.createElement('span');
     source.className = 'fintech-card-source';
-    source.textContent = (news.sourceRegion === 'TW' ? '🇹🇼 台灣來源｜' : '📰 ') + (news.source || '來源未提供');
+    const sourcePrefix = news.sourceRegion === 'TW' ? '🇹🇼 台灣來源｜' : '📰 ';
+    source.textContent = sourcePrefix + (news.source || '來源未提供') + (news.sourceKind === 'google_news_rss' ? '｜Google News 聚合' : '｜官方 RSS');
     const original = document.createElement('a');
     original.className = 'fintech-original-link';
     if (directUrl !== '#') {
@@ -1168,10 +1186,13 @@ function createFintechArticleCard(news) {
     provenanceDetails.className = 'fintech-card-provenance-details';
     const provenanceToggle = document.createElement('summary');
     provenanceToggle.className = 'fintech-provenance-toggle';
-    provenanceToggle.textContent = '查看來源與驗證資訊';
+    provenanceToggle.textContent = '查看來源與資料類型';
     const provenance = document.createElement('div');
     provenance.className = 'fintech-card-provenance';
-    provenance.textContent = `原文發布：${news.date || '未提供'}｜${news.liveFallback ? '即時 RSS 讀取' : `本站收錄：${news.collectedDate || '未提供'}`}｜覆核狀態：${news.reviewState === 'approved' ? '自動通過' : '待人工覆核'}`;
+    const provenanceMode = news.sourceKind === 'google_news_rss'
+        ? 'Google News RSS 聚合（非媒體官方 RSS）'
+        : (news.liveFallback ? '官方 RSS 即時讀取' : `本站收錄：${news.collectedDate || '未提供'}`);
+    provenance.textContent = `原文發布：${news.date || '未提供'}｜${provenanceMode}｜覆核狀態：${news.reviewState === 'approved' ? '規則通過' : '待人工覆核'}`;
     const feedUrl = safeHttpUrl(news.sourceFeed);
     if (feedUrl !== '#') {
         const separator = document.createTextNode('｜');
@@ -1179,7 +1200,7 @@ function createFintechArticleCard(news) {
         feedLink.href = feedUrl;
         feedLink.target = '_blank';
         feedLink.rel = 'noopener';
-        feedLink.textContent = 'RSS 來源';
+        feedLink.textContent = news.sourceKind === 'google_news_rss' ? 'Google News RSS 查詢' : 'RSS 來源';
         provenance.append(separator, feedLink);
     }
     provenanceDetails.append(provenanceToggle, provenance);
@@ -1201,7 +1222,7 @@ function renderFintechMonitoring() {
         const state = document.createElement('p');
         state.className = 'fintech-summary-state';
         state.textContent = isLoading
-            ? '正在讀取已驗證 RSS 來源、近兩個月資料與關鍵字命中結果。'
+            ? '正在讀取官方 RSS 與 Google News RSS 聚合來源、近兩個月資料與關鍵字命中結果。'
             : '真實新聞服務目前無法驗證，頁面不會改以展示資料替代。';
         summary.appendChild(state);
         renderFintechKeywordPills([]);
@@ -1210,10 +1231,10 @@ function renderFintechMonitoring() {
             isLoading ? '⏳' : '⚠️',
             isLoading ? '正在讀取金融科技新聞' : '真實新聞服務暫時無法驗證',
             isLoading
-                ? '系統正在確認來源健康狀態與兩個月資料窗口。'
+                ? '系統正在確認來源健康狀態、Google News 聚合結果與兩個月資料窗口。'
                 : '為避免未驗證內容被誤認為新聞，請稍後重新整理。'
         ));
-        resultCount.textContent = isLoading ? '正在載入已驗證 RSS 新聞' : '真實新聞服務目前無法驗證';
+        resultCount.textContent = isLoading ? '正在載入金融科技真實新聞' : '真實新聞服務目前無法驗證';
         loadMore.hidden = true;
         return;
     }
@@ -1244,17 +1265,19 @@ function renderFintechMonitoring() {
     }
 
     const visible = filtered.slice(0, fintechPage * FINTECH_PER_PAGE);
-    resultCount.textContent = '顯示 ' + visible.length + '／' + filtered.length + ' 篇已驗證 RSS 新聞';
+    const aggregatedVisible = visible.filter((article) => article.sourceKind === 'google_news_rss').length;
+    const modeLabel = aggregatedVisible ? `（含 ${aggregatedVisible} 篇 Google News 聚合）` : '';
+    resultCount.textContent = '顯示 ' + visible.length + '／' + filtered.length + ' 篇真實新聞' + modeLabel;
     grid.replaceChildren();
     if (!filtered.length) {
         const emptyMessage = !allArticles.length
             ? '近兩個月目前沒有符合金融科技規則的文章；資料服務正常，請稍後再查看。'
             : (selectedSource || keyword || fintechMode !== 'all'
                 ? '目前篩選條件沒有命中；請調整分類、來源或搜尋文字。'
-                : '資料服務已連線，但目前沒有可公開的已驗證文章。');
+            : '資料服務已連線，但目前沒有可公開的官方 RSS 或 Google News 聚合文章。');
         grid.appendChild(makeFintechEmptyState(
             '🔍',
-            '目前沒有符合條件的已驗證新聞',
+            '目前沒有符合條件的真實新聞',
             emptyMessage + ' 頁面不會以展示資料補足結果。'
         ));
     } else {
@@ -1595,8 +1618,8 @@ function renderNews(append = false) {
 
     if (countEl) {
         const modes = {
-            loading: '正在載入已驗證 RSS 新聞',
-            verified: '已驗證 RSS 真實新聞',
+            loading: '正在載入真實新聞',
+            verified: '官方 RSS＋Google News 聚合真實新聞',
             unavailable: '真實新聞服務目前無法驗證'
         };
         const mode = modes[dataMode] || modes.unavailable;
@@ -1610,7 +1633,7 @@ function renderNews(append = false) {
     if (filteredNews.length === 0) {
         const emptyState = {
             loading: {
-                icon: '⏳', title: '正在讀取已驗證 RSS 新聞',
+                icon: '⏳', title: '正在讀取真實新聞',
                 message: '系統正在確認來源健康狀態、近兩個月日期範圍與關鍵字命中結果。', reset: false
             },
             unavailable: {
@@ -1618,8 +1641,8 @@ function renderNews(append = false) {
                 message: '為避免未驗證內容被誤認為新聞，頁面不會改顯示展示資料。請稍後重新整理。', reset: false
             },
             verified: {
-                icon: '🔍', title: '目前沒有可顯示的已驗證 RSS 新聞',
-                message: '頁面只顯示已驗證公開 RSS 來源且命中規則的文章。請查看上方來源狀態，或調整資料夾與關鍵字條件。', reset: true
+                icon: '🔍', title: '目前沒有可顯示的真實新聞',
+                message: '頁面只顯示官方 RSS 或 Google News RSS 聚合來源且命中規則的文章。請查看上方來源狀態，或調整資料夾與關鍵字條件。', reset: true
             }
         }[dataMode] || null;
         const state = emptyState || {
@@ -1666,7 +1689,7 @@ function renderNews(append = false) {
         item.className = 'timeline-item animate-on-scroll is-visible';
         const brandColor = safeCssColor(news.companyColor);
         const companyId = escapeHtml(news.companyId || 'monitoring');
-        const companyName = escapeHtml(news.companyName || '已驗證 RSS 監測');
+        const companyName = escapeHtml(news.companyName || '真實新聞監測');
         const category = escapeHtml(news.category || '關鍵字監測');
         const source = escapeHtml(news.source || '來源未提供');
         const date = escapeHtml(news.date || '日期未提供');
@@ -1679,9 +1702,11 @@ function renderNews(append = false) {
             ? '<span style="background:#fef3c7;color:#92400e;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">🤖 模擬資料</span>'
             : '';
 
-        const verifiedBadge = news.verifiedMonitoring
-            ? '<span style="background:#dcfce7;color:#166534;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證 RSS</span>'
-            : '';
+        const verifiedBadge = news.sourceKind === 'google_news_rss'
+            ? '<span style="background:#e0f2fe;color:#075985;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
+            : (news.verifiedMonitoring
+                ? '<span style="background:#dcfce7;color:#166534;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
+                : '');
 
         const huikeBadge = huikeKeyword
             ? `<span class="tag-huike-chip" data-kw="${huikeKeyword}" style="background:#fff1ee; color:#c84b31; border:1px solid #ffd8d0; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${huikeKeyword}</span>`
@@ -1705,7 +1730,7 @@ function renderNews(append = false) {
             <div class="timeline-card">
                 <div class="timeline-card-header">
                     <div>
-                        <span class="timeline-company-badge" data-comp-id="${companyId}" style="background: ${brandColor}18; color: ${brandColor}; cursor:pointer;" title="已驗證 RSS 監測">
+                        <span class="timeline-company-badge" data-comp-id="${companyId}" style="background: ${brandColor}18; color: ${brandColor}; cursor:pointer;" title="${news.sourceKind === 'google_news_rss' ? 'Google News RSS 聚合監測' : '官方 RSS 監測'}">
                             ${companyName}
                         </span>
                         ${huikeBadge}
@@ -1726,7 +1751,7 @@ function renderNews(append = false) {
                     ${originalLink}
                 </div>
                 <details class="timeline-provenance-details">
-                    <summary class="timeline-provenance-toggle">查看來源與驗證資訊</summary>
+                    <summary class="timeline-provenance-toggle">查看來源與資料類型</summary>
                     <div class="timeline-provenance">原文發布：${date}｜本站收錄：${collectedDate}｜覆核狀態：${reviewLabel}</div>
                 </details>
             </div>

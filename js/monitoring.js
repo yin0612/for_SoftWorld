@@ -1,4 +1,5 @@
-/* 真實新聞監測 API 設定。公開頁只顯示已驗證公開 RSS 來源的規則命中文章。 */
+/* 真實新聞監測 API 設定。官方 RSS 與 Google News RSS 聚合來源分開標示，
+   不把聚合結果誤稱為媒體官方 RSS，也不以展示資料補足。 */
 window.MONITORING_API_BASE = 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev';
 
 function monitoringApiBase() {
@@ -86,18 +87,20 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
         total: total ?? rawArticles.length,
         complete,
         liveFallbackCount: rawArticles.filter((article) => article.live_fallback === true).length,
+        aggregatedCount: rawArticles.filter((article) => article.source_kind === 'google_news_rss').length,
+        officialRssCount: rawArticles.filter((article) => article.source_kind !== 'google_news_rss').length,
         articles: rawArticles.map((article) => {
             const evidenceList = parseEvidenceList(article);
             const matchedTerms = uniqueTerms(evidenceList.flatMap((evidence) => [
                 ...(evidence.any_hits || []),
                 ...(evidence.all_hits || []),
                 ...(evidence.required_any_group_hits || []).flat()
-            ]));
+            ]).concat(Array.isArray(article.matched_terms) ? article.matched_terms : []));
             const folders = uniqueTerms(String(article.folder_ids || '').split(','));
             const ruleIds = uniqueTerms(String(article.rule_ids || '').split(','));
             return {
                 companyId: 'monitoring',
-                companyName: '已驗證 RSS 監測',
+                companyName: '真實新聞監測',
                 companyColor: '#0f766e',
                 title: article.title,
                 category: '關鍵字監測',
@@ -106,18 +109,27 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
                 huikeKeyword: matchedTerms[0] || ruleIds[0] || '規則命中',
                 matchedTerms,
                 ruleIds,
-                excerpt: article.excerpt || '此文章由已驗證公開 RSS 來源收錄。',
+                excerpt: article.excerpt || (article.source_kind === 'google_news_rss'
+                    ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文查看完整內容。'
+                    : '此文章由已驗證公開 RSS 來源收錄。'),
                 date: formatMonitoringDate(article.published_at || article.fetched_at),
                 collectedDate: formatMonitoringDate(article.fetched_at),
                 reviewState: article.review_status || 'approved',
                 source: article.source,
                 sourceRegion: article.source_region || '',
                 sourceFeed: article.source_feed,
+                sourceHomepage: article.source_homepage,
+                sourceKind: article.source_kind || 'official_rss',
+                sourceAccessMode: article.source_access_mode || 'rss',
+                verificationStatus: article.verification_status || (article.source_kind === 'google_news_rss' ? 'aggregated' : 'verified_rss'),
+                urlKind: article.url_kind || 'publisher_url',
                 liveFallback: article.live_fallback === true,
                 url: article.url,
                 synthetic: false,
-                verifiedMonitoring: true,
-                verificationLabel: '已驗證 RSS 自動收錄'
+                verifiedMonitoring: article.source_kind !== 'google_news_rss',
+                verificationLabel: article.source_kind === 'google_news_rss'
+                    ? 'Google News RSS 聚合（非官方 RSS）'
+                    : '已驗證 RSS 自動收錄'
             };
         })
     };

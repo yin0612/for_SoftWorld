@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "purpose": "金融科技與穩定幣監測的非官方 RSS 補位來源清單",
+  "input_files": [
+    "金融科技&穩定幣監測/關鍵字清單.xlsx",
+    "金融科技&穩定幣監測/監測關鍵字及媒體.docx"
+  ],
+  "policy": {
+    "official_rss": "已通過公開 RSS 可讀取、日期與原文連結檢查的來源",
+    "google_news_rss": "以 site:<官方網域> 查詢 Google News RSS；只保存標題、發布時間與 Google News 原文跳轉連結，前端不得標示為官方 RSS",
+    "manual_or_authorized": "沒有可驗證公開 RSS 或網域尚未確認的媒體，只列為候選，不自動發布",
+    "no_full_text_mirroring": true
+  },
+  "sources": [
+    {"id":"cnyes-google-news","name":"鉅亨網","document_name":"鉅亨網","domains":["news.cnyes.com"],"homepage":"https://news.cnyes.com/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"ebc-google-news","name":"東森財經／東森新聞","document_name":"東森財經新聞網","domains":["news.ebc.net.tw"],"homepage":"https://news.ebc.net.tw/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"ctee-google-news","name":"工商時報","document_name":"工商時報","domains":["ctee.com.tw"],"homepage":"https://www.ctee.com.tw/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"moneydj-google-news","name":"MoneyDJ 理財網","document_name":"Money DJ理財網","domains":["moneydj.com"],"homepage":"https://www.moneydj.com/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"businesstoday-google-news","name":"今周刊","document_name":"今周刊","domains":["businesstoday.com.tw"],"homepage":"https://www.businesstoday.com.tw/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"wealth-google-news","name":"財訊","document_name":"財訊","domains":["wealth.com.tw"],"homepage":"https://www.wealth.com.tw/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"businessweekly-google-news","name":"商業周刊","document_name":"商業周刊","domains":["businessweekly.com.tw"],"homepage":"https://www.businessweekly.com.tw/","region":"TW","category":"財經／產業","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"bnext-google-news","name":"數位時代","document_name":"數位時代","domains":["bnext.com.tw"],"homepage":"https://www.bnext.com.tw/","region":"TW","category":"科技／產業","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"setn-google-news","name":"三立新聞網","document_name":"三立新聞網","domains":["setn.com"],"homepage":"https://www.setn.com/","region":"TW","category":"新聞／財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"tvbs-google-news","name":"TVBS新聞網","document_name":"TVBS新聞網","domains":["news.tvbs.com.tw"],"homepage":"https://news.tvbs.com.tw/","region":"TW","category":"新聞／財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"ftv-google-news","name":"民視新聞網","document_name":"民視新聞網","domains":["ftvnews.com.tw"],"homepage":"https://www.ftvnews.com.tw/","region":"TW","category":"新聞／財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"chinatimes-google-news","name":"中國時報／中時新聞網","document_name":"中國時報","domains":["chinatimes.com"],"homepage":"https://www.chinatimes.com/","region":"TW","category":"新聞／財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"nownews-google-news","name":"NOWnews今日新聞","document_name":"NOWnews今日新聞","domains":["nownews.com"],"homepage":"https://www.nownews.com/","region":"TW","category":"新聞／財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"mirrormedia-google-news","name":"鏡傳媒／鏡週刊","document_name":"鏡傳媒","domains":["mirrormedia.mg"],"homepage":"https://www.mirrormedia.mg/","region":"TW","category":"新聞／財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"newtalk-google-news","name":"新頭殼","document_name":"新頭殼","domains":["newtalk.tw"],"homepage":"https://newtalk.tw/","region":"TW","category":"新聞／財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true}
+  ]
+}
