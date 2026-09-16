@@ -82,7 +82,8 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
 
 // 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
 const LIVE_AGGREGATED_STABLECOIN_SOURCES = LIVE_AGGREGATED_FINTECH_SOURCES;
-const AGGREGATED_STATIC_URL = 'https://yin0612.github.io/for_SoftWorld/data/fintech-aggregated.json';
+// 使用 GitHub raw 內容作為 Actions 產出的公開快照；不依賴 Pages 部署延遲。
+const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260916-1';
 
 const LIVE_STABLECOIN_RULES = [
   {
@@ -448,10 +449,11 @@ async function fetchLiveAggregatedStablecoinArticles(from, to, diagnostics = nul
 
 async function fetchStaticAggregatedArticles(from, to, folderId, diagnostics = null) {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
+  const timeout = setTimeout(() => controller.abort(), 20000);
   try {
     const response = await fetch(AGGREGATED_STATIC_URL, {
       signal: controller.signal,
+      cache: 'no-store',
       headers: { 'user-agent': 'SoftWorldMonitoring/1.0 (+https://yin0612.github.io/for_SoftWorld/)', accept: 'application/json' }
     });
     if (!response.ok) {
@@ -464,7 +466,11 @@ async function fetchStaticAggregatedArticles(from, to, folderId, diagnostics = n
       .filter((article) => article?.source_kind === 'google_news_rss')
       .filter((article) => !folderId || String(article.folder_ids || '').split(',').includes(folderId))
       .filter((article) => isPublishedInRange(article.published_at, from, to))
-      .map((article) => ({ ...article, live_fallback: true }));
+      .map((article) => ({
+        ...article,
+        canonical_url: article.canonical_url || article.url,
+        live_fallback: true
+      }));
   } catch (error) {
     diagnostics?.push({ source_id: 'fintech-aggregated-static', result: 'fetch_error', error: String(error).slice(0, 160) });
     return [];
