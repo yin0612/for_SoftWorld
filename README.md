@@ -38,6 +38,7 @@ http://127.0.0.1:8765/
 - `config/media_catalog.json`：監測文件與補充專業來源的媒體候選清單。它是覆蓋範圍清單，不代表所有媒體都已自動擷取。
 - `config/core_media_sources.json`：目前實測可用、近期仍更新且獲准自動收錄的官方／專業 RSS 白名單，包含 18 個台灣來源（含聯卡中心多頻道、卡優與自由）。其他媒體保留為 `manual_or_authorized`，必須先完成 RSS/API、條款或授權檢查。
 - `config/fintech_media_sources.json`：由 `金融科技&穩定幣監測/關鍵字清單.xlsx` 與 `監測關鍵字及媒體.docx` 整理的金融科技媒體白名單。鉅亨、東森財經、工商時報、MoneyDJ、今周刊等無穩定官方 RSS 時，使用官方網域 Google News RSS 補位；不鏡像全文、不寫入 D1，且保留來源類型與原文跳轉連結。
+- `scripts/update_fintech_aggregated.py` 與 `.github/workflows/update_fintech_aggregated.yml`：每 6 小時從白名單媒體的 Google News RSS 產生 `data/fintech-aggregated.json` 公開快照；Worker 讀取快照以避開 Google 對 Cloudflare 網路的節流，失敗來源會記錄在 `errors` 而不產生虛構文章。
 - `worker/schema.sql`：媒體、規則、媒體清單、文章、命中證據、審核與收集執行紀錄。
 - `worker/README.md`：D1 migration、部署、收集與資料品質政策。
 
