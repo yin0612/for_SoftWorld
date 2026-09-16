@@ -1122,6 +1122,10 @@ mark {
     flex-basis: 100%;
   }
 
+  .site-data-status-text {
+    flex: 0 1 auto;
+  }
+
   .site-data-status-extra {
     align-items: flex-start;
     flex-direction: column;
