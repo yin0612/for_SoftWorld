@@ -466,6 +466,56 @@
 }
 
 /* 慧科關鍵字導航與新聞中心增強樣式 */
+.section-context-details {
+  margin-top: 8px;
+}
+
+.section-context-toggle {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  min-height: 30px;
+  padding: 5px 11px;
+  border: 1px solid #99f6e4;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.86);
+  color: #0f766e;
+  cursor: pointer;
+  font-size: 0.78rem;
+  font-weight: 800;
+  line-height: 1.35;
+  list-style: none;
+  transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+}
+
+.section-context-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.section-context-toggle::before {
+  content: '＋';
+  margin-right: 5px;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
+.section-context-details[open] > .section-context-toggle::before {
+  content: '−';
+}
+
+.section-context-toggle:hover,
+.section-context-toggle:focus-visible {
+  border-color: #0f766e;
+  background: #ecfdf5;
+  color: #115e59;
+  outline: 2px solid rgba(20, 184, 166, 0.25);
+  outline-offset: 2px;
+}
+
+.section-context-content {
+  margin: 10px 0 0;
+}
+
 .huike-chip:hover {
   border-color: #e76f51 !important;
   transform: translateY(-1px);
