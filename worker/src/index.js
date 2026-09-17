@@ -87,7 +87,7 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
 // 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
 const LIVE_AGGREGATED_STABLECOIN_SOURCES = LIVE_AGGREGATED_FINTECH_SOURCES;
 // 使用 GitHub raw 內容作為 Actions 產出的公開快照；不依賴 Pages 部署延遲。
-const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260916-1';
+const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260917-1';
 
 const LIVE_STABLECOIN_RULES = [
   {
@@ -384,7 +384,7 @@ async function fetchLiveArticles(from, to, { sources, rules, folderId, sourceKin
           url_kind: sourceIsAggregated ? 'google_news_redirect' : 'publisher_url',
           title,
           excerpt: excerpt || (sourceIsAggregated
-            ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文查看完整內容。'
+            ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。'
             : '此文章由已驗證公開 RSS 來源即時收錄。'),
           published_at: parsedDate.toISOString(),
           fetched_at: fetchedAt,

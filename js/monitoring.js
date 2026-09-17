@@ -111,7 +111,7 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
                 matchedTerms,
                 ruleIds,
                 excerpt: article.excerpt || (article.source_kind === 'google_news_rss'
-                    ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文查看完整內容。'
+                    ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。'
                     : '此文章由已驗證公開 RSS 來源收錄。'),
                 date: formatMonitoringDate(article.published_at || article.fetched_at),
                 collectedDate: formatMonitoringDate(article.fetched_at),

@@ -102,7 +102,7 @@ def parse_feed(raw: bytes, source: dict, feed_url: str, fetched_at: str) -> tupl
         rows.append({
             "id": "google-news-" + hashlib.sha256(link.encode("utf-8")).hexdigest()[:20],
             "title": title,
-            "excerpt": "Google News RSS 聚合僅提供標題與發布時間；請開啟原文查看完整內容。",
+            "excerpt": "Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。",
             "url": link,
             "published_at": published_at,
             "fetched_at": fetched_at,

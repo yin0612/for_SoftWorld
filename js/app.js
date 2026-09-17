@@ -646,7 +646,7 @@ function renderMonitoringTransparency() {
     disclosure.open = wasOpen;
     const disclosureToggle = document.createElement('summary');
     disclosureToggle.className = 'monitoring-disclosure-toggle';
-    disclosureToggle.textContent = '查看資料來源與監測狀態';
+    disclosureToggle.textContent = '資料來源與監測狀態';
     const disclosureContent = document.createElement('div');
     disclosureContent.className = 'monitoring-disclosure-content';
     disclosure.append(disclosureToggle, disclosureContent);
@@ -694,7 +694,7 @@ function renderMonitoringTransparency() {
     const details = document.createElement('details');
     details.style.marginTop = '10px';
     const title = document.createElement('summary');
-    title.textContent = '查看監測文件完整規則與關鍵字';
+    title.textContent = '監測文件完整規則與關鍵字';
     title.style.cssText = 'cursor:pointer; font-weight:700; color:#0f766e;';
     details.appendChild(title);
 
@@ -1042,7 +1042,7 @@ function renderFintechSummary(summary, articles) {
     const contextDetails = document.createElement('details');
     contextDetails.className = 'fintech-summary-details';
     const contextToggle = document.createElement('summary');
-    contextToggle.textContent = '查看資料範圍與監測口徑';
+    contextToggle.textContent = '資料範圍與監測口徑';
     const contextContent = document.createElement('div');
     contextContent.className = 'fintech-summary-details-content';
     contextDetails.append(contextToggle, contextContent);
@@ -1138,7 +1138,7 @@ function createFintechArticleCard(news) {
     const excerpt = document.createElement('p');
     excerpt.className = 'fintech-card-excerpt';
     excerpt.textContent = truncateFintechText(news.excerpt || (news.sourceKind === 'google_news_rss'
-        ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文查看完整內容。'
+        ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。'
         : '此文章由已驗證公開 RSS 來源收錄。'));
 
     const matchedTerms = [...new Set([
@@ -1187,7 +1187,7 @@ function createFintechArticleCard(news) {
     provenanceDetails.className = 'fintech-card-provenance-details';
     const provenanceToggle = document.createElement('summary');
     provenanceToggle.className = 'fintech-provenance-toggle';
-    provenanceToggle.textContent = '查看來源與資料類型';
+    provenanceToggle.textContent = '來源與資料類型';
     const provenance = document.createElement('div');
     provenance.className = 'fintech-card-provenance';
     const provenanceMode = news.sourceKind === 'google_news_rss'
@@ -1272,7 +1272,7 @@ function renderFintechMonitoring() {
     grid.replaceChildren();
     if (!filtered.length) {
         const emptyMessage = !allArticles.length
-            ? '近兩個月目前沒有符合金融科技規則的文章；資料服務正常，請稍後再查看。'
+            ? '近兩個月目前沒有符合金融科技規則的文章；資料服務正常，請稍後重試。'
             : (selectedSource || keyword || fintechMode !== 'all'
                 ? '目前篩選條件沒有命中；請調整分類、來源或搜尋文字。'
             : '資料服務已連線，但目前沒有可公開的官方 RSS 或 Google News 聚合文章。');
@@ -1643,7 +1643,7 @@ function renderNews(append = false) {
             },
             verified: {
                 icon: '🔍', title: '目前沒有可顯示的真實新聞',
-                message: '頁面只顯示官方 RSS 或 Google News RSS 聚合來源且命中規則的文章。請查看上方來源狀態，或調整資料夾與關鍵字條件。', reset: true
+                message: '頁面只顯示官方 RSS 或 Google News RSS 聚合來源且命中規則的文章。請確認上方來源狀態，或調整資料夾與關鍵字條件。', reset: true
             }
         }[dataMode] || null;
         const state = emptyState || {
@@ -1752,7 +1752,7 @@ function renderNews(append = false) {
                     ${originalLink}
                 </div>
                 <details class="timeline-provenance-details">
-                    <summary class="timeline-provenance-toggle">查看來源與資料類型</summary>
+                    <summary class="timeline-provenance-toggle">來源與資料類型</summary>
                     <div class="timeline-provenance">原文發布：${date}｜本站收錄：${collectedDate}｜覆核狀態：${reviewLabel}</div>
                 </details>
             </div>
