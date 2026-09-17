@@ -68,6 +68,22 @@
   text-decoration: none;
 }
 
+/* 方法論入口保留為小型圖示，避免次要文字佔用導覽列空間；
+   aria-label 與 title 仍讓鍵盤及滑鼠使用者知道入口用途。 */
+.navbar-link-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+.navbar-link-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
 .navbar-link:hover, 
 .navbar-link.active {
   color: #2d5a3f;
