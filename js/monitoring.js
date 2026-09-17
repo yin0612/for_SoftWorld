@@ -6,6 +6,24 @@ function monitoringApiBase() {
     return (window.MONITORING_API_BASE || '').replace(/\/$/, '');
 }
 
+async function fetchMonitoringJson(url, options = {}, maxAttempts = 3) {
+    let lastError = null;
+    for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+        try {
+            const response = await fetch(url, { cache: 'no-store', ...options });
+            if (!response.ok) throw new Error(`Monitoring request returned ${response.status}`);
+            return await response.json();
+        } catch (error) {
+            lastError = error;
+            if (attempt < maxAttempts - 1) {
+                // 短暫 502/503 或網路抖動時退避重試，避免整頁誤判為無法驗證。
+                await new Promise((resolve) => setTimeout(resolve, 450 * (attempt + 1)));
+            }
+        }
+    }
+    throw lastError || new Error('Monitoring request failed');
+}
+
 function uniqueTerms(values) {
     return [...new Set(values.filter(Boolean))];
 }
@@ -28,19 +46,17 @@ function formatMonitoringDate(value) {
 }
 
 window.loadMonitoringManifest = async function loadMonitoringManifest() {
-    const response = await fetch('config/monitoring_rules.json?v=20260916_01', {
-        cache: 'no-store', headers: { Accept: 'application/json' }
+    return fetchMonitoringJson('config/monitoring_rules.json?v=20260917_01', {
+        headers: { Accept: 'application/json' }
     });
-    if (!response.ok) throw new Error(`Monitoring manifest returned ${response.status}`);
-    return response.json();
 };
 
 window.loadMonitoringStatus = async function loadMonitoringStatus() {
     const base = monitoringApiBase();
     if (!base) return null;
-    const response = await fetch(`${base}/api/status`, { headers: { Accept: 'application/json' } });
-    if (!response.ok) throw new Error(`Monitoring status returned ${response.status}`);
-    return response.json();
+    return fetchMonitoringJson(`${base}/api/status`, {
+        headers: { Accept: 'application/json' }
+    });
 };
 
 window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArticles() {
@@ -64,9 +80,9 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     for (let page = 0; page < 1000; page++) {
         const params = new URLSearchParams(baseParams);
         params.set('offset', String(offset));
-        const response = await fetch(`${base}/api/articles?${params.toString()}`, { headers: { Accept: 'application/json' } });
-        if (!response.ok) throw new Error(`Monitoring API returned ${response.status}`);
-        const payload = await response.json();
+        const payload = await fetchMonitoringJson(`${base}/api/articles?${params.toString()}`, {
+            headers: { Accept: 'application/json' }
+        });
         const pageArticles = Array.isArray(payload.articles) ? payload.articles : [];
         rawArticles.push(...pageArticles);
         range = payload.range || range;

@@ -904,15 +904,10 @@ export default {
       const totalSql = `SELECT COUNT(DISTINCT a.id) AS total ${joins} ${whereSql}`;
       const aggregateDiagnostics = [];
       // Google News RSS 聚合改由 GitHub Actions 產出的公開快照提供。
-      // Worker 不在每次頁面請求時重新查詢 Google，避免被節流／503 拖慢整個頁面，
-      // 同時保留上一份可追溯資料；快照每 6 小時更新一次，官方 RSS 仍維持即時唯讀補位。
+      // 全分類頁只讀取 D1 與快照，避免前端分頁時重複觸發大量 RSS 請求而被
+      // 上游節流／503 影響；單一分類頁仍保留官方 RSS 即時唯讀補位。
       const livePromise = !folder
-        ? Promise.all([
-          fetchLiveDomesticArticles(from, to),
-          fetchLiveStablecoinArticles(from, to),
-          fetchLiveHuikeArticles(env, from, to, '', aggregateDiagnostics),
-          fetchStaticAggregatedArticles(from, to, '', aggregateDiagnostics)
-        ]).then((groups) => groups.flat())
+        ? fetchStaticAggregatedArticles(from, to, '', aggregateDiagnostics)
         : folder === 'folder_2'
           ? Promise.all([
             fetchLiveDomesticArticles(from, to),
@@ -981,9 +976,15 @@ export default {
         data_mode: 'verified_rss_plus_google_news_aggregation',
         range: { from: fromDate, to: toDate },
         live_fallback_count: liveArticles.length,
-        live_fallback_sources: LIVE_DOMESTIC_SOURCES.map((source) => source.name),
+        live_fallback_sources: [...new Set(liveArticles
+          .filter((article) => article.source_kind !== 'google_news_rss')
+          .map((article) => article.source)
+          .filter(Boolean))],
         aggregated_count: liveArticles.filter((article) => article.source_kind === 'google_news_rss').length,
-        aggregated_sources: LIVE_AGGREGATED_FINTECH_SOURCES.map((source) => source.name)
+        aggregated_sources: [...new Set(liveArticles
+          .filter((article) => article.source_kind === 'google_news_rss')
+          .map((article) => article.source)
+          .filter(Boolean))]
       };
       if (url.searchParams.get('debug') === '1') responsePayload.aggregated_diagnostics = aggregateDiagnostics;
       return json(responsePayload, 200, headers);
