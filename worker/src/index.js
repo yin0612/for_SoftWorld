@@ -924,7 +924,10 @@ export default {
               fetchStaticAggregatedArticles(from, to, 'folder_6', aggregateDiagnostics)
             ]).then((groups) => groups.flat())
             : folder === 'folder_3' || folder === 'folder_4'
-              ? fetchLiveHuikeArticles(env, from, to, folder, aggregateDiagnostics)
+              ? Promise.all([
+                fetchLiveHuikeArticles(env, from, to, folder, aggregateDiagnostics),
+                fetchStaticAggregatedArticles(from, to, folder, aggregateDiagnostics)
+              ]).then((groups) => groups.flat())
               : Promise.resolve([]);
       const [result, totalResult, liveCandidates] = await Promise.all([
         env.DB.prepare(articlesSql).bind(...values).all(),
