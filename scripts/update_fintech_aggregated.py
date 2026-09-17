@@ -25,7 +25,7 @@ MAX_ITEMS_PER_SOURCE = 80
 PAYMENT_TERMS = (
     "藍新科技", "藍新金流", "newebpay", "簡單付", "ezpay", "歐付寶", "o'pay", "opay",
     "街口支付", "街口電子支付", "綠界科技", "ecpay", "全支付", "全盈支付", "台灣pay",
-    "悠遊付", "一卡通", "ipass money", "line pay", "line pay money", "pi拍錢包",
+    "悠遊付", "一卡通", "ipass money", "line pay", "line pay money", "line bank", "彈性付", "pi拍錢包",
     "pchomepay", "hami pay", "friday錢包", "蝦皮支付", "電子支付", "行動支付",
     "數位支付", "第三方支付", "支付基礎設施", "跨境支付", "金流", "收單", "代收付",
     "電子票證", "信用卡支付", "信用卡", "刷卡", "電子錢包", "數位錢包", "掃碼支付",
@@ -37,7 +37,7 @@ STABLECOIN_TERMS = (
     "代幣化貨幣", "tokenized deposit", "tokenized deposits", "stablecoin settlement",
     "stablecoin payment", "stablecoin payments", "奧丁丁", "owlpay",
 )
-QUERY_PAYMENT_TERMS = ("支付", "電子支付", "行動支付", "金流", "信用卡", "第三方支付", "電子票證", "跨境支付", "BNPL", "先買後付", "街口支付", "LINE Pay", "台灣Pay")
+QUERY_PAYMENT_TERMS = ("支付", "電子支付", "行動支付", "金流", "信用卡", "第三方支付", "電子票證", "跨境支付", "BNPL", "先買後付", "街口支付", "LINE Pay", "LINE Bank", "彈性付", "台灣Pay")
 QUERY_STABLECOIN_TERMS = ("穩定幣", "stablecoin", "USDT", "USDC", "鏈上支付", "鏈上結算", "代幣化")
 # 聚合查詢只使用能有效縮小結果集的代表詞；實際是否歸入分類，仍須
 # 再通過 monitoring_rules.json 的完整雙群組條件。

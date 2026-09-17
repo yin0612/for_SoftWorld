@@ -28,21 +28,21 @@ const LIVE_DOMESTIC_RULES = [
     id: 'newebpay-brand',
     folder_id: 'folder_2',
     scope: 'full_text',
-    any_of_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','簡單行動支付','ezAIO簡單收','ezAIO','簡單收','歐付寶','O\'Pay','OPay','橘子支','橘子支付','樂點行動支付','GAMA PAY','街口支付','街口電子支付','綠界科技','ECPay','全支付','PXPay','全盈支付','全盈+PAY','台灣Pay','悠遊付','悠遊卡','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子票證','MaiCoin Pay','TWQR']),
+    any_of_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','簡單行動支付','ezAIO簡單收','ezAIO','簡單收','歐付寶','O\'Pay','OPay','橘子支','橘子支付','樂點行動支付','GAMA PAY','街口支付','街口電子支付','綠界科技','ECPay','全支付','PXPay','全盈支付','全盈+PAY','台灣Pay','悠遊付','悠遊卡','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','LINE Bank','彈性付','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子票證','MaiCoin Pay','TWQR']),
     all_of_json: '[]',
     exclude_any_json: JSON.stringify(['大宇紡織']),
     auto_publish: 1,
-    auto_publish_allowed_terms_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','簡單行動支付','ezAIO簡單收','ezAIO','簡單收','歐付寶','O\'Pay','OPay','橘子支','橘子支付','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','全盈+PAY','台灣Pay','悠遊付','悠遊卡','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子票證','MaiCoin Pay','TWQR'])
+    auto_publish_allowed_terms_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','簡單行動支付','ezAIO簡單收','ezAIO','簡單收','歐付寶','O\'Pay','OPay','橘子支','橘子支付','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','全盈+PAY','台灣Pay','悠遊付','悠遊卡','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','LINE Bank','彈性付','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子票證','MaiCoin Pay','TWQR'])
   },
   {
     id: 'taiwan-payment-core',
     folder_id: 'folder_2',
     scope: 'full_text',
-    any_of_json: JSON.stringify(['電支','電子支付','行動支付','數位支付','第三方支付','收單','代收付','電子票證','悠遊卡','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','街口支付','街口電子支付','全支付','全盈支付','台灣Pay','跨境支付','非現金支付','支付安全','支付基礎建設','支付機構','電支機構','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','卡友','特店','特約商店','BNPL','先買後付','MaiCoin Pay']),
-    all_of_json: JSON.stringify(['台灣','臺灣','國內','本土','台北','金管會','金融監督管理委員會','央行','中央銀行','財金公司','聯卡中心','聯合信用卡處理中心','數位發展部','數發部','經濟部','行政院','立法院','金融科技','數位金融','支付產業','支付市場','支付業者','支付機構','電支機構','電子支付機構','金融服務','信用卡市場','信用卡','卡友','特店','特約商店','台灣Pay','一卡通','悠遊卡','悠遊付','街口支付','全支付','全盈支付','LINE Pay','iPASS MONEY','藍新科技','NewebPay','TWQR']),
+    any_of_json: JSON.stringify(['電支','電子支付','行動支付','數位支付','第三方支付','收單','代收付','電子票證','悠遊卡','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','LINE Bank','彈性付','街口支付','街口電子支付','全支付','全盈支付','台灣Pay','跨境支付','非現金支付','支付安全','支付基礎建設','支付機構','電支機構','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','卡友','特店','特約商店','BNPL','先買後付','MaiCoin Pay']),
+    all_of_json: JSON.stringify(['台灣','臺灣','國內','本土','台北','金管會','金融監督管理委員會','央行','中央銀行','財金公司','聯卡中心','聯合信用卡處理中心','數位發展部','數發部','經濟部','行政院','立法院','金融科技','數位金融','支付產業','支付市場','支付業者','支付機構','電支機構','電子支付機構','金融服務','信用卡市場','信用卡','卡友','特店','特約商店','台灣Pay','一卡通','悠遊卡','悠遊付','街口支付','全支付','全盈支付','LINE Pay','LINE Bank','彈性付','iPASS MONEY','藍新科技','NewebPay','TWQR']),
     exclude_any_json: JSON.stringify(['大宇紡織']),
     auto_publish: 1,
-    auto_publish_allowed_terms_json: JSON.stringify(['電支','電子支付','行動支付','數位支付','第三方支付','金流','收單','代收付','電子票證','悠遊卡','悠遊付','一卡通','iPASS MONEY','LINE Pay','街口支付','全支付','全盈支付','台灣Pay','跨境支付','非現金支付','支付安全','支付基礎建設','支付機構','電支機構','信用卡支付','信用卡','刷卡','TWQR','卡友','特店','MaiCoin Pay'])
+    auto_publish_allowed_terms_json: JSON.stringify(['電支','電子支付','行動支付','數位支付','第三方支付','金流','收單','代收付','電子票證','悠遊卡','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Bank','彈性付','街口支付','全支付','全盈支付','台灣Pay','跨境支付','非現金支付','支付安全','支付基礎建設','支付機構','電支機構','信用卡支付','信用卡','刷卡','TWQR','卡友','特店','MaiCoin Pay'])
   },
   {
     id: 'taiwan-payment-authority',
@@ -137,11 +137,11 @@ const LIVE_AGGREGATED_DOMESTIC_RULES = [
     id: 'taiwan-payment-google-news',
     folder_id: 'folder_2',
     scope: 'full_text',
-    any_of_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','歐付寶','O\'Pay','OPay','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','台灣Pay','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子支付','行動支付','數位支付','第三方支付','支付基礎設施','跨境支付','金流','收單','代收付','電子票證','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','BNPL','先買後付']),
+    any_of_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','歐付寶','O\'Pay','OPay','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','台灣Pay','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','LINE Bank','彈性付','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子支付','行動支付','數位支付','第三方支付','支付基礎設施','跨境支付','金流','收單','代收付','電子票證','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','BNPL','先買後付']),
     all_of_json: '[]',
     exclude_any_json: JSON.stringify(['大宇紡織']),
     auto_publish: 1,
-    auto_publish_allowed_terms_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','歐付寶','O\'Pay','OPay','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','台灣Pay','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子支付','行動支付','數位支付','第三方支付','支付基礎設施','跨境支付','金流','收單','代收付','電子票證','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','BNPL','先買後付'])
+    auto_publish_allowed_terms_json: JSON.stringify(['藍新科技','藍新金流','NewebPay','簡單付','ezPay','歐付寶','O\'Pay','OPay','街口支付','街口電子支付','綠界科技','ECPay','全支付','全盈支付','台灣Pay','悠遊付','一卡通','iPASS MONEY','LINE Pay','LINE Pay Money','LINE Bank','彈性付','Pi拍錢包','PChomepay','Hami Pay','friDay錢包','蝦皮支付','電子支付','行動支付','數位支付','第三方支付','支付基礎設施','跨境支付','金流','收單','代收付','電子票證','信用卡支付','信用卡','刷卡','電子錢包','數位錢包','掃碼支付','TWQR','BNPL','先買後付'])
   }
 ];
 

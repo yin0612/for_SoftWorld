@@ -97,6 +97,8 @@ huike_2025_monitoring:
       - ECPay
       - 全支付
       - 全盈支付
+      - LINE Bank
+      - 彈性付
     group_1_payment_and_fraud:
       operator: "A(詐騙/趨勢/市場/合作/創新/產業/策略/成長/案件) + B(支付生態)"
       terms:
