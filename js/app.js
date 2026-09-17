@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     // 確保資料已載入
-    if (typeof COMPANIES === 'undefined' || typeof PRESS_RELEASES === 'undefined') {
-        console.error('Data not loaded. Make sure data.js is included before app.js');
+    if (typeof COMPANIES === 'undefined') {
+        console.error('Company data not loaded. Make sure data.js is included before app.js');
         return;
     }
 
@@ -9,9 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
     initStatsOverview();
     initNewsSection();
     initFintechMonitoringPage();
+    renderRealTrends();
     initNavbar();
     initHashRouter();
     initBackToTop();
+    initSkipLink();
 });
 
 // 1. Hash SPA 獨立切頁路由器 (點選目錄只顯示該項獨立頁面)
@@ -77,6 +79,9 @@ function initHashRouter() {
             }
             if (targetPage === 'compare' && typeof forceResizeCompareCharts === 'function') {
                 forceResizeCompareCharts();
+            }
+            if (targetPage === 'trends' && typeof renderRealTrends === 'function') {
+                renderRealTrends();
             }
             window.dispatchEvent(new Event('resize'));
         }, 100);
@@ -287,197 +292,102 @@ function getMediaSearchUrl(mediaName, companyName) {
     return searchUrls[mediaName] || `https://www.google.com/search?q=${encodedName}+${encodeURIComponent(mediaName)}`;
 }
 
-// 彈出下鑽溯源 Modal 視窗 (Provenance Modal)
-function showProvenanceModal(companyNameOrId, month, docs) {
-    const modal = document.getElementById('companyModal');
-    const modalBody = document.getElementById('modalBody');
-    if (!modal || !modalBody) return;
 
-    // 1. 查找公司物件
-    let company = COMPANIES.find(c => c.name === companyNameOrId || c.id === companyNameOrId);
-    if (!company && typeof companyNameOrId === 'string') {
-        company = COMPANIES.find(c => c.name.includes(companyNameOrId) || companyNameOrId.includes(c.name));
-    }
-    const compName = company ? company.name : companyNameOrId;
-    const compId = company ? company.id : 'soft-world';
-    const brandColor = company ? company.brandColor : '#e76f51';
-
-    // 2. 查找該月份之統計數據 (包含全網媒體報導曝光總數量)
-    let monthStat = null;
-    if (typeof MONTHLY_STATS !== 'undefined' && MONTHLY_STATS[compId]) {
-        monthStat = MONTHLY_STATS[compId].find(s => s.month === month);
-    }
-    const totalCoverage = monthStat ? monthStat.mediaCoverage : (docs ? docs.length : 0);
-    const prCount = monthStat ? monthStat.pressReleaseCount : 1;
-
-    // 3. 渲染精選重點新聞稿清單 (包含實體文章超連結)
-    const items = Array.isArray(docs) ? docs : (docs?.items || []);
-    let curatedHtml = '';
-    if (items.length > 0) {
-        curatedHtml = items.map(d => {
-            const targetUrl = (d.url && d.url.startsWith('http')) 
-                ? d.url 
-                : getMediaSearchUrl(d.source_domain, compName);
-            const syntheticTag = d.synthetic 
-                ? `<span style="background:#fef3c7; color:#92400e; font-size:0.75rem; padding:2px 7px; border-radius:12px; font-weight:700; margin-left:6px;">🤖 模擬資料</span>` 
-                : '';
-
-            return `
-                <li style="margin-bottom: 12px; padding: 12px 14px; background: #ffffff; border: 1px solid var(--border-color); border-radius: 8px; list-style: none; transition: transform 0.2s ease, box-shadow 0.2s ease;">
-                    <div style="font-weight: 700; font-size: 0.95rem; margin-bottom: 6px;">
-                        <a href="${targetUrl}" target="_blank" rel="noopener" style="color: ${brandColor}; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                            📌 ${d.title} ${syntheticTag} <span style="font-size:0.85rem; margin-left:2px;">↗</span>
-                        </a>
-                    </div>
-                    ${d.excerpt ? `<p style="font-size: 0.85rem; color: #475569; margin: 4px 0 8px 0; line-height: 1.5;">${d.excerpt}</p>` : ''}
-                    <div style="font-size: 0.8rem; color: var(--text-muted); display: flex; gap: 14px; flex-wrap: wrap; align-items: center;">
-                        <span>📅 發布日期：${d.published_at}</span>
-                        <span>📰 來源：<strong>${d.source_domain}</strong></span>
-                        ${d.category ? `<span style="background:${brandColor}15; color:${brandColor}; padding:2px 8px; border-radius:12px; font-weight:600; font-size:0.75rem;">🏷️ ${d.category}</span>` : ''}
-                        <a href="${targetUrl}" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline; font-weight: 600; margin-left: auto;">開啟新聞原文 ↗</a>
-                    </div>
-                </li>
-            `;
-        }).join('');
-    } else {
-        const fallbackUrl = company ? (company.newsUrl || company.website) : 'https://www.google.com';
-        curatedHtml = `
-            <div style="text-align:center; padding: 20px; color: var(--text-muted); background: #f8fafc; border-radius: 8px; border: 1px dashed var(--border-color);">
-                該月份暫無登記之精選新聞稿紀錄。<br>
-                <a href="${fallbackUrl}" target="_blank" rel="noopener" style="color:${brandColor}; font-weight:700; text-decoration:underline; display:inline-block; margin-top:8px;">
-                    → 前往 ${compName} 官方新聞專區 ↗
-                </a>
-            </div>
-        `;
-    }
-
-    // 4. 渲染 10 大觀測媒體通路之篇數估算與直達報導檢索連結
-    let channelsHtml = '';
-    const channelMix = (typeof MEDIA_CHANNELS !== 'undefined' && MEDIA_CHANNELS[compId]) ? MEDIA_CHANNELS[compId] : {};
-    const channelEntries = Object.entries(channelMix);
-
-    if (channelEntries.length > 0) {
-        channelsHtml = channelEntries.map(([channelName, pct]) => {
-            const estCount = Math.max(1, Math.round((totalCoverage * pct) / 100));
-            const searchUrl = getMediaSearchUrl(channelName, compName);
-            return `
-                <a href="${searchUrl}" target="_blank" rel="noopener" 
-                   style="display: flex; justify-content: space-between; align-items: center; padding: 9px 12px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; text-decoration: none; color: #334155; font-size: 0.85rem; font-weight: 500; transition: all 0.2s ease;"
-                   onmouseover="this.style.borderColor='${brandColor}'; this.style.backgroundColor='${brandColor}08'; this.style.color='${brandColor}';" 
-                   onmouseout="this.style.borderColor='#e2e8f0'; this.style.backgroundColor='#ffffff'; this.style.color='#334155';">
-                    <span>📰 ${channelName}</span>
-                    <span style="font-weight: 700; color: ${brandColor}; font-size: 0.8rem;">約 ${estCount} 則報導 ↗</span>
-                </a>
-            `;
-        }).join('');
-    }
-
-    // 5. 組裝完整 Modal HTML
-    modalBody.innerHTML = `
-        <div style="margin-bottom: 16px;">
-            <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
-                <span class="section-tag" style="background: ${brandColor}15; color: ${brandColor}; border: 1px solid ${brandColor}30; padding: 4px 10px; border-radius: 20px; font-weight: 700; font-size: 0.8rem;">
-                    🔍 數據下鑽溯源 (Data Provenance)
-                </span>
-                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 600;">觀測月份：${month}</span>
-            </div>
-            <h2 style="font-size: 1.4rem; color: #1e293b; margin: 6px 0 12px 0; font-weight: 700;">
-                ${compName} · ${month} 媒體聲量數據與報導連結
-            </h2>
-            
-            <!-- 數據總覽統計卡 -->
-            <div style="background: linear-gradient(135deg, ${brandColor}0D, ${brandColor}1A); border: 1px solid ${brandColor}35; padding: 16px 20px; border-radius: 12px; margin-bottom: 18px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 14px;">
-                <div>
-                    <div style="font-size: 0.85rem; color: #475569; font-weight: 600;">📈 全網估算媒體報導總聲量</div>
-                    <div style="font-size: 1.8rem; font-weight: 800; color: ${brandColor}; line-height: 1.2;">
-                        ${totalCoverage.toLocaleString()} <span style="font-size: 0.95rem; font-weight: 600;">則報導曝光</span>
-                    </div>
-                </div>
-                <div style="text-align: right; font-size: 0.85rem; color: #475569; line-height: 1.6;">
-                    <div>公關新聞稿發布：<strong style="color:#1e293b;">${prCount} 篇</strong></div>
-                    <div>涵蓋觀測頻道：<strong style="color:#1e293b;">10 大媒體通路</strong></div>
-                </div>
-            </div>
-        </div>
-
-        <div style="margin-bottom: 20px;">
-            <!-- 區塊一：精選重點新聞 -->
-            <h4 style="font-size: 0.95rem; color: #1e293b; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-                <span>📌 本月精選重點新聞與報導原文</span>
-                <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">(點擊標題直接開啟報導網頁)</span>
-            </h4>
-            <ul style="padding: 0; margin: 0 0 20px 0; max-height: 220px; overflow-y: auto;">
-                ${curatedHtml}
-            </ul>
-
-            <!-- 區塊二：10 大媒體頻道檢索 -->
-            <h4 style="font-size: 0.95rem; color: #1e293b; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
-                <span>🌐 全網 10 大觀測媒體聲量分佈與即時報導檢索</span>
-                <span style="font-size: 0.8rem; font-weight: 400; color: var(--text-muted);">(點擊各媒體開啟即時搜尋超連結)</span>
-            </h4>
-            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; margin-bottom: 16px; max-height: 180px; overflow-y: auto;">
-                ${channelsHtml}
-            </div>
-        </div>
-
-        <!-- 數據說明敘述 -->
-        <div style="background: #f8fafc; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; font-size: 0.8rem; color: #64748b; line-height: 1.5; border: 1px solid #e2e8f0;">
-            <strong>💡 數據來源與檢索說明：</strong>
-            本月媒體報導總聲量（${totalCoverage} 則）包含官方新聞稿發布、各大科技財經媒體報導及全網曝光追蹤。上方精選新聞提供發布原文直接連結；其他觀測頻道報導亦可點擊對應媒體按鈕進行即時關鍵字報導檢索。
-        </div>
-
-        <!-- 底部快捷按鈕 -->
-        <div style="display: flex; gap: 10px; justify-content: space-between; align-items: center; flex-wrap: wrap;">
-            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                ${company && company.newsUrl ? `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm" style="font-size: 0.85rem;">📰 官方新聞發布專區 ↗</a>` : ''}
-                <a href="${company && company.mopsUrl ? company.mopsUrl : 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="font-size: 0.85rem;">🏛️ MOPS 公開資訊觀測站 ↗</a>
-            </div>
-            <button class="btn btn-primary btn-sm" id="provenanceCloseBtn" style="padding: 6px 20px;">關閉視窗</button>
-        </div>
-    `;
-
-    modal.classList.add('active');
-
-    const closeBtn = document.getElementById('modalClose');
-    const pCloseBtn = document.getElementById('provenanceCloseBtn');
-    if (closeBtn) closeBtn.onclick = () => modal.classList.remove('active');
-    if (pCloseBtn) pCloseBtn.onclick = () => modal.classList.remove('active');
-    modal.onclick = (e) => {
-        if (e.target === modal) modal.classList.remove('active');
-    };
+// 3. 初始化真實監測數據總覽
+function initStatsOverview() {
+    updateRealStatsOverview([], null);
 }
 
-// 3. 初始化數據總覽 (計算 4 大指標全站數據)
-function initStatsOverview() {
-    let totalPR = 0;
-    let totalCoverage = 0;
-    let totalSocial = 0;
-    let totalKol = 0;
+function initSkipLink() {
+    const link = document.getElementById('skipToContent');
+    if (!link || link.dataset.ready === 'true') return;
+    link.addEventListener('click', (event) => {
+        event.preventDefault();
+        const pages = ['companies', 'news', 'fintech', 'analytics', 'compare', 'trends', 'methodology'];
+        const active = pages.map((id) => document.getElementById(id))
+            .find((element) => element && window.getComputedStyle(element).display !== 'none');
+        const target = active || document.getElementById('hero');
+        if (!target) return;
+        target.setAttribute('tabindex', '-1');
+        target.focus({ preventScroll: true });
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    link.dataset.ready = 'true';
+}
 
-    if (typeof PRESS_RELEASES !== 'undefined') {
-        totalPR = PRESS_RELEASES.length;
+function updateRealStatsOverview(articles = [], status = null) {
+    const total = Array.isArray(articles) ? articles.length : 0;
+    const official = Array.isArray(articles)
+        ? articles.filter((article) => article.sourceKind !== 'google_news_rss').length
+        : 0;
+    const aggregated = Array.isArray(articles)
+        ? articles.filter((article) => article.sourceKind === 'google_news_rss').length
+        : 0;
+    const statusSources = Number(status?.source_summary?.healthy || 0);
+    const sourceCount = statusSources || new Set((articles || []).map((article) => article.source).filter(Boolean)).size;
+    const setValue = (id, value) => {
+        const element = document.getElementById(id);
+        if (!element) return;
+        element.textContent = Number(value || 0).toLocaleString();
+        element.setAttribute('data-target', String(value || 0));
+    };
+    setValue('statTotalNews', total);
+    setValue('totalPressReleases', total);
+    setValue('statOfficialRss', official);
+    setValue('statAggregatedNews', aggregated);
+    setValue('statVerifiedSources', sourceCount);
+    const range = status?.article_range || monitoringLoadState?.range || getRollingMonitoringDateRange();
+    const methodCompanies = document.getElementById('methodCompanies');
+    const methodRange = document.getElementById('methodRange');
+    if (methodCompanies) methodCompanies.textContent = String(COMPANIES.length);
+    if (methodRange && range?.from && range?.to) methodRange.textContent = `${range.from} — ${range.to}`;
+}
+
+function renderRealTrends() {
+    const summary = document.getElementById('trendsSummary');
+    const timeline = document.getElementById('trendsTimeline');
+    if (!summary || !timeline) return;
+    const articles = typeof monitoringNews !== 'undefined' && Array.isArray(monitoringNews)
+        ? monitoringNews
+        : [];
+    if (!articles.length) {
+        summary.innerHTML = '<p class="method-muted">目前沒有可公開的真實新聞資料。</p>';
+        timeline.innerHTML = '<p class="method-muted">資料服務尚未回傳文章，請稍後重新整理。</p>';
+        return;
     }
-
-    if (typeof MONTHLY_STATS !== 'undefined') {
-        Object.values(MONTHLY_STATS).forEach(companyStats => {
-            companyStats.forEach(stat => {
-                totalCoverage += (stat.mediaCoverage || 0);
-                totalSocial += (stat.socialMentions || 0);
-                totalKol += (stat.kolCollabs || 0);
-            });
+    const folders = new Map();
+    articles.forEach((article) => {
+        (article.huikeFolders || [article.huikeFolder]).filter(Boolean).forEach((folder) => {
+            folders.set(folder, (folders.get(folder) || 0) + 1);
+        });
+    });
+    const folderNames = typeof HUIKE_2025_STRUCTURE !== 'undefined'
+        ? new Map(HUIKE_2025_STRUCTURE.map((folder) => [folder.id, folder.folderName || folder.name]))
+        : new Map();
+    if (typeof monitoringManifest !== 'undefined' && Array.isArray(monitoringManifest?.folders)) {
+        monitoringManifest.folders.forEach((folder) => {
+            if (folder?.id && folder?.name) folderNames.set(folder.id, folder.name);
         });
     }
-
-    const elNews = document.getElementById('statTotalNews');
-    const elCoverage = document.getElementById('statTotalCoverage');
-    const elSocial = document.getElementById('statTotalSocial');
-    const elKol = document.getElementById('statTotalKol');
-
-    if (elNews) { elNews.textContent = totalPR.toLocaleString(); elNews.setAttribute('data-target', totalPR); }
-    if (elCoverage) { elCoverage.textContent = totalCoverage.toLocaleString(); elCoverage.setAttribute('data-target', totalCoverage); }
-    if (elSocial) { elSocial.textContent = totalSocial.toLocaleString(); elSocial.setAttribute('data-target', totalSocial); }
-    if (elKol) { elKol.textContent = totalKol.toLocaleString(); elKol.setAttribute('data-target', totalKol); }
-
+    const topFolders = [...folders.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
+    summary.innerHTML = topFolders.map(([folder, count]) => `
+        <article class="trend-card">
+            <div class="trend-card-icon">📊</div>
+            <h4 class="trend-card-title">${escapeHtml(folderNames.get(folder) || folder)}</h4>
+            <p class="trend-card-desc">目前窗口命中 ${count.toLocaleString()} 篇真實新聞。</p>
+            <span class="trend-card-date">近兩個月</span>
+        </article>
+    `).join('');
+    const latest = [...articles].sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).slice(0, 12);
+    timeline.innerHTML = latest.map((article) => `
+        <div class="event-item">
+            <div class="event-date">${escapeHtml(article.date || '日期待確認')}</div>
+            <div class="event-content">
+                <h4><a href="${escapeHtml(safeHttpUrl(article.url))}" target="_blank" rel="noopener">${escapeHtml(article.title || '未命名新聞')} ↗</a></h4>
+                <p>${escapeHtml(article.source || '來源待確認')}｜${escapeHtml(article.verificationLabel || '已驗證監測')}</p>
+            </div>
+        </div>
+    `).join('');
 }
 
 // 4. 新聞發布區塊與過濾邏輯
@@ -572,11 +482,11 @@ function renderGlobalDataStatusBar() {
         const liveSourceText = liveSourceCount ? `；台灣即時補位來源設定 ${liveSourceCount} 個` : '';
         const liveText = liveFallback ? `；新增台灣來源即時補位 ${liveFallback} 篇` : '';
         const aggregatedText = aggregatedSourceCount ? `；Google News RSS 聚合來源 ${aggregatedSourceCount} 個、目前 ${aggregatedCount} 篇` : '';
-        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜官方 RSS ${sources} 個（台灣 ${taiwanSources} 個）｜${updated}${liveSourceText}${aggregatedText}${liveText}；模擬圖表僅供教學比較。`;
+        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜官方 RSS ${sources} 個（台灣 ${taiwanSources} 個）｜${updated}${liveSourceText}${aggregatedText}${liveText}`;
     } else if (monitoringDataMode === 'loading') {
-        statusText.textContent = '真實新聞：正在確認官方 RSS、Google News RSS 聚合來源與近兩個月資料；模擬圖表僅供教學比較。';
+        statusText.textContent = '真實新聞：正在確認官方 RSS、Google News RSS 聚合來源與近兩個月資料。';
     } else {
-        statusText.textContent = '真實新聞服務目前無法驗證；頁面不會以模擬內容補足。模擬圖表仍標示為教學資料。';
+        statusText.textContent = '真實新聞服務目前無法驗證；頁面不會以其他資料補足結果。';
     }
 }
 
@@ -600,6 +510,11 @@ function setVerifiedMonitoringSourceTotal(status) {
     const visibleSources = healthySources + unseededLiveSources;
     element.textContent = visibleSources.toLocaleString();
     element.setAttribute('data-target', visibleSources);
+    const overviewSource = document.getElementById('statVerifiedSources');
+    if (overviewSource) {
+        overviewSource.textContent = visibleSources.toLocaleString();
+        overviewSource.setAttribute('data-target', String(visibleSources));
+    }
 }
 
 function hydrateMonitoringManifest(manifest) {
@@ -809,6 +724,7 @@ function initNewsSection() {
             aggregatedCount: result.aggregatedCount || 0,
             officialRssCount: result.officialRssCount || 0
         };
+        updateRealStatsOverview(monitoringNews, status);
         setVerifiedNewsTotal(monitoringLoadState.total);
         setNewsDataMode('verified');
         refreshVerifiedSourceOptions(result.articles, [
@@ -820,16 +736,25 @@ function initNewsSection() {
         renderHuikeChips();
         applyNewsFilters();
         renderFintechMonitoring();
+        renderRealTrends();
+        if (window.location.hash.includes('analytics') && typeof renderAnalyticsCharts === 'function') {
+            renderAnalyticsCharts();
+        }
+        if (window.location.hash.includes('compare') && typeof forceResizeCompareCharts === 'function') {
+            forceResizeCompareCharts();
+        }
     }).catch((error) => {
         console.warn('Verified monitoring API unavailable; no unverified content is shown.', error);
         monitoringNews = [];
         monitoringLoadState = null;
         setVerifiedNewsTotal(0);
         setVerifiedMonitoringSourceTotal(null);
+        updateRealStatsOverview([], null);
         setNewsDataMode('unavailable');
         renderMonitoringTransparency();
         applyNewsFilters();
         renderFintechMonitoring();
+        renderRealTrends();
     });
 
     const loadMoreBtn = document.getElementById('loadMoreBtn');
@@ -1836,10 +1761,6 @@ function renderNews(append = false) {
         const huikeKeyword = escapeHtml(news.huikeKeyword || '');
         item.style.setProperty('--item-brand-color', brandColor);
         
-        const syntheticBadge = news.synthetic
-            ? '<span style="background:#fef3c7;color:#92400e;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">🤖 模擬資料</span>'
-            : '';
-
         const verifiedBadge = news.sourceKind === 'google_news_rss'
             ? '<span style="background:#e0f2fe;color:#075985;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
             : (news.verifiedMonitoring
@@ -1877,7 +1798,6 @@ function renderNews(append = false) {
                 </div>
                 <h4 class="timeline-title">
                     ${titleContent}
-                    ${syntheticBadge}
                     ${verifiedBadge}
                 </h4>
                 <p class="timeline-excerpt">${displayExcerpt}</p>

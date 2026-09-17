@@ -5,8 +5,8 @@
 
 ## ⚠️ 資料說明與規範
 - **公司主檔與重大動態**：人工整理自 TWSE/TPEx 公開資訊觀測站 (MOPS) 與各公司官方新聞專區，介面標示「人工整理・待查核」與來源入口。
-- **媒體曝光與聲量數據**：依據 `COMPANY_PROFILES` 參數與公司發稿權重生成，呈現月度趨勢、通路分佈與比對雷達圖；所有圖表與匯出檔標示為教學用模擬數據。
-- **下鑽溯源 (Data Provenance)**：點擊數據分析頁面之曝光趨勢圖資料點，可彈出原始新聞來源清單與可點擊連結。
+- **真實新聞分析**：`#/analytics`、`#/compare` 與 `#/trends` 只使用 Cloudflare Worker/D1 已收錄的文章，統計新聞量、監測分類、實際來源與關鍵字命中；不使用模型聲量或估算數字。
+- **資料溯源 (Data Provenance)**：每則新聞保留來源、命中規則、發布日期與原文連結，圖表的日期區間與來源類型會同步顯示。
 
 ## 🚀 本機開發與預覽
 ```bash
@@ -20,9 +20,9 @@ http://127.0.0.1:8765/
 ## 📁 專案檔案結構
 - `index.html` — 主網頁 HTML 結構與七大獨立區塊
 - `css/` — 核心樣式表 (index.css, components.css, animations.css)
-- `js/data.js` — 8 大公司主檔、媒體與指標數據集
-- `js/charts.js` — 數據分析圖表模組 (Chart.js v4)
-- `js/compare.js` — 企業 PK 多維度雷達圖與比對工具
+- `js/data.js` — 8 大公司主檔、監測分類與關鍵字設定（新聞資料由 API 提供）
+- `js/charts.js` — 真實監測圖表模組（進入分析頁時才載入 Chart.js）
+- `js/compare.js` — 企業真實新聞數量、來源與分類比較工具
 - `js/app.js` — SPA Hash 切頁路由器 (`#/companies`, `#/news`, `#/fintech`, `#/analytics`, `#/compare`, `#/trends`, `#/methodology`) 與 UI 邏輯
 - `config/` — `companies.yml` 公司主檔與 `sources.yml` 觀測媒體清單
 

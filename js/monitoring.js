@@ -59,6 +59,50 @@ window.loadMonitoringStatus = async function loadMonitoringStatus() {
     });
 };
 
+function normalizeMonitoringArticle(article) {
+    const evidenceList = parseEvidenceList(article);
+    const matchedTerms = uniqueTerms(evidenceList.flatMap((evidence) => [
+        ...(evidence.any_hits || []),
+        ...(evidence.all_hits || []),
+        ...(evidence.required_any_group_hits || []).flat()
+    ]).concat(Array.isArray(article.matched_terms) ? article.matched_terms : []));
+    const folders = uniqueTerms(String(article.folder_ids || '').split(','));
+    const ruleIds = uniqueTerms(String(article.rule_ids || '').split(','));
+    return {
+        companyId: 'monitoring',
+        companyName: '真實新聞監測',
+        companyColor: '#0f766e',
+        title: article.title,
+        keyPointZh: article.key_point_zh || article.keyPointZh || '',
+        category: '關鍵字監測',
+        huikeFolder: folders[0] || '',
+        huikeFolders: folders,
+        huikeKeyword: matchedTerms[0] || ruleIds[0] || '規則命中',
+        matchedTerms,
+        ruleIds,
+        excerpt: article.excerpt || (article.source_kind === 'google_news_rss'
+            ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。'
+            : '此文章由已驗證公開 RSS 來源收錄。'),
+        date: formatMonitoringDate(article.published_at || article.fetched_at),
+        collectedDate: formatMonitoringDate(article.fetched_at),
+        reviewState: article.review_status || 'approved',
+        source: article.source,
+        sourceRegion: article.source_region || '',
+        sourceFeed: article.source_feed,
+        sourceHomepage: article.source_homepage,
+        sourceKind: article.source_kind || 'official_rss',
+        sourceAccessMode: article.source_access_mode || 'rss',
+        verificationStatus: article.verification_status || (article.source_kind === 'google_news_rss' ? 'aggregated' : 'verified_rss'),
+        urlKind: article.url_kind || 'publisher_url',
+        liveFallback: article.live_fallback === true,
+        url: article.url,
+        verifiedMonitoring: article.source_kind !== 'google_news_rss',
+        verificationLabel: article.source_kind === 'google_news_rss'
+            ? 'Google News RSS 聚合（非官方 RSS）'
+            : '已驗證 RSS 自動收錄'
+    };
+}
+
 window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArticles() {
     const base = monitoringApiBase();
     if (!base) return { loaded: false, reason: 'not_configured' };
@@ -69,7 +113,11 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
         baseParams.set('from', range.from);
         baseParams.set('to', range.to);
     }
-    const rawArticles = [];
+    const articles = [];
+    let liveFallbackCount = 0;
+    let officialLiveFallbackCount = 0;
+    let aggregatedCount = 0;
+    let officialRssCount = 0;
     let offset = 0;
     let total = null;
     let range = null;
@@ -84,7 +132,15 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
             headers: { Accept: 'application/json' }
         });
         const pageArticles = Array.isArray(payload.articles) ? payload.articles : [];
-        rawArticles.push(...pageArticles);
+        pageArticles.forEach((article) => {
+            if (article.live_fallback === true) {
+                liveFallbackCount += 1;
+                if (article.source_kind !== 'google_news_rss') officialLiveFallbackCount += 1;
+            }
+            if (article.source_kind === 'google_news_rss') aggregatedCount += 1;
+            else officialRssCount += 1;
+            articles.push(normalizeMonitoringArticle(article));
+        });
         range = payload.range || range;
         if (Number.isFinite(Number(payload.total))) total = Number(payload.total);
         if (!payload.has_more) break;
@@ -100,55 +156,12 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     return {
         loaded: true,
         range,
-        total: total ?? rawArticles.length,
+        total: total ?? articles.length,
         complete,
-        liveFallbackCount: rawArticles.filter((article) => article.live_fallback === true).length,
-        officialLiveFallbackCount: rawArticles.filter((article) => article.live_fallback === true && article.source_kind !== 'google_news_rss').length,
-        aggregatedCount: rawArticles.filter((article) => article.source_kind === 'google_news_rss').length,
-        officialRssCount: rawArticles.filter((article) => article.source_kind !== 'google_news_rss').length,
-        articles: rawArticles.map((article) => {
-            const evidenceList = parseEvidenceList(article);
-            const matchedTerms = uniqueTerms(evidenceList.flatMap((evidence) => [
-                ...(evidence.any_hits || []),
-                ...(evidence.all_hits || []),
-                ...(evidence.required_any_group_hits || []).flat()
-            ]).concat(Array.isArray(article.matched_terms) ? article.matched_terms : []));
-            const folders = uniqueTerms(String(article.folder_ids || '').split(','));
-            const ruleIds = uniqueTerms(String(article.rule_ids || '').split(','));
-            return {
-                companyId: 'monitoring',
-                companyName: '真實新聞監測',
-                companyColor: '#0f766e',
-                title: article.title,
-                keyPointZh: article.key_point_zh || article.keyPointZh || '',
-                category: '關鍵字監測',
-                huikeFolder: folders[0] || '',
-                huikeFolders: folders,
-                huikeKeyword: matchedTerms[0] || ruleIds[0] || '規則命中',
-                matchedTerms,
-                ruleIds,
-                excerpt: article.excerpt || (article.source_kind === 'google_news_rss'
-                    ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。'
-                    : '此文章由已驗證公開 RSS 來源收錄。'),
-                date: formatMonitoringDate(article.published_at || article.fetched_at),
-                collectedDate: formatMonitoringDate(article.fetched_at),
-                reviewState: article.review_status || 'approved',
-                source: article.source,
-                sourceRegion: article.source_region || '',
-                sourceFeed: article.source_feed,
-                sourceHomepage: article.source_homepage,
-                sourceKind: article.source_kind || 'official_rss',
-                sourceAccessMode: article.source_access_mode || 'rss',
-                verificationStatus: article.verification_status || (article.source_kind === 'google_news_rss' ? 'aggregated' : 'verified_rss'),
-                urlKind: article.url_kind || 'publisher_url',
-                liveFallback: article.live_fallback === true,
-                url: article.url,
-                synthetic: false,
-                verifiedMonitoring: article.source_kind !== 'google_news_rss',
-                verificationLabel: article.source_kind === 'google_news_rss'
-                    ? 'Google News RSS 聚合（非官方 RSS）'
-                    : '已驗證 RSS 自動收錄'
-            };
-        })
+        liveFallbackCount,
+        officialLiveFallbackCount,
+        aggregatedCount,
+        officialRssCount,
+        articles
     };
 };

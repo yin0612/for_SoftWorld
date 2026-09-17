@@ -19,11 +19,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"
-            integrity="sha384-NrKB+u6Ts6AtkIhwPixiKTzgSKNblyhlk0Sohlgar9UHUBzai/sgnNNWWd291xqt"
-            crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
     <!-- Stylesheets -->
     <link rel="stylesheet" href="css/index.css?v=20260914_03">
     <link rel="stylesheet" href="css/components.css?v=20260917_01">
@@ -65,11 +60,10 @@
         </div>
     </nav>
 
-    <!-- 全站資料狀態列：真實監測與模擬分析分開標示 -->
+    <!-- 全站資料狀態列 -->
     <div class="site-data-status" id="siteDataStatus" role="status" aria-live="polite">
         <div class="container site-data-status-inner">
             <span class="data-type-badge data-type-real">✓ 官方 RSS＋Google News 聚合真實新聞</span>
-            <span class="data-type-badge data-type-model">◆ 教學用模擬分析</span>
             <details class="site-data-status-details">
                 <summary class="site-data-status-toggle">資料狀態</summary>
                 <div class="site-data-status-extra">
@@ -97,7 +91,7 @@
             </h1>
             <p class="hero-subtitle animate-on-scroll animate-delay-1">
                 依據智冠年度監測規則，追蹤智冠集團、藍新科技、競業與遊戲／支付產業新聞<br>
-                新聞監測採官方 RSS 與 Google News RSS 聚合；產業比較圖表為教學用模擬數據，兩者分開標示
+                所有新聞與統計均來自近兩個月的官方 RSS、Google News RSS 聚合與監測規則命中結果
             </p>
             <div class="hero-cta animate-on-scroll animate-delay-2">
                 <a href="#/news" class="btn btn-primary">
@@ -149,7 +143,7 @@
             </div>
 
             <!-- 全站數據總覽卡片 -->
-            <div class="stats-grid animate-on-scroll" aria-label="資料類型分區：第一張為真實監測，其餘為教學用模擬分析">
+            <div class="stats-grid animate-on-scroll" aria-label="真實新聞監測資料總覽">
                 <div class="stat-card">
                     <div class="stat-card-icon">📊</div>
                     <div class="stat-card-number" data-target="0" id="statTotalNews">0</div>
@@ -158,21 +152,21 @@
                 </div>
                 <div class="stat-card">
                     <div class="stat-card-icon">📰</div>
-                    <div class="stat-card-number" data-target="0" id="statTotalCoverage">0</div>
-                    <div class="stat-card-label">模擬媒體報導量（非實測）</div>
-                    <span class="data-type-badge data-type-model">◆ 模擬數據</span>
+                    <div class="stat-card-number" data-target="0" id="statOfficialRss">0</div>
+                    <div class="stat-card-label">官方 RSS 新聞</div>
+                    <span class="data-type-badge data-type-real">✓ API 統計</span>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-card-icon">💬</div>
-                    <div class="stat-card-number" data-target="0" id="statTotalSocial">0</div>
-                    <div class="stat-card-label">模擬社群提及（非實測）</div>
-                    <span class="data-type-badge data-type-model">◆ 模擬數據</span>
+                    <div class="stat-card-icon">🔎</div>
+                    <div class="stat-card-number" data-target="0" id="statAggregatedNews">0</div>
+                    <div class="stat-card-label">Google News 聚合</div>
+                    <span class="data-type-badge data-type-real">✓ API 統計</span>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-card-icon">🤝</div>
-                    <div class="stat-card-number" data-target="0" id="statTotalKol">0</div>
-                    <div class="stat-card-label">模擬 KOL 合作（非實測）</div>
-                    <span class="data-type-badge data-type-model">◆ 模擬數據</span>
+                    <div class="stat-card-icon">📡</div>
+                    <div class="stat-card-number" data-target="0" id="statVerifiedSources">0</div>
+                    <div class="stat-card-label">已驗證來源</div>
+                    <span class="data-type-badge data-type-real">✓ 來源狀態</span>
                 </div>
             </div>
 
@@ -420,83 +414,45 @@
     </section>
 
     <!-- ======================================
-         媒體曝光數據分析
+         真實監測數據分析
     ====================================== -->
     <section class="section" id="analytics">
         <div class="container">
             <div class="section-header animate-on-scroll">
-                <span class="section-tag">DATA ANALYTICS</span>
-                <h2 class="section-title">模擬媒體聲量與曝光<span class="text-gradient">數據視覺化</span></h2>
-                <p class="section-subtitle">以下圖表為教學用模型輸出，協助理解比較方法；不得引用為實際聲量、合作數或市場占有率</p>
+                <span class="section-tag">VERIFIED DATA ANALYTICS</span>
+                <h2 class="section-title">真實新聞<span class="text-gradient">數據分析</span></h2>
+                <p class="section-subtitle">統計範圍為近兩個月至今天；圖表直接使用 Cloudflare Worker 的已驗證 RSS／Google News 聚合文章。</p>
             </div>
 
-            <!-- 自動洞察摘要（由 enhancements.js 依實際數據計算） -->
-            <div class="insights-grid animate-on-scroll" id="analyticsInsights"></div>
+            <div class="insights-grid animate-on-scroll" id="analyticsInsights" aria-label="真實監測摘要"></div>
 
-            <!-- 曝光量趨勢圖 -->
             <div class="chart-card animate-on-scroll" id="chartTrendCard">
                 <div class="chart-card-header">
-                    <h3 class="chart-card-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                        模擬：8 大企業月度媒體報導量趨勢
-                    </h3>
-                    <span class="chart-card-subtitle" id="trendRangeLabel">模型月份：載入中</span>
+                    <h3 class="chart-card-title">📈 每日真實新聞量</h3>
+                    <span class="chart-card-subtitle" id="trendRangeLabel">資料區間：載入中</span>
                 </div>
-                <div class="year-filter" id="trendYearFilter" role="group" aria-label="趨勢圖年度區間"></div>
                 <div class="chart-card-body">
-                    <canvas id="exposureTrendChart" role="img" aria-label="2024 至 2026 年八家台灣遊戲公司每月媒體報導聲量趨勢折線圖"></canvas>
-                </div>
-                <!-- 趨勢觀測對話框 -->
-                <div class="insight-box">
-                    <strong>💡 數據趨勢觀測洞察：</strong>
-                    各家公司媒體曝光量與「新遊戲上市/改版」及「經營權股權爭奪事件」呈現高度正相關。例如橘子在 2024 年 6 月推出《波拉西亞戰記》時媒體聲量達到年度高峰；智冠與網銀則在 2024 年年中股東會改選期間出現顯著的財經與產經媒體曝光波段。
+                    <canvas id="exposureTrendChart" role="img" aria-label="近兩個月官方 RSS 與 Google News 聚合每日新聞量折線圖"></canvas>
                 </div>
             </div>
 
-            <!-- 雙欄圖表 -->
             <div class="chart-grid">
-                <!-- 媒體通路分佈 -->
-                <div class="chart-card animate-on-scroll" id="chartChannelCard">
-                    <div class="chart-card-header">
-                        <h3 class="chart-card-title">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-                            模擬：各公司媒體曝光通路分佈比例
-                        </h3>
-                        <select class="chart-company-select" id="channelCompanySelect">
-                            <!-- 由 JavaScript 動態渲染 -->
-                        </select>
-                    </div>
-                    <div class="chart-card-body">
-                        <canvas id="mediaChannelChart" role="img" aria-label="各遊戲公司在各大媒體通路的曝光百分比圓餅圖"></canvas>
-                    </div>
+                <div class="chart-card animate-on-scroll" id="chartCategoryCard">
+                    <div class="chart-card-header"><h3 class="chart-card-title">🗂️ 監測分類新聞量</h3></div>
+                    <div class="chart-card-body"><canvas id="categoryChart" role="img" aria-label="六大監測分類真實新聞數量長條圖"></canvas></div>
                 </div>
-
-                <!-- KOL 合作排行 -->
-                <div class="chart-card animate-on-scroll" id="chartKolCard">
-                    <div class="chart-card-header">
-                        <h3 class="chart-card-title">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            模擬：KOL 實況主合作排序
-                        </h3>
-                    </div>
-                    <div class="chart-card-body">
-                        <canvas id="kolRankChart" role="img" aria-label="八大台灣遊戲企業 KOL 與實況主合作次數排行榜橫向長條圖"></canvas>
-                    </div>
+                <div class="chart-card animate-on-scroll" id="chartSourceCard">
+                    <div class="chart-card-header"><h3 class="chart-card-title">📰 實際來源排行</h3></div>
+                    <div class="chart-card-body"><canvas id="sourceChart" role="img" aria-label="實際新聞來源數量排行長條圖"></canvas></div>
                 </div>
             </div>
 
-            <!-- 新聞稿數量排行 -->
-            <div class="chart-card animate-on-scroll" id="chartPressCard">
-                <div class="chart-card-header">
-                    <h3 class="chart-card-title">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-                        模擬：官方公關新聞稿發布排序
-                    </h3>
-                </div>
-                <div class="chart-card-body">
-                    <canvas id="pressReleaseChart" role="img" aria-label="八大台灣遊戲企業官方新聞稿發布總總篇數長條圖"></canvas>
-                </div>
+            <div class="chart-card animate-on-scroll" id="chartKeywordCard">
+                <div class="chart-card-header"><h3 class="chart-card-title">🔑 關鍵字命中排行</h3></div>
+                <div class="chart-card-body"><canvas id="keywordChart" role="img" aria-label="監測關鍵字實際命中次數排行長條圖"></canvas></div>
             </div>
+
+            <p class="method-muted" id="analyticsDataNote">每張圖表均附日期範圍與來源類型；Google News 聚合只代表可開啟的原文索引，不等同媒體官方 RSS。</p>
         </div>
     </section>
 
@@ -508,7 +464,7 @@
             <div class="section-header animate-on-scroll">
                 <span class="section-tag">BENCHMARK TOOL</span>
                 <h2 class="section-title">企業多維度<span class="text-gradient">PK 對比分析工具</span></h2>
-                <p class="section-subtitle">勾選 2 至 8 家目標公司，進行公關力、曝光量、社群聲量與 KOL 合作之全方位雷達圖與指標數據比對</p>
+                <p class="section-subtitle">勾選目標公司，比較近兩個月實際命中的新聞數、監測分類、來源數與最新發布日期</p>
             </div>
 
             <div class="compare-container" id="compareContainer">
@@ -518,97 +474,20 @@
     </section>
 
     <!-- ======================================
-         產業趨勢分析
+         真實趨勢分析
     ====================================== -->
     <section class="section" id="trends">
         <div class="container">
             <div class="section-header animate-on-scroll">
-                <span class="section-tag">INDUSTRY INSIGHTS</span>
-                <h2 class="section-title">2024–2026 台灣遊戲產業<span class="text-gradient">趨勢與大事記</span></h2>
-                <p class="section-subtitle">彙整 AI 技術轉型、泛娛樂資本佈局、海外市場拓展與經典 IP 重塑四大產業趨勢</p>
+                <span class="section-tag">VERIFIED TRENDS</span>
+                <h2 class="section-title">近兩個月真實新聞<span class="text-gradient">趨勢與事件</span></h2>
+                <p class="section-subtitle">依實際收錄文章整理熱門分類、來源與發布時間；每則事件均可回到原文查核。</p>
             </div>
-
-            <!-- 趨勢亮點卡 -->
-            <div class="trend-highlights animate-on-scroll">
-                <div class="trend-card">
-                    <div class="trend-card-icon">🚀</div>
-                    <h4 class="trend-card-title">AI 轉型與技術創新浪潮</h4>
-                    <p class="trend-card-desc">2026年橘子集團定調「AI商轉元年」，推出 Vyin AI 平台與邊緣算力中心，引領產業 AI 轉型趨勢。</p>
-                    <span class="trend-card-date">2026</span>
-                </div>
-                <div class="trend-card">
-                    <div class="trend-card-icon">🔄</div>
-                    <h4 class="trend-card-title">經營權攻防與泛娛樂資本</h4>
-                    <p class="trend-card-desc">網銀國際積極布局泛娛樂生態圈，入主威秀影城、入股智冠與華義，引發產業版圖重整。</p>
-                    <span class="trend-card-date">2024</span>
-                </div>
-                <div class="trend-card">
-                    <div class="trend-card-icon">🌏</div>
-                    <h4 class="trend-card-title">全球化佈局與海外授權</h4>
-                    <p class="trend-card-desc">宇峻奧汀「一次研發，全球授權」策略成效顯著，傳奇網路端遊全球版持續擴展，華義進軍印度市場。</p>
-                    <span class="trend-card-date">2025-2026</span>
-                </div>
-                <div class="trend-card">
-                    <div class="trend-card-icon">🎯</div>
-                    <h4 class="trend-card-title">IP 經營與事業轉型模式</h4>
-                    <p class="trend-card-desc">大宇出售仙劍/軒轅劍 IP 轉型控股、網銀《星城》品牌煥新、宇峻奧汀 30 週年更新 CIS 與 UE5 新作。</p>
-                    <span class="trend-card-date">2024-2026</span>
-                </div>
-            </div>
-
-            <!-- 重大事件時間軸 -->
+            <div class="trend-highlights animate-on-scroll" id="trendsSummary" aria-live="polite"></div>
             <div class="events-timeline animate-on-scroll">
-                <h3 class="subsection-title">2024 – 2026 重大產業事件時間軸</h3>
-                <div class="events-list">
-                    <div class="event-item">
-                        <div class="event-date">2024.06</div>
-                        <div class="event-content">
-                            <h4>網銀國際收購威秀影城 35.69% 股權</h4>
-                            <p>斥資 12.49 億元取得最大股東地位，打通虛實娛樂影音通路。</p>
-                        </div>
-                    </div>
-                    <div class="event-item">
-                        <div class="event-date">2024.06</div>
-                        <div class="event-content">
-                            <h4>智冠股東改選完成經營權鞏固</h4>
-                            <p>智冠透過與榮剛換股鞏固經營權，順利取得過半董事席次。</p>
-                        </div>
-                    </div>
-                    <div class="event-item">
-                        <div class="event-date">2024.09</div>
-                        <div class="event-content">
-                            <h4>大宇資訊處分《仙劍》《軒轅劍》雙劍 IP</h4>
-                            <p>挹注逾 5 億元營運資金，開啟轉型半導體/重電控股集團之路。</p>
-                        </div>
-                    </div>
-                    <div class="event-item">
-                        <div class="event-date">2025.Q1</div>
-                        <div class="event-content">
-                            <h4>宇峻奧汀代理《FINAL FANTASY XIV》繁中版</h4>
-                            <p>代理 SQUARE ENIX 旗艦 MMORPG 繁體中文版，帶動營收獲利創高峰。</p>
-                        </div>
-                    </div>
-                    <div class="event-item">
-                        <div class="event-date">2026.01</div>
-                        <div class="event-content">
-                            <h4>大宇母公司更名「光聚晶電聯合」</h4>
-                            <p>正式轉型多角化控股集團，原遊戲研發事業移至子公司大宇資訊。</p>
-                        </div>
-                    </div>
-                    <div class="event-item">
-                        <div class="event-date">2026.07</div>
-                        <div class="event-content">
-                            <h4>《星城Online》品牌煥新更名《星城》</h4>
-                            <p>營運 18 年的招牌產品全面轉向跨生活場景的泛娛樂 IP 品牌。</p>
-                        </div>
-                    </div>
-                    <div class="event-item">
-                        <div class="event-date">2026.08</div>
-                        <div class="event-content">
-                            <h4>智冠科技交棒二代繼任董事長</h4>
-                            <p>創辦人王俊博卸任轉任集團總裁，由其長女王思淳接任董事長。</p>
-                        </div>
-                    </div>
+                <h3 class="subsection-title">真實監測新聞時間軸</h3>
+                <div class="events-list" id="trendsTimeline">
+                    <p class="method-muted">正在讀取真實新聞監測資料。</p>
                 </div>
             </div>
         </div>
@@ -621,134 +500,47 @@
         <div class="container">
             <div class="section-header animate-on-scroll">
                 <span class="section-tag">DATA &amp; METHODOLOGY</span>
-                <h2 class="section-title">資料來源與<span class="text-gradient">方法論說明</span></h2>
-                <p class="section-subtitle">本站每一個數字的來源、定義與限制，供引用與查核使用</p>
+                <h2 class="section-title">資料來源與<span class="text-gradient">監測口徑</span></h2>
+                <p class="section-subtitle">保留查核所需資訊，其餘細節收合，避免干擾新聞閱讀。</p>
             </div>
 
             <div class="method-notice animate-on-scroll">
-                <h3>⚠️ 資料性質聲明（先看這裡）</h3>
-                <p>本站為<strong>媒體曝光比較方法的展示與教學平台</strong>，並非商業或官方統計服務。頁面上的資料分為兩類，請務必分開理解：</p>
-                <p><strong>一、公司基本資料與重大事件</strong>（公司簡介、代表作品、近期重大動態、新聞稿標題與發布日期）為人工整理自公開資訊，可對照官方新聞頁與公開資訊觀測站查核。</p>
-                <p><strong>二、月度量化指標</strong>（媒體報導篇數、社群聲量、KOL 合作數、媒體通路佔比）為<strong>依產業特性參數建模產生的模擬數據</strong>，用於示範比較方法與視覺化呈現，<strong>不得作為各公司實際媒體聲量的量測結果引用</strong>。</p>
+                <h3>資料原則</h3>
+                <p>新聞只公開已命中監測規則、具備原文連結且來自官方 RSS 或 Google News RSS 聚合的資料。兩種來源會分開標示；Google News 聚合不等同媒體官方 RSS。</p>
             </div>
 
             <div class="method-grid animate-on-scroll">
                 <div class="method-card">
                     <h3>📐 監測範圍</h3>
                     <ul>
-                        <li>觀測企業：<span class="method-figure" id="methodCompanies">8</span> 家台灣遊戲上市櫃／指標企業</li>
-                        <li>時間跨度：<span class="method-figure" id="methodMonths">近兩個月</span></li>
+                        <li>觀測企業：<span class="method-figure" id="methodCompanies">8</span> 家指標企業</li>
                         <li>資料區間：<span class="method-figure" id="methodRange">近兩個月 — 今天</span></li>
-                        <li>媒體通路：<span class="method-figure" id="methodChannels">10</span> 個觀測頻道</li>
+                        <li>關鍵字分類：六大規則資料夾</li>
                     </ul>
                 </div>
                 <div class="method-card">
-                    <h3>📰 新聞稿資料</h3>
+                    <h3>🔄 更新與驗證</h3>
                     <ul>
-                        <li>總筆數：<span class="method-figure" id="methodPressTotal">30</span> 則</li>
-                        <li>人工整理（可查核）：<span class="method-figure" id="methodCurated">30</span> 則</li>
-                        <li>系統模擬（標示徽章）：<span class="method-figure" id="methodSynthetic">0</span> 則</li>
-                        <li>每則皆標註分類、來源媒體與發布日期</li>
+                        <li>Cloudflare Worker 依排程收集 RSS，頁面顯示最後成功時間</li>
+                        <li>公開資料只包含 approved 文章；待覆核內容不會顯示</li>
+                        <li>每則新聞保留來源、命中規則、發布日與原文連結</li>
                     </ul>
                 </div>
                 <div class="method-card">
-                    <h3>🔄 更新機制</h3>
+                    <h3>⚖️ 使用限制</h3>
                     <ul>
-                        <li>真實 RSS：Cloudflare Worker 每小時第 17 分鐘收集，頁面顯示最後成功更新時間</li>
-                        <li>監測窗口：台北時間今天往前兩個月，發布日與本站收錄日分開保存</li>
-                        <li>自動產生的項目一律標示「🤖 模擬資料」且來源記為「系統模擬」</li>
-                        <li>模擬項目設有 12 筆上限，避免資料無限膨脹</li>
-                        <li>人工資料以 commit 方式維護，可完整追溯修改歷程</li>
+                        <li>Google News 聚合只提供索引資訊，請以原文為準</li>
+                        <li>來源未提供 RSS 時，不以估算聲量補足</li>
+                        <li>本站不提供投資、交易或法律意見</li>
                     </ul>
                 </div>
             </div>
 
-            <div class="method-update-log animate-on-scroll" aria-live="polite">
-                <h3>🗓️ 公開更新紀錄</h3>
-                <p><strong>2026-09-16｜v1.3</strong>：資料來源、同步狀態、監測口徑與新聞卡片驗證細節改為可收合按鈕，保留核心新聞與統計資訊常駐。</p>
-                <p><strong>2026-09-16｜v1.2</strong>：穩定幣視圖新增奧丁丁／OwlPay 高精準優先規則、優先排序與命中語境說明。</p>
-                <p class="method-muted">程式提交可於 GitHub 追溯；本區只呈現使用者需要知道的資料口徑與介面變更。</p>
-            </div>
-
-            <div class="method-table-wrap animate-on-scroll">
-                <table class="method-table">
-                    <caption class="sr-only">四項核心指標的定義、單位與資料性質</caption>
-                    <thead>
-                        <tr>
-                            <th scope="col">指標</th>
-                            <th scope="col">定義</th>
-                            <th scope="col">單位</th>
-                            <th scope="col">資料性質</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row">新聞稿發布數</th>
-                            <td>企業主動對外發布的官方公關訊息數量</td>
-                            <td>篇／月</td>
-                            <td><span class="method-tag method-tag-model">模型產生</span></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">媒體報導篇數</th>
-                            <td>觀測媒體對該企業的報導則數，含轉載</td>
-                            <td>則／月</td>
-                            <td><span class="method-tag method-tag-model">模型產生</span></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">社群網路聲量</th>
-                            <td>社群平台與論壇提及該企業或旗下產品的次數</td>
-                            <td>次／月</td>
-                            <td><span class="method-tag method-tag-model">模型產生</span></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">KOL 合作數</th>
-                            <td>與實況主、網紅進行的宣傳合作檔次</td>
-                            <td>次／月</td>
-                            <td><span class="method-tag method-tag-model">模型產生</span></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">公司基本資料</th>
-                            <td>成立年份、股票代號、代表作品、重大動態</td>
-                            <td>—</td>
-                            <td><span class="method-tag method-tag-real">公開資訊</span></td>
-                        </tr>
-                        <tr>
-                            <th scope="row">新聞稿標題與日期</th>
-                            <td>實際發生之事件標題、發布日期與報導媒體</td>
-                            <td>—</td>
-                            <td><span class="method-tag method-tag-real">公開資訊</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="method-grid animate-on-scroll" style="margin-top: var(--spacing-2xl);">
-                <div class="method-card">
-                    <h3>🧮 模擬數據怎麼產生</h3>
-                    <p>每家公司設定四項基準值（basePR、baseMedia、baseSocial、baseKol），再乘上兩個係數：</p>
-                    <ul>
-                        <li><strong>週期項</strong>：以正弦波模擬產業淡旺季，振幅約 ±15%</li>
-                        <li><strong>事件項</strong>：在該公司實際發生重大事件的月份（如併購、新作上線、經營權改選）套用 1.4–2.9 倍的聲量高峰</li>
-                    </ul>
-                    <p>計算過程<strong>不含亂數</strong>，因此任何人在任何時間開啟本站，看到的數字都完全相同、可重現、可比對。</p>
-                </div>
-                <div class="method-card">
-                    <h3>⚖️ 已知限制</h3>
-                    <ul>
-                        <li>量化指標為模型輸出，不等同真實媒體監測結果</li>
-                        <li>媒體通路佔比為各公司設定之固定分佈，非逐則統計</li>
-                        <li>未涵蓋非上市櫃的中小型遊戲公司與獨立開發者</li>
-                        <li>未區分正面／負面報導傾向（無情緒分析）</li>
-                        <li>社群聲量未區分自然討論與付費行銷內容</li>
-                    </ul>
-                </div>
-                <div class="method-card">
-                    <h3>📎 引用方式</h3>
-                    <p>若於報告或論文中引用本站圖表，建議標註為：</p>
-                    <p class="method-cite">智冠產業關鍵字監測中心（產業概覽含示範用模擬數據），https://yin0612.github.io/for_SoftWorld/</p>
-                    <p>各圖表下方可展開「數據表」或匯出 CSV，取得完整底層數字。</p>
-                </div>
-            </div>
+            <details class="method-details animate-on-scroll">
+                <summary>完整監測規則與關鍵字</summary>
+                <p>完整規則由 <code>config/monitoring_rules.json</code> 維護，包含台灣支付、競業、產業、國際金融科技與穩定幣（奧丁丁／OwlPay 優先）等條件。</p>
+                <p class="method-muted">程式提交與來源清單可於 GitHub 追溯。</p>
+            </details>
         </div>
     </section>
 
@@ -836,7 +628,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>© 2024-2026 台灣遊戲產業媒體曝光分析平台 — 本站為數據展示與比較分析示範工具</p>
+                <p>© 2024-2026 智冠產業關鍵字監測中心 — 真實新聞與來源整理平台</p>
             </div>
         </div>
     </footer>
@@ -855,12 +647,11 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="js/data.js?v=20260917_08"></script>
+    <script src="js/data.js?v=20260917_09"></script>
     <script src="js/animations.js?v=20260914_03"></script>
-    <script src="js/charts.js?v=20260915_01"></script>
-    <script src="js/compare.js?v=20260914_03"></script>
+    <script src="js/charts.js?v=20260917_01"></script>
+    <script src="js/compare.js?v=20260917_01"></script>
     <script src="js/monitoring.js?v=20260917_02"></script>
-    <script src="js/app.js?v=20260917_02"></script>
-    <script src="js/enhancements.js?v=20260915_01"></script>
+    <script src="js/app.js?v=20260917_03"></script>
 </body>
 </html>

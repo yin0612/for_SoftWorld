@@ -1,474 +1,211 @@
 /**
- * 圖表模組 (Charts Module)
- * 使用 Chart.js v4 繪製，日系清新風格，莫蘭迪配色。
- * 依賴：全域資料變數來自 js/data.js (COMPANIES, MONTHLY_STATS, MEDIA_CHANNELS, PRESS_RELEASES)
+ * 真實監測圖表模組。
+ * Chart.js 只在使用者進入分析頁時載入，圖表資料完全來自 monitoringNews。
  */
-
-// 設定 Chart.js 日系明亮清新主題預設值
-if (typeof Chart !== 'undefined') {
-    Chart.defaults.color = '#5a6578';
-    Chart.defaults.font.family = "'Noto Sans TC', 'Inter', sans-serif";
-    Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(43, 48, 58, 0.9)';
-    Chart.defaults.plugins.tooltip.padding = 10;
-    Chart.defaults.plugins.tooltip.cornerRadius = 8;
-    Chart.defaults.plugins.legend.labels.usePointStyle = true;
-    Chart.defaults.scale.grid.color = 'rgba(229, 233, 240, 0.7)';
-}
 
 const charts = {};
+const CHART_JS_SRC = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js';
+let chartJsPromise = null;
 
-/**
- * 取得公司品牌顏色
- */
-function getBrandColor(companyId) {
-    const company = COMPANIES.find(c => c.id === companyId);
-    return company ? company.brandColor : '#ffffff';
+function ensureChartJs() {
+    if (window.Chart) return Promise.resolve(window.Chart);
+    if (chartJsPromise) return chartJsPromise;
+    chartJsPromise = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = CHART_JS_SRC;
+        script.crossOrigin = 'anonymous';
+        script.referrerPolicy = 'no-referrer';
+        script.onload = () => resolve(window.Chart);
+        script.onerror = () => reject(new Error('Chart.js 載入失敗'));
+        document.head.appendChild(script);
+    });
+    return chartJsPromise;
 }
 
-/**
- * 初始化每月媒體曝光趨勢折線圖
- */
-function initExposureTrendChart(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-
-    // 取得所有月份標籤 (假設所有公司的月份區間相同)
-    const firstCompanyId = COMPANIES[0].id;
-    const allMonths = MONTHLY_STATS[firstCompanyId].map(stat => stat.month);
-
-    // 年度區間篩選：window.TREND_YEAR 由 enhancements.js 的年度切換鈕設定
-    const yearFilter = (typeof window !== 'undefined' && window.TREND_YEAR) || 'all';
-    const kept = allMonths
-        .map((m, i) => ({ m, i }))
-        .filter(o => yearFilter === 'all' || o.m.startsWith(yearFilter));
-    const months = kept.map(o => o.m);
-    const monthIndexes = kept.map(o => o.i);
-
-    const pointStyles = ['circle', 'triangle', 'rect', 'star', 'cross', 'rectRot', 'crossRot', 'dash'];
-
-    const datasets = COMPANIES.map((company, idx) => {
-        const data = monthIndexes.map(i => MONTHLY_STATS[company.id][i].mediaCoverage);
-        return {
-            label: `${company.name}（模擬）`,
-            data: data,
-            borderColor: company.brandColor,
-            backgroundColor: company.brandColor,
-            borderWidth: 2,
-            pointRadius: 3,
-            pointHoverRadius: 6,
-            pointStyle: pointStyles[idx % pointStyles.length],
-            tension: 0.4 // 平滑曲線
-        };
-    });
-
-    charts[canvasId] = new Chart(canvas, {
-        type: 'line',
-        data: {
-            labels: months,
-            datasets: datasets
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: {
-                mode: 'index',
-                intersect: false,
-            },
-            onClick: function(evt, elements) {
-                if (!elements || !elements.length) return;
-                const el = elements[0];
-                const datasetIndex = el.datasetIndex;
-                const index = el.index;
-                
-                const company = COMPANIES[datasetIndex];
-                const month = months[index];
-                
-                if (company && month) {
-                    const docs = typeof loadSources === 'function' ? loadSources(company.id, month) : [];
-                    showProvenanceModal(company.name, month, docs);
-                }
-            },
-            plugins: {
-                legend: {
-                    position: 'top',
-                    labels: {
-                        usePointStyle: true,
-                        boxWidth: 8
-                    }
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.dataset.label}: ${context.parsed.y} 則（模型值，非實測）`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: {
-                        callback: function(val, index) {
-                            // 每 3 個月顯示一次標籤
-                            return index % 3 === 0 ? this.getLabelForValue(val) : '';
-                        }
-                    }
-                },
-                y: {
-                    beginAtZero: true
-                }
-            }
-        }
-    });
+function getRealArticles() {
+    return typeof monitoringNews !== 'undefined' && Array.isArray(monitoringNews)
+        ? monitoringNews.filter((article) => article && article.title)
+        : [];
 }
 
-/**
- * 初始化媒體通路分佈甜甜圈圖
- */
-function initMediaChannelChart(canvasId, companyId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-    
-    // 取得容器
-    const container = canvas.parentElement;
+function getRealRange() {
+    const range = typeof monitoringLoadState !== 'undefined' ? monitoringLoadState?.range : null;
+    if (range?.from && range?.to) return `${range.from} — ${range.to}`;
+    if (typeof getRollingMonitoringDateRange === 'function') {
+        const fallback = getRollingMonitoringDateRange();
+        return `${fallback.from} — ${fallback.to}`;
+    }
+    return '近兩個月 — 今天';
+}
 
-    const channelColors = [
-        '#00b4d8', '#f72585', '#7209b7', '#4361ee', '#4cc9f0', '#ffb703', '#9b5de5'
+function destroyChart(id) {
+    if (charts[id]) {
+        try { charts[id].destroy(); } catch (_) {}
+        delete charts[id];
+    }
+}
+
+function chartColors(count) {
+    const palette = ['#0f766e', '#e76f51', '#48cae4', '#f4a261', '#9d4edf', '#4a7c59', '#64748b', '#f59e0b', '#2563eb', '#db2777'];
+    return Array.from({ length: count }, (_, index) => palette[index % palette.length]);
+}
+
+function folderLabel(folderId) {
+    if (typeof HUIKE_2025_STRUCTURE !== 'undefined') {
+        const folder = HUIKE_2025_STRUCTURE.find((entry) => entry.id === folderId);
+        if (folder) return String(folder.folderName || folder.name || folderId).replace(/^\d+\.\s*/, '');
+    }
+    if (typeof monitoringManifest !== 'undefined' && monitoringManifest?.folders) {
+        const folder = monitoringManifest.folders.find((entry) => entry.id === folderId);
+        if (folder?.name) return folder.name;
+    }
+    return folderId;
+}
+
+function folderCounts(articles) {
+    const counts = new Map();
+    articles.forEach((article) => {
+        const folders = Array.isArray(article.huikeFolders) && article.huikeFolders.length
+            ? article.huikeFolders
+            : [article.huikeFolder];
+        folders.filter(Boolean).forEach((folder) => counts.set(folder, (counts.get(folder) || 0) + 1));
+    });
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]);
+}
+
+function sourceCounts(articles) {
+    const counts = new Map();
+    articles.forEach((article) => {
+        const source = article.source || '來源未提供';
+        counts.set(source, (counts.get(source) || 0) + 1);
+    });
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12);
+}
+
+function keywordCounts(articles) {
+    const counts = new Map();
+    articles.forEach((article) => {
+        const terms = Array.isArray(article.matchedTerms) ? article.matchedTerms : [];
+        const unique = new Set(terms.filter(Boolean));
+        unique.forEach((term) => counts.set(term, (counts.get(term) || 0) + 1));
+    });
+    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15);
+}
+
+function dateCounts(articles) {
+    const counts = new Map();
+    articles.forEach((article) => {
+        if (!article.date) return;
+        const current = counts.get(article.date) || { official: 0, aggregated: 0 };
+        if (article.sourceKind === 'google_news_rss') current.aggregated += 1;
+        else current.official += 1;
+        counts.set(article.date, current);
+    });
+    const labels = [...counts.keys()].sort();
+    return {
+        labels,
+        official: labels.map((label) => counts.get(label).official),
+        aggregated: labels.map((label) => counts.get(label).aggregated)
+    };
+}
+
+function applyChartDefaults() {
+    if (!window.Chart) return;
+    window.Chart.defaults.color = '#5a6578';
+    window.Chart.defaults.font.family = "'Noto Sans TC', 'Inter', sans-serif";
+    window.Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(43, 48, 58, 0.9)';
+    window.Chart.defaults.plugins.tooltip.padding = 10;
+    window.Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    window.Chart.defaults.plugins.legend.labels.usePointStyle = true;
+    window.Chart.defaults.scale.grid.color = 'rgba(229, 233, 240, 0.7)';
+}
+
+function makeChart(id, config) {
+    const canvas = document.getElementById(id);
+    if (!canvas || !window.Chart) return;
+    destroyChart(id);
+    charts[id] = new window.Chart(canvas, config);
+}
+
+function renderRealSummary(articles) {
+    const host = document.getElementById('analyticsInsights');
+    if (!host) return;
+    const official = articles.filter((article) => article.sourceKind !== 'google_news_rss').length;
+    const aggregated = articles.length - official;
+    const sourceTotal = new Set(articles.map((article) => article.source).filter(Boolean)).size;
+    const latest = articles.map((article) => article.date).filter(Boolean).sort().pop() || '待更新';
+    const cards = [
+        ['📰', '真實新聞', articles.length.toLocaleString(), '目前監測窗口'],
+        ['✓', '官方 RSS', official.toLocaleString(), '已驗證來源文章'],
+        ['🔎', 'Google News 聚合', aggregated.toLocaleString(), '保留原文索引'],
+        ['📡', '實際來源', sourceTotal.toLocaleString(), `最新發布 ${latest}`]
     ];
-
-    // 若尚未加入公司選擇器，則加入
-    let selectEl = document.getElementById(`${canvasId}-select`);
-    if (!selectEl) {
-        const selectHtml = `
-            <select id="${canvasId}-select" class="company-selector" style="margin-bottom: 12px; padding: 6px 12px; background: #ffffff; color: #334155; border: 1px solid #cbd5e1; border-radius: 6px; font-family: inherit; font-size: 0.9rem; font-weight: 600; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-                ${COMPANIES.map(c => `<option value="${c.id}">${c.name}</option>`).join('')}
-            </select>
-        `;
-        container.insertAdjacentHTML('afterbegin', selectHtml);
-        selectEl = document.getElementById(`${canvasId}-select`);
-        
-        selectEl.addEventListener('change', (e) => {
-            updateChart(e.target.value);
-        });
-    }
-
-    function updateChart(cid) {
-        const company = COMPANIES.find(c => c.id === cid);
-        const channels = MEDIA_CHANNELS[cid];
-        const labels = Object.keys(channels);
-        const data = Object.values(channels);
-
-        if (charts[canvasId]) {
-            charts[canvasId].data.labels = labels;
-            charts[canvasId].data.datasets[0].data = data;
-            
-            // 更新中心文字的 plugin state
-            charts[canvasId].options.plugins.centerText = {
-                text: company.name,
-                color: company.brandColor
-            };
-            
-            charts[canvasId].update();
-        } else {
-            charts[canvasId] = new Chart(canvas, {
-                type: 'doughnut',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: channelColors,
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: {
-                            position: 'right',
-                            labels: {
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        },
-                        centerText: {
-                            text: company.name,
-                            color: company.brandColor
-                        }
-                    }
-                },
-                plugins: [{
-                    id: 'centerTextPlugin',
-                    beforeDraw: function(chart) {
-                        const width = chart.width, height = chart.height, ctx = chart.ctx;
-                        const pluginOptions = chart.options.plugins.centerText || {};
-                        const text = pluginOptions.text || '';
-                        const color = pluginOptions.color || '#fff';
-                        
-                        ctx.restore();
-                        ctx.font = "bold 20px 'Noto Sans TC'";
-                        ctx.fillStyle = color;
-                        ctx.textBaseline = "middle";
-                        
-                        const textX = Math.round((chart.chartArea.left + chart.chartArea.right) / 2 - ctx.measureText(text).width / 2);
-                        const textY = height / 2;
-                        
-                        ctx.fillText(text, textX, textY);
-                        ctx.save();
-                    }
-                }]
-            });
-        }
-    }
-
-    updateChart(companyId || COMPANIES[0].id);
+    host.innerHTML = cards.map(([icon, label, value, note]) => `
+        <article class="insight-card">
+            <div class="insight-card-top"><span class="insight-card-icon" aria-hidden="true">${icon}</span><span class="insight-card-label">${label}</span></div>
+            <p class="insight-card-value">${value}</p>
+            <p class="insight-card-note">${note}</p>
+        </article>
+    `).join('');
 }
 
-/**
- * 初始化 KOL 合作排行長條圖 (橫向)
- */
-function initKolRankChart(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-
-    // 計算各公司 KOL 總合作數
-    const kolData = COMPANIES.map(company => {
-        const totalKol = MONTHLY_STATS[company.id].reduce((sum, stat) => sum + stat.kolCollabs, 0);
-        return {
-            id: company.id,
-            name: company.name,
-            total: totalKol,
-            color: company.brandColor
-        };
-    });
-
-    // 排序降冪
-    kolData.sort((a, b) => b.total - a.total);
-
-    charts[canvasId] = new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: kolData.map(d => d.name),
-            datasets: [{
-                label: '模擬 KOL 合作總數',
-                data: kolData.map(d => d.total),
-                backgroundColor: kolData.map(d => d.color || '#3a86ff'),
-                borderRadius: 6,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            indexAxis: 'y', // 橫向長條圖
-            responsive: true,
-            maintainAspectRatio: false,
-            animation: {
-                duration: 1500,
-                easing: 'easeOutQuart'
-            },
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.parsed.x} 次合作（模型值，非實測）`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    beginAtZero: true,
-                    ticks: { color: '#64748b' },
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                },
-                y: {
-                    ticks: { color: '#334155', font: { weight: '600' } },
-                    grid: { display: false }
-                }
-            }
-        }
-    });
+function renderEmptyAnalytics(message) {
+    const host = document.getElementById('analyticsInsights');
+    if (host) host.innerHTML = `<p class="method-muted">${message}</p>`;
+    ['exposureTrendChart', 'categoryChart', 'sourceChart', 'keywordChart'].forEach((id) => destroyChart(id));
 }
 
-/**
- * 初始化新聞稿數量排行長條圖 (直向)
- */
-function initPressReleaseChart(canvasId) {
-    const canvas = document.getElementById(canvasId);
-    if (!canvas) return;
-
-    // 計算各公司新聞稿總數
-    const prData = COMPANIES.map(company => {
-        const totalPr = MONTHLY_STATS[company.id].reduce((sum, stat) => sum + stat.pressReleaseCount, 0);
-        return {
-            id: company.id,
-            name: company.name,
-            total: totalPr,
-            color: company.brandColor || company.color || '#3a86ff'
-        };
-    });
-
-    // 排序降冪
-    prData.sort((a, b) => b.total - a.total);
-
-    charts[canvasId] = new Chart(canvas, {
-        type: 'bar',
-        data: {
-            labels: prData.map(d => d.name),
-            datasets: [{
-                label: '模擬新聞稿總數',
-                data: prData.map(d => d.total),
-                backgroundColor: prData.map(d => d.color),
-                borderRadius: 6,
-                borderSkipped: false
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            return `${context.parsed.y} 篇新聞稿（模型值，非實測）`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    ticks: { color: '#334155', font: { weight: '600' } },
-                    grid: { display: false }
-                },
-                y: {
-                    beginAtZero: true,
-                    ticks: { color: '#64748b' },
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' }
-                }
-            }
-        },
-        plugins: [{
-            id: 'topLabelsPlugin',
-            afterDatasetsDraw(chart) {
-                const { ctx, data } = chart;
-                ctx.save();
-                chart.getDatasetMeta(0).data.forEach((datapoint, index) => {
-                    const value = data.datasets[0].data[index];
-                    ctx.font = "bold 13px 'Noto Sans TC', sans-serif";
-                    ctx.fillStyle = '#2d3748';
-                    ctx.textAlign = 'center';
-                    ctx.fillText(value, datapoint.x, datapoint.y - 8);
-                });
-                ctx.restore();
-            }
-        }]
-    });
-}
-
-/**
- * freshCanvas — 以全新 canvas 元素取代舊的，清除 Chart.js 殘留的 width/height 屬性
- * Chart.js 在 display:none 的容器中初始化時會把 canvas 設成 0x0，
- * 用新元素替換才能確保下一次建立時尺寸正確。
- */
-function freshCanvas(canvasId) {
-    const old = document.getElementById(canvasId);
-    if (!old) return null;
-    const parent = old.parentElement;
-    if (!parent) return old;
-
-    const neo = document.createElement('canvas');
-    neo.id = canvasId;
-    // 複製除 width/height 以外的所有屬性（保留 role, aria-label）
-    Array.from(old.attributes).forEach(attr => {
-        if (attr.name !== 'width' && attr.name !== 'height') {
-            neo.setAttribute(attr.name, attr.value);
-        }
-    });
-    parent.replaceChild(neo, old);
-    return neo;
-}
-
-/**
- * 銷毀並重新創建數據分析頁面的 4 大圖表
- * 強制重建策略：移除所有 display 守衛，確保每次切頁都能渲染。
- */
 function renderAnalyticsCharts() {
-    if (typeof Chart === 'undefined') {
-        document.querySelectorAll('#analytics canvas').forEach(c => {
-            if (!c.parentElement.querySelector('.chart-error-msg')) {
-                c.insertAdjacentHTML('afterend', '<p class="chart-error-msg" style="text-align:center;color:#94a3b8;padding:40px;">圖表元件載入失敗，請檢查網路連線後重新整理。</p>');
-            }
-        });
+    const analytics = document.getElementById('analytics');
+    if (!analytics || window.getComputedStyle(analytics).display === 'none') return;
+    const articles = getRealArticles();
+    const rangeLabel = document.getElementById('trendRangeLabel');
+    if (rangeLabel) rangeLabel.textContent = `資料區間：${getRealRange()}`;
+    if (!articles.length) {
+        renderEmptyAnalytics('正在等待真實新聞監測資料；資料服務無法驗證時不會以其他資料補足。');
         return;
     }
-
-    // 1. 8 大企業月度報導趨勢圖
-    if (document.getElementById('exposureTrendChart')) {
-        if (charts['exposureTrendChart']) {
-            try { charts['exposureTrendChart'].destroy(); } catch (e) {}
-            delete charts['exposureTrendChart'];
-        }
-        freshCanvas('exposureTrendChart');
-        initExposureTrendChart('exposureTrendChart');
-    }
-
-    // 2. 媒體曝光通路分佈比例
-    if (document.getElementById('mediaChannelChart') && typeof COMPANIES !== 'undefined' && COMPANIES.length > 0) {
-        if (charts['mediaChannelChart']) {
-            try { charts['mediaChannelChart'].destroy(); } catch (e) {}
-            delete charts['mediaChannelChart'];
-        }
-        freshCanvas('mediaChannelChart');
-        const selectedCompanyId = document.getElementById('channelCompanySelect')?.value || COMPANIES[0].id;
-        initMediaChannelChart('mediaChannelChart', selectedCompanyId);
-    }
-
-    // 3. KOL 合作宣傳排行榜
-    if (document.getElementById('kolRankChart')) {
-        if (charts['kolRankChart']) {
-            try { charts['kolRankChart'].destroy(); } catch (e) {}
-            delete charts['kolRankChart'];
-        }
-        freshCanvas('kolRankChart');
-        initKolRankChart('kolRankChart');
-    }
-
-    // 4. 新聞稿發布篇數排行榜
-    if (document.getElementById('pressReleaseChart')) {
-        if (charts['pressReleaseChart']) {
-            try { charts['pressReleaseChart'].destroy(); } catch (e) {}
-            delete charts['pressReleaseChart'];
-        }
-        freshCanvas('pressReleaseChart');
-        initPressReleaseChart('pressReleaseChart');
-    }
-
-    // 給 Chart.js 一個 resize 信號，確保自適應尺寸正確
-    setTimeout(() => {
-        Object.values(charts).forEach(c => {
-            if (c) try { c.resize(); } catch (e) {}
+    renderRealSummary(articles);
+    ensureChartJs().then(() => {
+        applyChartDefaults();
+        const dates = dateCounts(articles);
+        makeChart('exposureTrendChart', {
+            type: 'line',
+            data: { labels: dates.labels, datasets: [
+                { label: '官方 RSS', data: dates.official, borderColor: '#0f766e', backgroundColor: 'rgba(15,118,110,.12)', fill: true, tension: .25 },
+                { label: 'Google News 聚合', data: dates.aggregated, borderColor: '#e76f51', backgroundColor: 'rgba(231,111,81,.08)', fill: true, tension: .25 }
+            ] },
+            options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { tooltip: { callbacks: { label: (context) => `${context.dataset.label}：${context.parsed.y} 篇` } } } }
         });
-    }, 50);
+
+        const categories = folderCounts(articles);
+        makeChart('categoryChart', {
+            type: 'bar', data: { labels: categories.map(([id]) => folderLabel(id)), datasets: [{ label: '文章數', data: categories.map(([, count]) => count), backgroundColor: chartColors(categories.length) }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } }
+        });
+
+        const sources = sourceCounts(articles);
+        makeChart('sourceChart', {
+            type: 'bar', data: { labels: sources.map(([name]) => name), datasets: [{ label: '文章數', data: sources.map(([, count]) => count), backgroundColor: '#48cae4' }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } }
+        });
+
+        const keywords = keywordCounts(articles);
+        makeChart('keywordChart', {
+            type: 'bar', data: { labels: keywords.map(([term]) => term), datasets: [{ label: '命中文章數', data: keywords.map(([, count]) => count), backgroundColor: '#f4a261' }] },
+            options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { legend: { display: false } } }
+        });
+    }).catch((error) => {
+        console.warn('[charts] Chart.js unavailable', error);
+        renderEmptyAnalytics('圖表元件載入失敗，但真實新聞清單仍可正常使用。');
+    });
 }
 
-/**
- * initAllChartsNow — 定義缺失的函式（之前 DOMContentLoaded 呼叫它時拋出 ReferenceError）
- * 不主動初始化：圖表由使用者切頁後透過 renderAnalyticsCharts 按需建立。
- */
-function initAllChartsNow() {
-    // no-op：charts 由路由切換觸發，不在頁面載入時初始化
-}
-
-/**
- * forceResizeAllCharts — 切頁時由路由呼叫
- * 無論已有無圖表，一律重新渲染，確保尺寸正確。
- */
 function forceResizeAllCharts() {
-    renderAnalyticsCharts();
+    Object.values(charts).forEach((chart) => {
+        try { chart.resize(); } catch (_) {}
+    });
 }
 
-// 匯出供 app.js 呼叫
-window.initAllCharts = function() {};      // 保留介面，不再需要 IntersectionObserver
 window.renderAnalyticsCharts = renderAnalyticsCharts;
+window.forceResizeAllCharts = forceResizeAllCharts;
