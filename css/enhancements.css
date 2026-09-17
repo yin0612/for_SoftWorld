@@ -849,6 +849,32 @@ mark {
   font-weight: 600;
 }
 
+.fintech-card-key-point {
+  display: flex;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0 0 9px;
+  padding: 8px 10px;
+  border-left: 3px solid #0f766e;
+  border-radius: 7px;
+  background: #f0fdfa;
+  color: #115e59;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.fintech-key-point-label {
+  flex: 0 0 auto;
+  color: #0f766e;
+  font-size: 0.71rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+}
+
+.fintech-key-point-text {
+  min-width: 0;
+}
+
 .fintech-card-title {
   margin: 0 0 10px;
   color: #1e293b;

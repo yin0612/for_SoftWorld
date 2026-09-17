@@ -120,6 +120,7 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
                 companyName: '真實新聞監測',
                 companyColor: '#0f766e',
                 title: article.title,
+                keyPointZh: article.key_point_zh || article.keyPointZh || '',
                 category: '關鍵字監測',
                 huikeFolder: folders[0] || '',
                 huikeFolders: folders,

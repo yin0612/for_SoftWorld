@@ -971,6 +971,140 @@ function truncateFintechText(value, maxLength = 300) {
     return text.length > maxLength ? text.slice(0, maxLength).trimEnd() + '…' : text;
 }
 
+// 國際金融科技新聞多為英文 RSS。標題上方提供一行中文重點，
+// 只翻譯標題本身，並以 sessionStorage 暫存，避免每次切換分類都重複請求。
+const INTERNATIONAL_KEY_POINT_CACHE_KEY = 'softworld-intl-key-points-v1';
+const internationalKeyPointCache = (() => {
+    try {
+        const parsed = JSON.parse(window.sessionStorage.getItem(INTERNATIONAL_KEY_POINT_CACHE_KEY) || '{}');
+        return parsed && typeof parsed === 'object' ? parsed : {};
+    } catch (_) {
+        return {};
+    }
+})();
+const internationalKeyPointPending = new Map();
+const internationalKeyPointQueue = [];
+let internationalKeyPointActive = 0;
+const INTERNATIONAL_KEY_POINT_CONCURRENCY = 3;
+
+function persistInternationalKeyPointCache() {
+    try {
+        const entries = Object.entries(internationalKeyPointCache).slice(-160);
+        window.sessionStorage.setItem(INTERNATIONAL_KEY_POINT_CACHE_KEY, JSON.stringify(Object.fromEntries(entries)));
+    } catch (_) {
+        // 儲存空間或隱私模式不可用時，仍保留本次頁面內的翻譯結果。
+    }
+}
+
+function isMostlyChineseText(value) {
+    const text = String(value || '');
+    const chineseCount = (text.match(/[\u3400-\u9fff]/g) || []).length;
+    const latinCount = (text.match(/[A-Za-z]/g) || []).length;
+    return chineseCount >= 4 && chineseCount >= latinCount * 0.5;
+}
+
+function internationalKeyPointFallback(news) {
+    const title = truncateFintechText(news.title || '', 120);
+    if (title && isMostlyChineseText(title)) return `本則聚焦：${title}`;
+    const terms = [...new Set((news.matchedTerms || []).filter(Boolean))].slice(0, 2);
+    if (terms.length) return `本則聚焦國際金融科技動態，關鍵詞為「${terms.join('、')}」。`;
+    return '本則聚焦國際金融科技與支付產業最新動態；完整內容請以原文為準。';
+}
+
+function parseGoogleTranslation(payload) {
+    if (!Array.isArray(payload) || !Array.isArray(payload[0])) return '';
+    return payload[0]
+        .map((segment) => Array.isArray(segment) ? segment[0] : '')
+        .filter(Boolean)
+        .join('')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+async function requestInternationalTranslation(text) {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 3500);
+    try {
+        const params = new URLSearchParams({
+            client: 'gtx', sl: 'auto', tl: 'zh-TW', dt: 't', q: String(text).slice(0, 500)
+        });
+        const response = await fetch(`https://translate.googleapis.com/translate_a/single?${params.toString()}`, {
+            signal: controller.signal,
+            headers: { Accept: 'application/json' }
+        });
+        if (!response.ok) throw new Error(`translation_${response.status}`);
+        return parseGoogleTranslation(await response.json());
+    } finally {
+        window.clearTimeout(timeout);
+    }
+}
+
+function pumpInternationalKeyPointQueue() {
+    while (internationalKeyPointActive < INTERNATIONAL_KEY_POINT_CONCURRENCY && internationalKeyPointQueue.length) {
+        const task = internationalKeyPointQueue.shift();
+        internationalKeyPointActive += 1;
+        requestInternationalTranslation(task.text)
+            .then((translated) => task.resolve(translated))
+            .catch((error) => task.reject(error))
+            .finally(() => {
+                internationalKeyPointActive -= 1;
+                pumpInternationalKeyPointQueue();
+            });
+    }
+}
+
+function translateInternationalKeyPoint(text) {
+    const key = String(text || '').replace(/\s+/g, ' ').trim();
+    if (!key) return Promise.resolve('');
+    if (internationalKeyPointCache[key]) return Promise.resolve(internationalKeyPointCache[key]);
+    if (internationalKeyPointPending.has(key)) return internationalKeyPointPending.get(key);
+    const promise = new Promise((resolve, reject) => {
+        internationalKeyPointQueue.push({ text: key, resolve, reject });
+        pumpInternationalKeyPointQueue();
+    });
+    internationalKeyPointPending.set(key, promise);
+    promise.then((translated) => {
+        if (translated) {
+            internationalKeyPointCache[key] = translated;
+            persistInternationalKeyPointCache();
+        }
+        internationalKeyPointPending.delete(key);
+    }, () => internationalKeyPointPending.delete(key));
+    return promise;
+}
+
+function isInternationalFintechArticle(news) {
+    return articleHasMonitoringFolder(news, 'folder_5');
+}
+
+function createInternationalKeyPoint(news) {
+    const container = document.createElement('p');
+    container.className = 'fintech-card-key-point';
+    const label = document.createElement('span');
+    label.className = 'fintech-key-point-label';
+    label.textContent = '中文重點';
+    const text = document.createElement('span');
+    text.className = 'fintech-key-point-text';
+    text.textContent = '翻譯中…';
+    container.append(label, text);
+
+    const title = plainFintechText(news.title || '');
+    if (news.keyPointZh || news.key_point_zh) {
+        text.textContent = news.keyPointZh || news.key_point_zh;
+    } else if (isMostlyChineseText(title)) {
+        text.textContent = internationalKeyPointFallback(news);
+    } else {
+        translateInternationalKeyPoint(title)
+            .then((translated) => {
+                if (container.isConnected) text.textContent = translated || internationalKeyPointFallback(news);
+            })
+            .catch(() => {
+                if (container.isConnected) text.textContent = internationalKeyPointFallback(news);
+            });
+    }
+    return container;
+}
+
 function fintechSearchText(news) {
     return [
         stablecoinSearchText(news),
@@ -1120,6 +1254,7 @@ function createFintechArticleCard(news) {
     date.textContent = '📅 ' + (news.date || '日期未提供');
     header.append(badges, date);
 
+    const keyPoint = isInternationalFintechArticle(news) ? createInternationalKeyPoint(news) : null;
     const title = document.createElement('h3');
     title.className = 'fintech-card-title';
     const displayTitle = plainFintechText(news.title || '未提供標題');
@@ -1205,7 +1340,9 @@ function createFintechArticleCard(news) {
         provenance.append(separator, feedLink);
     }
     provenanceDetails.append(provenanceToggle, provenance);
-    card.append(header, title, excerpt, evidence, footer, provenanceDetails);
+    card.append(header);
+    if (keyPoint) card.appendChild(keyPoint);
+    card.append(title, excerpt, evidence, footer, provenanceDetails);
     return card;
 }
 
