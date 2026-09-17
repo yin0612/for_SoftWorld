@@ -63,6 +63,14 @@ const LIVE_STABLECOIN_SOURCES = LIVE_DOMESTIC_SOURCES.filter((source) => [
   'cna-finance', 'cna-technology', 'ltn-business', 'techorange', 'blocktempo', 'abmedia'
 ].includes(source.id));
 
+// 競業／產業分類也提供官方 RSS 的即時唯讀補位。來源限定在遊戲、科技、
+// 財經與區塊鏈等已驗證的台灣 RSS，避免把所有泛新聞來源套用到產業規則。
+const LIVE_HUIKE_SOURCE_IDS = [
+  'fourgamers', 'bahamut-gnn', 'gamebase', 'technews', 'ithome', 'gvm',
+  'techorange', 'udn-money-industry', 'cna-finance', 'cna-technology',
+  'ltn-business', 'blocktempo', 'abmedia'
+];
+
 // 監測文件列出的主流財經／新聞媒體中，有些沒有可穩定驗證的官方 RSS。
 // 這些來源不寫入 D1，也不冒充官方 RSS；只用官方網域的 Google News RSS
 // 取得公開 metadata，並在 API／前端明確標示為「聚合來源」。
@@ -87,7 +95,7 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
 // 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
 const LIVE_AGGREGATED_STABLECOIN_SOURCES = LIVE_AGGREGATED_FINTECH_SOURCES;
 // 使用 GitHub raw 內容作為 Actions 產出的公開快照；不依賴 Pages 部署延遲。
-const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260917-3';
+const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260917-4';
 
 const LIVE_STABLECOIN_RULES = [
   {
@@ -428,6 +436,31 @@ async function fetchLiveStablecoinArticles(from, to) {
     sources: LIVE_STABLECOIN_SOURCES,
     rules: LIVE_STABLECOIN_RULES,
     folderId: 'folder_6'
+  });
+}
+
+async function fetchLiveHuikeArticles(env, from, to, folderId = '', diagnostics = null) {
+  const placeholders = LIVE_HUIKE_SOURCE_IDS.map(() => '?').join(',');
+  const folderIds = folderId ? [folderId] : ['folder_3', 'folder_4'];
+  const folderPlaceholders = folderIds.map(() => '?').join(',');
+  const [sourceResult, ruleResult] = await Promise.all([
+    env.DB.prepare(`SELECT id, name, region, type, feed_url
+      FROM media_sources
+      WHERE enabled = 1 AND auto_publish = 1 AND access_mode = 'rss'
+        AND feed_url IS NOT NULL AND id IN (${placeholders})`).bind(...LIVE_HUIKE_SOURCE_IDS).all(),
+    env.DB.prepare(`SELECT r.*, f.region_scope_json
+      FROM monitoring_rules r
+      LEFT JOIN monitoring_folders f ON f.id = r.folder_id
+      WHERE r.active = 1 AND r.folder_id IN (${folderPlaceholders})`).bind(...folderIds).all()
+  ]);
+  const sources = Array.isArray(sourceResult.results) ? sourceResult.results : [];
+  const rules = Array.isArray(ruleResult.results) ? ruleResult.results : [];
+  if (!sources.length || !rules.length) return [];
+  return fetchLiveArticles(from, to, {
+    sources,
+    rules,
+    folderId: folderId || folderIds.join(','),
+    diagnostics
   });
 }
 
@@ -877,6 +910,7 @@ export default {
         ? Promise.all([
           fetchLiveDomesticArticles(from, to),
           fetchLiveStablecoinArticles(from, to),
+          fetchLiveHuikeArticles(env, from, to, '', aggregateDiagnostics),
           fetchStaticAggregatedArticles(from, to, '', aggregateDiagnostics)
         ]).then((groups) => groups.flat())
         : folder === 'folder_2'
@@ -889,7 +923,9 @@ export default {
               fetchLiveStablecoinArticles(from, to),
               fetchStaticAggregatedArticles(from, to, 'folder_6', aggregateDiagnostics)
             ]).then((groups) => groups.flat())
-            : Promise.resolve([]);
+            : folder === 'folder_3' || folder === 'folder_4'
+              ? fetchLiveHuikeArticles(env, from, to, folder, aggregateDiagnostics)
+              : Promise.resolve([]);
       const [result, totalResult, liveCandidates] = await Promise.all([
         env.DB.prepare(articlesSql).bind(...values).all(),
         env.DB.prepare(totalSql).bind(...values).first(),

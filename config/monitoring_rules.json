@@ -1,9 +1,9 @@
 {
-  "version": "2026-09-16-owlpay-priority-v1",
+  "version": "2026-09-17-huike-public-v1",
   "source_document": "智冠年度監測關鍵字與媒體文件；金融科技&穩定幣監測/關鍵字清單.xlsx；金融科技&穩定幣監測/監測關鍵字及媒體.docx",
   "matching_capability": "僅比對已授權 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容；不擷取原新聞網站頁面。",
   "description": "依原始 Word、金融科技關鍵字清單與媒體清單資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。穩定幣採獨立高精準規則；奧丁丁／OwlPay 需搭配穩定幣、鏈上支付、加密資產或金融科技語境，不把泛稱加密貨幣直接視為穩定幣。",
-  "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","newebpay-brand","taiwan-payment-core","taiwan-payment-authority","international-fintech","stablecoin-core","stablecoin-settlement","stablecoin-brand"],
+  "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","newebpay-brand","taiwan-payment-core","taiwan-payment-authority","international-fintech","stablecoin-core","stablecoin-settlement","stablecoin-brand","competitor-brand","competitor-tw-game","competitor-global-game","industry-game-platform","industry-game-market","industry-platform-business","industry-new-business","industry-einvoice","industry-martech"],
   "automatic_publication_allowed_terms": {
     "softworld-brand": ["智冠科技","智冠集團","智冠","台灣淘米","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團"],
     "newebpay-brand": ["藍新科技","藍新金流","NewebPay","簡單付","ezPay","簡單行動支付","ezAIO簡單收","ezAIO","簡單收","歐付寶","O'Pay","OPay","橘子支","橘子支付","街口支付","街口電子支付","綠界科技","ECPay","全支付","全盈支付","全盈+PAY","台灣Pay","悠遊付","悠遊卡","一卡通","iPASS MONEY","LINE Pay","LINE Pay Money","Pi拍錢包","PChomepay","Hami Pay","friDay錢包","蝦皮支付","電子票證","MaiCoin Pay","TWQR"],
@@ -14,7 +14,7 @@
     "stablecoin-settlement": ["鏈上結算","鏈上支付","代幣化存款","代幣化貨幣","tokenized deposit","tokenized deposits","stablecoin settlement","stablecoin payment","stablecoin payments"],
     "stablecoin-brand": ["奧丁丁","OwlPay"]
   },
-  "automatic_publication_note": "台灣支付優先：核心規則限定台灣 RSS 來源，並命中明確支付／卡片／票證詞；主管機關與支付基礎建設另設高精準規則。穩定幣頁優先辨識奧丁丁／OwlPay，但必須同時出現穩定幣、鏈上結算、加密支付或金融科技語境；一般奧丁丁商業新聞不會直接歸入穩定幣。僅高精準品牌、台灣支付、產品/IP、國際金融科技與穩定幣／鏈上結算規則可自動公開；易產生歧義的別名仍列待覆核。",
+  "automatic_publication_note": "台灣支付優先：核心規則限定台灣 RSS 來源，並命中明確支付／卡片／票證詞；主管機關與支付基礎建設另設高精準規則。穩定幣頁優先辨識奧丁丁／OwlPay，但必須同時出現穩定幣、鏈上結算、加密支付或金融科技語境；一般奧丁丁商業新聞不會直接歸入穩定幣。競業與產業分類的規則均要求品牌、遊戲、平台、產值、發票或行銷等明確詞組，命中後自動公開；仍保留全域排除詞與 RSS 來源驗證。",
   "retired_rule_ids": ["competitor-game","industry-market","industry-platform"],
   "folders": [
     {"id":"folder_1","name":"智冠集團","region_scope":["TW","CN","HK"],"priority":"high","description":"智冠集團、產品與 IP 授權"},
