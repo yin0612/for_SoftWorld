@@ -557,17 +557,51 @@ function hydrateMonitoringManifest(manifest) {
         const sourceFolder = manifest.folders.find((entry) => entry.id === folder.id);
         const exactKeywords = [...new Set(rulesByFolder.get(folder.id) || [])];
         const ruleCount = manifest.rules.filter((rule) => rule.folder_id === folder.id).length;
-        const quickKeywords = folder.keywords.filter((keyword) => exactKeywords.includes(keyword));
-        folder.keywords = (quickKeywords.length ? quickKeywords : exactKeywords).slice(0, 24);
+        const originalQuickKeywords = folder.suggestedKeywords || folder.keywords || [];
+        const canonicalKeywords = new Map();
+        exactKeywords.forEach((keyword) => {
+            const normalized = normalizeMonitoringKeyword(keyword);
+            if (normalized && !canonicalKeywords.has(normalized)) canonicalKeywords.set(normalized, keyword);
+        });
+        const quickKeywords = originalQuickKeywords
+            .map((keyword) => {
+                const canonicalKeyword = canonicalKeywords.get(normalizeMonitoringKeyword(keyword));
+                // 若配置本身已有此拼寫，保留資料清單較易讀的大小寫與標點。
+                return canonicalKeyword ? (exactKeywords.includes(keyword) ? keyword : canonicalKeyword) : '';
+            })
+            .filter(Boolean);
+
+        // 保留 data.js 的人工排序做為快速篩選，同時以 manifest 的實際詞彙補足。
+        // 不直接覆寫 keywords，完整清單仍可精確對照監測規則。
+        folder.suggestedKeywords = [...originalQuickKeywords];
+        folder.quickKeywords = [...new Set([...quickKeywords, ...exactKeywords])].slice(0, 24);
         folder.allKeywords = exactKeywords;
         folder.ruleCount = ruleCount;
+        folder.baseDesc = folder.baseDesc || folder.desc;
         if (sourceFolder) {
             folder.folderName = `${index + 1}. ${sourceFolder.name}`;
-            folder.desc = sourceFolder.description;
         }
-        folder.desc = `${folder.desc}。完整規則 ${ruleCount} 組、別名詞 ${exactKeywords.length} 個`;
+        const description = sourceFolder?.description || folder.baseDesc || '';
+        folder.desc = `${description}。完整規則 ${ruleCount} 組、條件詞 ${exactKeywords.length} 個`;
     });
     renderMonitoringTransparency();
+    renderHuikeChips();
+}
+
+function normalizeMonitoringKeyword(value) {
+    return String(value || '')
+        .normalize('NFKC')
+        .toLowerCase()
+        .replace(/[\s:：/／]+/g, '');
+}
+
+function getManifestRulesForFolder(folderId) {
+    if (!Array.isArray(monitoringManifest?.rules)) return [];
+    return monitoringManifest.rules.filter((rule) => rule.folder_id === folderId);
+}
+
+function getRuleTerms(rules) {
+    return [...new Set(rules.flatMap((rule) => (rule.required_any_groups || []).flat()).filter(Boolean))];
 }
 
 function renderMonitoringTransparency() {
@@ -627,31 +661,10 @@ function renderMonitoringTransparency() {
         note.textContent = `發布保護：${monitoringManifest.automatic_publication_note}`;
         disclosureContent.appendChild(note);
     }
-    const details = document.createElement('details');
-    details.style.marginTop = '10px';
-    const title = document.createElement('summary');
-    title.textContent = '監測文件完整規則與關鍵字';
-    title.style.cssText = 'cursor:pointer; font-weight:700; color:#0f766e;';
-    details.appendChild(title);
-
-    monitoringManifest.folders.forEach((folder) => {
-        const section = document.createElement('div');
-        section.style.cssText = 'margin-top:10px; padding-top:10px; border-top:1px solid #e2e8f0;';
-        const heading = document.createElement('strong');
-        heading.textContent = `${folder.name}｜來源區域：${(folder.region_scope || []).join('、')}`;
-        section.appendChild(heading);
-        const list = document.createElement('ul');
-        list.style.cssText = 'margin:6px 0 0 18px; padding:0; font-size:0.82rem; color:#475569;';
-        monitoringManifest.rules.filter((rule) => rule.folder_id === folder.id).forEach((rule) => {
-            const item = document.createElement('li');
-            const groups = (rule.required_any_groups || []).map((group) => group.join('、')).join(' ＋ ');
-            item.textContent = `${rule.display_name}（${rule.scope_note}）：${groups}`;
-            list.appendChild(item);
-        });
-        section.appendChild(list);
-        details.appendChild(section);
-    });
-    disclosureContent.appendChild(details);
+    const rulesNote = document.createElement('p');
+    rulesNote.style.cssText = 'margin:8px 0 0; font-size:0.78rem; line-height:1.5; color:#0f766e;';
+    rulesNote.textContent = '完整關鍵字與組合規則已放在下方分類導航；選擇分類後即可展開核對。';
+    disclosureContent.appendChild(rulesNote);
     renderGlobalDataStatusBar();
 }
 
@@ -729,11 +742,16 @@ function initNewsSection() {
         ? loadMonitoringStatus().catch((error) => { console.warn('Monitoring status unavailable.', error); return null; })
         : Promise.resolve(null);
 
+    // 規則檔為同站靜態資料；即使即時新聞服務短暫不可用，仍須可核對關鍵字。
+    manifestPromise.then((manifest) => {
+        if (manifest) hydrateMonitoringManifest(manifest);
+    });
+
     Promise.all([loadVerifiedMonitoringArticles(), manifestPromise, statusPromise]).then(([result, manifest, status]) => {
         if (!result.loaded) throw new Error('Monitoring API is not configured.');
         monitoringRuntimeStatus = status;
         setVerifiedMonitoringSourceTotal(status);
-        if (manifest) hydrateMonitoringManifest(manifest);
+        if (manifest && monitoringManifest !== manifest) hydrateMonitoringManifest(manifest);
         monitoringNews = result.articles;
         monitoringLoadState = {
             total: result.total ?? monitoringNews.length,
@@ -1500,6 +1518,89 @@ function renderHuikeTabs() {
     });
 }
 
+function renderHuikeFullKeywordDisclosure(currentFolder) {
+    const details = document.getElementById('huikeFullKeywordDetails');
+    const summary = document.getElementById('huikeFullKeywordSummary');
+    const content = document.getElementById('huikeFullKeywordContent');
+    if (!details || !summary || !content) return;
+
+    const rules = currentFolder ? getManifestRulesForFolder(currentFolder.id) : [];
+    if (!currentFolder || !rules.length) {
+        details.hidden = true;
+        summary.textContent = '完整關鍵字與監測規則';
+        content.replaceChildren();
+        return;
+    }
+
+    const allKeywords = currentFolder.allKeywords || getRuleTerms(rules);
+    details.hidden = false;
+    summary.textContent = `完整關鍵字與監測規則（${allKeywords.length} 個條件詞）`;
+    content.replaceChildren();
+
+    const intro = document.createElement('p');
+    intro.className = 'huike-full-keywords-intro';
+    intro.textContent = '以下依實際新聞監測規則分組；標示為 A、B 的群組必須各至少命中一個詞，才會列入新聞結果。這些詞僅供核對規則，不會個別套用成過度寬鬆的篩選。';
+    content.appendChild(intro);
+
+    rules.forEach((rule) => {
+        const ruleCard = document.createElement('article');
+        ruleCard.className = 'huike-rule-card';
+
+        const header = document.createElement('div');
+        header.className = 'huike-rule-header';
+        const title = document.createElement('h4');
+        title.className = 'huike-rule-title';
+        title.textContent = rule.display_name || '監測規則';
+        header.appendChild(title);
+        if (rule.scope_note) {
+            const scope = document.createElement('p');
+            scope.className = 'huike-rule-note';
+            scope.textContent = rule.scope_note;
+            header.appendChild(scope);
+        }
+        ruleCard.appendChild(header);
+
+        const groups = (rule.required_any_groups || []).filter((group) => Array.isArray(group) && group.length);
+        const logic = document.createElement('p');
+        logic.className = 'huike-rule-logic';
+        logic.textContent = groups.length > 1
+            ? `命中條件：下列 ${groups.length} 組條件必須同時成立；每一組任一詞命中即可。`
+            : '命中條件：下列任一關鍵字命中即可。';
+        ruleCard.appendChild(logic);
+
+        const groupsContainer = document.createElement('div');
+        groupsContainer.className = 'huike-rule-groups';
+        groups.forEach((group, groupIndex) => {
+            const groupSection = document.createElement('section');
+            groupSection.className = 'huike-rule-group';
+            const groupTitle = document.createElement('h5');
+            const groupLetter = String.fromCharCode(65 + groupIndex);
+            groupTitle.textContent = groups.length > 1 ? `條件 ${groupLetter}（任一）` : '關鍵字（任一）';
+            groupSection.appendChild(groupTitle);
+
+            const termList = document.createElement('div');
+            termList.className = 'huike-rule-term-list';
+            group.forEach((term) => {
+                const termTag = document.createElement('span');
+                termTag.className = 'huike-rule-term';
+                termTag.textContent = term;
+                termList.appendChild(termTag);
+            });
+            groupSection.appendChild(termList);
+            groupsContainer.appendChild(groupSection);
+        });
+        ruleCard.appendChild(groupsContainer);
+
+        if (Array.isArray(rule.exclude_any) && rule.exclude_any.length) {
+            const exclusions = document.createElement('p');
+            exclusions.className = 'huike-rule-exclusions';
+            exclusions.textContent = `排除詞：${rule.exclude_any.join('、')}`;
+            ruleCard.appendChild(exclusions);
+        }
+        content.appendChild(ruleCard);
+    });
+}
+
 function renderHuikeChips() {
     const chipsContainer = document.getElementById('huikeKeywordChips');
     const descEl = document.getElementById('huikeFolderDesc');
@@ -1511,15 +1612,19 @@ function renderHuikeChips() {
         if (descEl) descEl.textContent = '全部五大監測分類：選擇一個資料夾可使用其精選關鍵字快速篩選。';
         chipsContainer.innerHTML = '';
         if (clearBtn) clearBtn.style.display = 'none';
+        renderHuikeFullKeywordDisclosure(null);
         return;
     }
+
+    const quickKeywords = currentFolder.quickKeywords || currentFolder.keywords || [];
+    const keywordCount = (currentFolder.allKeywords || quickKeywords).length;
     if (descEl) {
-        descEl.innerHTML = `<strong>${currentFolder.icon} ${currentFolder.desc}</strong>（以下為精選快速篩選；完整條件請展開上方規則清單）：`;
+        descEl.textContent = `${currentFolder.icon} ${currentFolder.desc}。精選 ${quickKeywords.length} 個快速篩選；完整 ${keywordCount} 個條件詞與組合規則已收合於下方。`;
     }
 
     chipsContainer.innerHTML = '';
 
-    currentFolder.keywords.forEach(kw => {
+    quickKeywords.forEach(kw => {
         const count = getKeywordNewsCount(kw);
         const chip = document.createElement('button');
         const isActive = (activeHuikeKeyword === kw);
@@ -1562,6 +1667,7 @@ function renderHuikeChips() {
 
         chipsContainer.appendChild(chip);
     });
+    renderHuikeFullKeywordDisclosure(currentFolder);
 }
 
 function setupNewsFilters() {

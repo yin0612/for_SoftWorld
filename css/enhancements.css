@@ -522,6 +522,104 @@
   box-shadow: 0 2px 8px rgba(231, 111, 81, 0.15);
 }
 
+.huike-full-keywords {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.huike-full-keywords-content {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.huike-full-keywords-intro {
+  margin: 0;
+  color: #475569;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.huike-rule-card {
+  padding: 12px;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.huike-rule-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px 14px;
+  flex-wrap: wrap;
+}
+
+.huike-rule-title {
+  margin: 0;
+  color: #1e3a5f;
+  font-size: 0.86rem;
+  font-weight: 800;
+}
+
+.huike-rule-note,
+.huike-rule-logic,
+.huike-rule-exclusions {
+  margin: 5px 0 0;
+  color: #64748b;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.huike-rule-logic {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+.huike-rule-exclusions {
+  color: #b45309;
+}
+
+.huike-rule-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 8px;
+  margin-top: 9px;
+}
+
+.huike-rule-group {
+  padding: 9px;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.huike-rule-group h5 {
+  margin: 0 0 7px;
+  color: #475569;
+  font-size: 0.74rem;
+  font-weight: 800;
+}
+
+.huike-rule-term-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.huike-rule-term {
+  display: inline-flex;
+  align-items: center;
+  min-height: 23px;
+  padding: 2px 7px;
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #334155;
+  font-size: 0.73rem;
+  line-height: 1.3;
+}
+
 .tag-huike-chip:hover {
   background: #ffe3dc !important;
   transform: scale(1.03);
@@ -564,6 +662,7 @@ mark {
 .fintech-summary-details > summary,
 .fintech-glossary-toggle,
 .monitoring-disclosure-toggle,
+.huike-full-keywords-toggle,
 .site-data-status-toggle,
 .fintech-provenance-toggle,
 .timeline-provenance-toggle {
@@ -587,6 +686,7 @@ mark {
 .fintech-summary-details > summary::-webkit-details-marker,
 .fintech-glossary-toggle::-webkit-details-marker,
 .monitoring-disclosure-toggle::-webkit-details-marker,
+.huike-full-keywords-toggle::-webkit-details-marker,
 .site-data-status-toggle::-webkit-details-marker,
 .fintech-provenance-toggle::-webkit-details-marker,
 .timeline-provenance-toggle::-webkit-details-marker {
@@ -596,6 +696,7 @@ mark {
 .fintech-summary-details > summary::before,
 .fintech-glossary-toggle::before,
 .monitoring-disclosure-toggle::before,
+.huike-full-keywords-toggle::before,
 .site-data-status-toggle::before,
 .fintech-provenance-toggle::before,
 .timeline-provenance-toggle::before {
@@ -608,6 +709,7 @@ mark {
 .fintech-summary-details[open] > summary::before,
 .fintech-glossary[open] > .fintech-glossary-toggle::before,
 #monitoringTransparency details[data-monitoring-disclosure][open] > .monitoring-disclosure-toggle::before,
+.huike-full-keywords[open] > .huike-full-keywords-toggle::before,
 .site-data-status-details[open] > .site-data-status-toggle::before,
 .fintech-card-provenance-details[open] > .fintech-provenance-toggle::before,
 .timeline-provenance-details[open] > .timeline-provenance-toggle::before {
@@ -617,12 +719,14 @@ mark {
 .fintech-summary-details > summary:hover,
 .fintech-glossary-toggle:hover,
 .monitoring-disclosure-toggle:hover,
+.huike-full-keywords-toggle:hover,
 .site-data-status-toggle:hover,
 .fintech-provenance-toggle:hover,
 .timeline-provenance-toggle:hover,
 .fintech-summary-details > summary:focus-visible,
 .fintech-glossary-toggle:focus-visible,
 .monitoring-disclosure-toggle:focus-visible,
+.huike-full-keywords-toggle:focus-visible,
 .site-data-status-toggle:focus-visible,
 .fintech-provenance-toggle:focus-visible,
 .timeline-provenance-toggle:focus-visible {
