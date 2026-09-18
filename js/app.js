@@ -148,16 +148,41 @@ function renderCompanyCards() {
 
     container.innerHTML = '';
     
+    let currentIndustry = '';
+
     COMPANIES.forEach((company) => {
+        const industry = company.industry || '遊戲與數位娛樂';
+        if (industry !== currentIndustry) {
+            currentIndustry = industry;
+            const groupHeading = document.createElement('div');
+            groupHeading.className = 'company-grid-heading';
+            groupHeading.innerHTML = `<span class="company-grid-heading-icon">${industry === '金融支付' ? '💳' : '🎮'}</span><div><strong>${industry}${industry === '金融支付' ? '（大型業者）' : ''}</strong><span>以官方網站與即時監測新聞作為查核入口</span></div>`;
+            container.appendChild(groupHeading);
+        }
+
         const card = document.createElement('div');
         card.className = 'company-card animate-on-scroll is-visible';
         card.style.setProperty('--card-brand-color', company.brandColor || company.color);
         
         const productsList = company.products || company.keyProducts || [];
         const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
-        const newsText = company.latestNews || company.recentNews || '2024-2026 營運與公關動態彙整中';
+        const newsText = company.latestNews || company.recentNews || '';
         const eventSourceUrl = safeHttpUrl(company.eventSourceUrl || company.newsUrl || company.mopsUrl);
         const eventSourceLabel = company.eventSourceLabel || (company.newsUrl ? '官方新聞專區' : 'MOPS 公開資訊觀測站');
+        const metaItems = [company.enName || company.englishName];
+        if (company.founded || company.foundingYear) metaItems.push(`成立 ${company.founded || company.foundingYear} 年`);
+        metaItems.push(industry);
+        const metaHtml = metaItems.filter(Boolean).map(item => `<span>${item}</span>`).join(' <span aria-hidden="true">•</span> ');
+        const productLabel = company.productLabel || (industry === '金融支付' ? '主要支付服務：' : '核心代表作品：');
+        const eventSummaryHtml = newsText ? `
+            <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
+                <div class="company-event-heading">
+                    <span style="font-weight: 700; color: ${company.brandColor || company.color};">近期重要事件</span>
+                    <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
+                </div>
+                <span style="color: #475569; line-height: 1.5; display: block;">${newsText}</span>
+                <span class="company-event-source">來源入口：<a href="${eventSourceUrl}" target="_blank" rel="noopener">${eventSourceLabel} ↗</a>｜最後查核：待補</span>
+            </div>` : '';
         
         // 判斷新聞來源按鈕
         let newsBtnHtml = '';
@@ -172,25 +197,17 @@ function renderCompanyCards() {
                 <div>
                     <h3 class="company-name" style="color: ${company.brandColor || company.color}">${company.name}</h3>
                     <div class="company-meta">
-                        <span>${company.enName || company.englishName || ''}</span> • 
-                        <span>成立 ${company.founded || company.foundingYear} 年</span>
+                        ${metaHtml}
                     </div>
                 </div>
                 <span class="company-stock">${company.stock || company.stockTicker}</span>
             </div>
             <p class="company-desc">${company.description || company.desc}</p>
             <div style="margin-bottom: var(--spacing-sm);">
-                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">核心代表作品：</div>
+                <div style="font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px;">${productLabel}</div>
                 <div class="company-tags">${tagsHtml}</div>
             </div>
-            <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
-                <div class="company-event-heading">
-                    <span style="font-weight: 700; color: ${company.brandColor || company.color};">近期重要事件</span>
-                    <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
-                </div>
-                <span style="color: #475569; line-height: 1.5; display: block;">${newsText}</span>
-                <span class="company-event-source">來源入口：<a href="${eventSourceUrl}" target="_blank" rel="noopener">${eventSourceLabel} ↗</a>｜最後查核：待補</span>
-            </div>
+            ${eventSummaryHtml}
             <div class="company-card-footer" style="flex-wrap: wrap;">
                 <a href="${company.website || company.officialWebsite}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">
                     官網 ↗
@@ -227,6 +244,9 @@ function showCompanyModal(companyId) {
     const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
     const eventSourceUrl = safeHttpUrl(company.eventSourceUrl || company.newsUrl || company.mopsUrl);
     const eventSourceLabel = company.eventSourceLabel || (company.newsUrl ? '官方新聞專區' : 'MOPS 公開資訊觀測站');
+    const industry = company.industry || '遊戲與數位娛樂';
+    const productLabel = company.productLabel || (industry === '金融支付' ? '主要支付服務' : '主要代表作品');
+    const newsText = company.latestNews || company.recentNews || '';
 
     let newsBtnHtml = '';
     if (company.newsUrl) {
@@ -244,17 +264,18 @@ function showCompanyModal(companyId) {
             <p style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6;">${company.description || company.desc}</p>
         </div>
         <div style="margin-bottom: 16px;">
-            <h4 style="font-size: 1rem; margin-bottom: 6px;">主要代表作品</h4>
+            <h4 style="font-size: 1rem; margin-bottom: 6px;">${productLabel}</h4>
             <div class="company-tags">${tagsHtml}</div>
         </div>
+        ${newsText ? `
         <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
             <div class="company-event-heading">
                 <h4 style="font-size: 0.9rem; color: var(--primary); margin: 0;">近期重要事件</h4>
                 <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
             </div>
-            <p style="font-size: 0.9rem; color: var(--text-primary);">${company.latestNews || company.recentNews || '資料彙整中'}</p>
+            <p style="font-size: 0.9rem; color: var(--text-primary);">${newsText}</p>
             <p class="company-event-source">來源入口：<a href="${eventSourceUrl}" target="_blank" rel="noopener">${eventSourceLabel} ↗</a>；請逐筆查核｜最後查核：待補</p>
-        </div>
+        </div>` : ''}
         <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
             <a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">🏛️ MOPS 公開資訊觀測站 ↗</a>
             ${newsBtnHtml}

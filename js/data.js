@@ -1,4 +1,4 @@
-// 台灣遊戲公司基本資料
+// 台灣遊戲與金融支付業者基本資料
 const MOPS_HOME_URL = 'https://mops.twse.com.tw/mops/#/web/home';
 
 const COMPANIES = [
@@ -113,6 +113,77 @@ const COMPANIES = [
         products: ['商用博弈遊戲機台', '網路博弈軟體系統', '叫號叫我智慧系統'],
         description: '台灣首家掛牌上櫃的博弈概念股，專注商用博弈軟硬體及系統整合。',
         latestNews: '2024年減資70%改善財務體質。轉型網路博弈技術輸出與智慧系統。'
+    },
+    // 金融支付主要業者（產業總覽延伸；新聞仍以即時監測頁的真實命中結果為準）
+    {
+        id: 'ecpay',
+        name: '綠界科技',
+        enName: 'ECPay',
+        stock: '第三方支付／金流',
+        industry: '金融支付',
+        website: 'https://www.ecpay.com.tw/',
+        newsUrl: 'https://www.ecpay.com.tw/',
+        mopsUrl: MOPS_HOME_URL,
+        color: '#16a085',
+        products: ['全方位金流', '電子發票', '物流整合', '跨境支付'],
+        description: '台灣大型第三方支付與電商金流服務商，提供信用卡、超商代收、行動支付、電子發票與物流等整合服務。',
+        latestNews: null
+    },
+    {
+        id: 'sunpay',
+        name: '紅陽科技',
+        enName: 'SunPay（紅陽支付）',
+        stock: '第三方支付／金流',
+        industry: '金融支付',
+        website: 'https://www.sunpay.com.tw/',
+        newsUrl: 'https://www.sunpay.com.tw/',
+        mopsUrl: MOPS_HOME_URL,
+        color: '#e67e22',
+        products: ['紅陽 Pay', '信用卡收款', '行動支付', '電子發票'],
+        description: '台灣老牌第三方支付與金流串接業者，提供信用卡、行動支付、電子發票及商店收款整合。',
+        latestNews: null
+    },
+    {
+        id: 'line-pay-money',
+        name: 'LINE Pay Money',
+        enName: 'LINE Pay Money',
+        stock: '電子支付服務',
+        industry: '金融支付',
+        website: 'https://pay.line.me/portal/tw-lpm/',
+        newsUrl: 'https://pay.line.me/portal/tw-lpm/',
+        mopsUrl: MOPS_HOME_URL,
+        color: '#06c755',
+        products: ['儲值與付款', '好友轉帳', '生活繳費', 'LINE 生態系'],
+        description: 'LINE 生態系中的台灣電子支付服務，涵蓋儲值、消費付款、轉帳與生活繳費等使用情境。',
+        latestNews: null
+    },
+    {
+        id: 'jkopay',
+        name: '街口支付',
+        enName: 'JKOPAY',
+        stock: '電子支付服務',
+        industry: '金融支付',
+        website: 'https://www.jkos.com/',
+        newsUrl: 'https://www.jkos.com/',
+        mopsUrl: MOPS_HOME_URL,
+        color: '#f15a24',
+        products: ['掃碼支付', '好友轉帳', '生活繳費', '商家收款'],
+        description: '台灣大型行動電子支付品牌，提供消費掃碼、好友轉帳、生活繳費與商家收款服務。',
+        latestNews: null
+    },
+    {
+        id: 'plus-pay',
+        name: '全支付',
+        enName: 'PX Pay Plus',
+        stock: '電子支付服務',
+        industry: '金融支付',
+        website: 'https://www.pluspay.com.tw/',
+        newsUrl: 'https://www.pluspay.com.tw/',
+        mopsUrl: MOPS_HOME_URL,
+        color: '#1d70b7',
+        products: ['全支付錢包', '掃碼支付', '跨境支付', '會員生態整合'],
+        description: '由全聯生態系延伸的電子支付服務，串接零售會員、掃碼付款、轉帳與跨境支付場景。',
+        latestNews: null
     }
 ];
 

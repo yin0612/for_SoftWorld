@@ -358,6 +358,43 @@
   gap: var(--spacing-lg);
 }
 
+.company-grid-heading {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: var(--spacing-sm);
+  padding: 10px 14px;
+  border-left: 4px solid var(--primary);
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
+  background: linear-gradient(90deg, #f0fdf4 0%, rgba(240, 253, 244, 0) 72%);
+}
+
+.company-grid-heading:first-child {
+  margin-top: 0;
+}
+
+.company-grid-heading-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.company-grid-heading strong,
+.company-grid-heading span {
+  display: block;
+}
+
+.company-grid-heading strong {
+  font-size: 1rem;
+}
+
+.company-grid-heading div span {
+  margin-top: 2px;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+}
+
 .company-card {
   background: #ffffff;
   border: 1px solid var(--border-color);
