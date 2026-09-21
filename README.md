@@ -18,12 +18,12 @@ http://127.0.0.1:8765/
 ```
 
 ## 📁 專案檔案結構
-- `index.html` — 主網頁 HTML 結構與七大獨立區塊
+- `index.html` — 主網頁 HTML 結構與八大獨立區塊
 - `css/` — 核心樣式表 (index.css, components.css, animations.css)
 - `js/data.js` — 8 大公司主檔、監測分類與關鍵字設定（新聞資料由 API 提供）
 - `js/charts.js` — 真實監測圖表模組（進入分析頁時才載入 Chart.js）
 - `js/compare.js` — 企業真實新聞數量、來源與分類比較工具
-- `js/app.js` — SPA Hash 切頁路由器 (`#/companies`, `#/news`, `#/fintech`, `#/analytics`, `#/compare`, `#/trends`, `#/methodology`) 與 UI 邏輯
+- `js/app.js` — SPA Hash 切頁路由器 (`#/companies`, `#/news`, `#/gaming`, `#/fintech`, `#/analytics`, `#/compare`, `#/trends`, `#/methodology`) 與 UI 邏輯
 - `config/` — `companies.yml` 公司主檔與 `sources.yml` 觀測媒體清單
 
 ## 🌐 部署
@@ -49,3 +49,7 @@ http://127.0.0.1:8765/
 #/fintech 將台灣支付與藍新科技、國際金融科技、穩定幣與鏈上結算規則集中在一頁，預設優先顯示台灣支付。它可依主題、來源類型（官方 RSS／Google News 聚合）與文字條件篩選，並保留每則新聞的命中證據與原文連結。穩定幣採獨立高精準規則；奧丁丁／OwlPay 命中穩定幣語境時會優先置頂並顯示徽章；來源文件中的「虛擬貨幣／加密貨幣／區塊鏈」仍維持原本的 A+B 情境條件，不會被直接誤歸為穩定幣。
 
 完整規劃與來源比對請見 [金融科技與穩定幣監測企畫書](docs/fintech-stablecoin-monitoring-plan.md)。
+
+## 遊戲產業監測
+
+`#/gaming` 重用全站已載入的已驗證新聞資料，不會額外發送遊戲專用的 RSS 或 Worker 請求。頁面只採用三組可明確對應遊戲內容的規則：智冠集團與旗下遊戲／IP、台灣與國際遊戲競業、以及遊戲平台／主機／電競；保留命中詞、來源類型與原文連結，並可依分類、來源或文字篩選。為避免雜訊，泛商業、支付、金融科技、發票、行銷，以及目前會命中加密貨幣內容的寬鬆市場規則均不會列入。

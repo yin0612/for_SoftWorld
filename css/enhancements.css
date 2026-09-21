@@ -1082,6 +1082,96 @@ mark {
   line-height: 1.65;
 }
 
+/* 遊戲產業真實新聞監測：沿用已驗證新聞卡片與來源揭露，
+   只以紫靛色區別瀏覽脈絡，不額外建立圖表或重複資料。 */
+.gaming-monitoring-summary {
+  background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%);
+  border-color: #c4b5fd;
+}
+
+.gaming-summary-details > summary,
+.gaming-glossary-toggle {
+  border-color: #c4b5fd;
+  color: #5b21b6;
+}
+
+.gaming-summary-details > summary:hover,
+.gaming-summary-details > summary:focus-visible,
+.gaming-glossary-toggle:hover,
+.gaming-glossary-toggle:focus-visible {
+  border-color: #4f46e5;
+  background: #eef2ff;
+  color: #4338ca;
+  outline-color: rgba(99, 102, 241, 0.24);
+}
+
+.gaming-mode-button:hover,
+.gaming-mode-button.active {
+  border-color: #4f46e5;
+  background: #4f46e5;
+  color: #ffffff;
+}
+
+.gaming-scope-pill {
+  border-color: #ddd6fe;
+  background: #faf5ff;
+  color: #5b21b6;
+}
+
+.gaming-stat {
+  border-color: #ddd6fe;
+}
+
+.gaming-stat-value {
+  color: #4f46e5;
+}
+
+.gaming-news-card:hover {
+  border-color: #a5b4fc;
+  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.11);
+}
+
+.gaming-category-badge {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.gaming-news-card .fintech-card-title a:hover,
+.gaming-news-card .fintech-original-link,
+.gaming-news-card .fintech-card-provenance a {
+  color: #4f46e5;
+}
+
+.gaming-news-card .fintech-term {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+/* 新增遊戲產業入口後，中等寬度改用既有選單按鈕，避免導覽列擠壓。 */
+@media (max-width: 1080px) and (min-width: 769px) {
+  .navbar-menu {
+    position: fixed;
+    top: 72px;
+    left: 0;
+    width: 100%;
+    background: #ffffff;
+    flex-direction: column !important;
+    padding: var(--spacing-lg);
+    border-bottom: 1px solid var(--border-color);
+    transform: translateY(-150%);
+    transition: transform var(--transition-normal);
+    box-shadow: var(--shadow-md);
+  }
+
+  .navbar-menu.active {
+    transform: translateY(0);
+  }
+
+  .navbar-toggle {
+    display: flex;
+  }
+}
+
 @media (max-width: 900px) {
   .fintech-stat-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));

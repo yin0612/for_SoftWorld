@@ -9,6 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initStatsOverview();
     initNewsSection();
     initFintechMonitoringPage();
+    initGamingMonitoringPage();
     renderRealTrends();
     initNavbar();
     initHashRouter();
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 1. Hash SPA 獨立切頁路由器 (點選目錄只顯示該項獨立頁面)
 function initHashRouter() {
-    const pages = ['companies', 'news', 'fintech', 'analytics', 'compare', 'trends', 'methodology'];
+    const pages = ['companies', 'news', 'gaming', 'fintech', 'analytics', 'compare', 'trends', 'methodology'];
 
     function handleRouteChange() {
         let hash = window.location.hash || '#/companies';
@@ -324,7 +325,7 @@ function initSkipLink() {
     if (!link || link.dataset.ready === 'true') return;
     link.addEventListener('click', (event) => {
         event.preventDefault();
-        const pages = ['companies', 'news', 'fintech', 'analytics', 'compare', 'trends', 'methodology'];
+        const pages = ['companies', 'news', 'gaming', 'fintech', 'analytics', 'compare', 'trends', 'methodology'];
         const active = pages.map((id) => document.getElementById(id))
             .find((element) => element && window.getComputedStyle(element).display !== 'none');
         const target = active || document.getElementById('hero');
@@ -428,6 +429,19 @@ let fintechMode = 'taiwan';
 let fintechPage = 1;
 const FINTECH_PER_PAGE = 12;
 const FINTECH_FOLDER_IDS = new Set(['folder_2', 'folder_5', 'folder_6']);
+let gamingMode = 'all';
+let gamingPage = 1;
+const GAMING_PER_PAGE = 12;
+const GAMING_MODE_RULE_IDS = {
+    softworld: new Set(['softworld-brand', 'softworld-games', 'softworld-ip']),
+    competitor: new Set(['competitor-tw-game', 'competitor-global-game']),
+    platform: new Set(['industry-game-platform'])
+};
+const GAMING_RULE_IDS = new Set([
+    ...GAMING_MODE_RULE_IDS.softworld,
+    ...GAMING_MODE_RULE_IDS.competitor,
+    ...GAMING_MODE_RULE_IDS.platform
+]);
 const STABLECOIN_RULE_IDS = new Set(['stablecoin-core', 'stablecoin-settlement', 'stablecoin-brand']);
 const STABLECOIN_PRIORITY_TERMS = ['奧丁丁', 'OwlPay'];
 const STABLECOIN_TERM_GROUPS = [
@@ -722,6 +736,7 @@ function initNewsSection() {
     renderHuikeChips();
     applyNewsFilters();
     renderFintechMonitoring();
+    renderGamingMonitoring();
 
     const configured = Boolean(window.MONITORING_API_BASE && typeof loadVerifiedMonitoringArticles === 'function');
     const companyFilter = document.getElementById('companyFilterSection');
@@ -732,6 +747,7 @@ function initNewsSection() {
         setNewsDataMode('unavailable');
         applyNewsFilters();
         renderFintechMonitoring();
+        renderGamingMonitoring();
         return;
     }
 
@@ -775,6 +791,7 @@ function initNewsSection() {
         renderHuikeChips();
         applyNewsFilters();
         renderFintechMonitoring();
+        renderGamingMonitoring();
         renderRealTrends();
         if (window.location.hash.includes('analytics') && typeof renderAnalyticsCharts === 'function') {
             renderAnalyticsCharts();
@@ -793,6 +810,7 @@ function initNewsSection() {
         renderMonitoringTransparency();
         applyNewsFilters();
         renderFintechMonitoring();
+        renderGamingMonitoring();
         renderRealTrends();
     });
 
@@ -844,6 +862,22 @@ function articleHasMonitoringFolder(news, folderId) {
     return getMonitoringFoldersForArticle(news).includes(folderId);
 }
 
+function getMonitoringRuleIdsForArticle(news) {
+    const ruleIds = Array.isArray(news?.ruleIds)
+        ? news.ruleIds
+        : String(news?.ruleIds || '').split(',');
+    return ruleIds.map((ruleId) => String(ruleId || '').trim()).filter(Boolean);
+}
+
+function articleHasMonitoringRule(news, ruleId) {
+    return getMonitoringRuleIdsForArticle(news).includes(ruleId);
+}
+
+function articleHasAnyMonitoringRule(news, ruleIds) {
+    if (!ruleIds || typeof ruleIds.has !== 'function') return false;
+    return getMonitoringRuleIdsForArticle(news).some((ruleId) => ruleIds.has(ruleId));
+}
+
 function stablecoinSearchText(news) {
     return [
         news?.title,
@@ -864,10 +898,7 @@ function matchesStablecoinTerm(target, term) {
 }
 
 function articleHasStablecoinRule(news) {
-    const ruleIds = Array.isArray(news?.ruleIds)
-        ? news.ruleIds
-        : String(news?.ruleIds || '').split(',');
-    return ruleIds.some((ruleId) => STABLECOIN_RULE_IDS.has(String(ruleId || '').trim()));
+    return articleHasAnyMonitoringRule(news, STABLECOIN_RULE_IDS);
 }
 
 function hasStablecoinContext(news) {
@@ -1085,8 +1116,8 @@ function updateFintechModeButtons() {
     });
 }
 
-function refreshFintechSourceOptions(articles) {
-    const sourceSelect = document.getElementById('fintechSourceFilter');
+function refreshMonitoringSourceOptions(selectId, articles) {
+    const sourceSelect = document.getElementById(selectId);
     if (!sourceSelect) return;
     const sources = [...new Set(articles.map((article) => article.source).filter(Boolean))]
         .sort((a, b) => String(a).localeCompare(String(b), 'zh-Hant'));
@@ -1108,6 +1139,10 @@ function refreshFintechSourceOptions(articles) {
     });
     if (sources.includes(previous)) sourceSelect.value = previous;
     sourceSelect.dataset.sourceSignature = signature;
+}
+
+function refreshFintechSourceOptions(articles) {
+    refreshMonitoringSourceOptions('fintechSourceFilter', articles);
 }
 
 function renderFintechKeywordPills(articles) {
@@ -1193,24 +1228,29 @@ function makeFintechEmptyState(icon, title, message) {
     return empty;
 }
 
-function createFintechArticleCard(news) {
+function createFintechArticleCard(news, options = {}) {
     const card = document.createElement('article');
-    card.className = 'fintech-news-card';
+    card.className = options.cardClass || 'fintech-news-card';
 
     const header = document.createElement('div');
     header.className = 'fintech-card-header';
     const badges = document.createElement('div');
     badges.className = 'fintech-card-badges';
-    getFintechCategoryLabels(news).forEach((label) => {
+    const categoryLabels = options.categoryLabels || getFintechCategoryLabels(news);
+    const categoryBadgeClass = options.categoryBadgeClass || 'fintech-category-badge';
+    categoryLabels.forEach((label) => {
         const badge = document.createElement('span');
-        badge.className = 'fintech-category-badge';
+        badge.className = categoryBadgeClass;
         badge.textContent = label;
         badges.appendChild(badge);
     });
-    if (isOwlPayPriorityArticle(news)) {
+    const priorityLabel = Object.prototype.hasOwnProperty.call(options, 'priorityLabel')
+        ? options.priorityLabel
+        : (isOwlPayPriorityArticle(news) ? '⭐ 奧丁丁優先' : '');
+    if (priorityLabel) {
         const priorityBadge = document.createElement('span');
-        priorityBadge.className = 'fintech-category-badge fintech-priority-badge';
-        priorityBadge.textContent = '⭐ 奧丁丁優先';
+        priorityBadge.className = categoryBadgeClass + ' fintech-priority-badge';
+        priorityBadge.textContent = priorityLabel;
         badges.appendChild(priorityBadge);
     }
     const date = document.createElement('time');
@@ -1218,7 +1258,9 @@ function createFintechArticleCard(news) {
     date.textContent = '📅 ' + (news.date || '日期未提供');
     header.append(badges, date);
 
-    const keyPoint = isInternationalFintechArticle(news) ? createInternationalKeyPoint(news) : null;
+    const keyPoint = options.disableKeyPoint
+        ? null
+        : (isInternationalFintechArticle(news) ? createInternationalKeyPoint(news) : null);
     const title = document.createElement('h3');
     title.className = 'fintech-card-title';
     const displayTitle = plainFintechText(news.title || '未提供標題');
@@ -1242,7 +1284,7 @@ function createFintechArticleCard(news) {
 
     const matchedTerms = [...new Set([
         ...(news.matchedTerms || []),
-        ...getStablecoinTermMatches(news)
+        ...(Array.isArray(options.additionalMatchedTerms) ? options.additionalMatchedTerms : getStablecoinTermMatches(news))
     ].filter(Boolean))].slice(0, 8);
     const evidence = document.createElement('div');
     evidence.className = 'fintech-evidence';
@@ -1437,6 +1479,241 @@ function initFintechMonitoringPage() {
         });
     }
     renderFintechMonitoring();
+}
+
+// 遊戲頁只採用可明確對應遊戲內容的規則，避免資料夾中的泛商業、
+// 金融或加密貨幣文章因關鍵字過寬而混入遊戲產業新聞。
+function isGamingMonitoringArticle(news) {
+    return articleHasAnyMonitoringRule(news, GAMING_RULE_IDS);
+}
+
+function getGamingMonitoringArticles() {
+    return monitoringNews
+        .filter(isGamingMonitoringArticle)
+        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+}
+
+function getGamingCategoryLabels(news) {
+    const labels = [];
+    if (articleHasAnyMonitoringRule(news, GAMING_MODE_RULE_IDS.softworld)) labels.push('智冠集團與旗下遊戲');
+    if (articleHasAnyMonitoringRule(news, GAMING_MODE_RULE_IDS.competitor)) labels.push('遊戲競業');
+    if (articleHasAnyMonitoringRule(news, GAMING_MODE_RULE_IDS.platform)) labels.push('平台／主機／電競');
+    return labels.length ? labels : ['遊戲產業'];
+}
+
+function gamingSearchText(news) {
+    return [
+        news?.title,
+        news?.excerpt,
+        news?.source,
+        ...(news?.matchedTerms || []),
+        ...getMonitoringRuleIdsForArticle(news),
+        ...getGamingCategoryLabels(news)
+    ].filter(Boolean).join(' ').toLowerCase();
+}
+
+function updateGamingModeButtons() {
+    document.querySelectorAll('[data-gaming-mode]').forEach((button) => {
+        const isActive = button.getAttribute('data-gaming-mode') === gamingMode;
+        button.classList.toggle('active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    });
+}
+
+function renderGamingKeywordPills(articles) {
+    const container = document.getElementById('gamingKeywordPills');
+    if (!container) return;
+    container.replaceChildren();
+    const scopes = [
+        { label: '智冠集團與旗下遊戲', ruleIds: GAMING_MODE_RULE_IDS.softworld },
+        { label: '遊戲競業', ruleIds: GAMING_MODE_RULE_IDS.competitor },
+        { label: '平台、主機與電競', ruleIds: GAMING_MODE_RULE_IDS.platform }
+    ];
+    scopes.forEach((scope) => {
+        const pill = document.createElement('span');
+        pill.className = 'fintech-scope-pill gaming-scope-pill';
+        pill.textContent = `${scope.label} ${articles.filter((article) => articleHasAnyMonitoringRule(article, scope.ruleIds)).length} 篇`;
+        container.appendChild(pill);
+    });
+}
+
+function renderGamingSummary(summary, articles) {
+    summary.replaceChildren();
+    const range = monitoringLoadState?.range || getRollingMonitoringDateRange();
+    const softworldCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.softworld)).length;
+    const competitorCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.competitor)).length;
+    const platformCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.platform)).length;
+    const sources = new Set(articles.map((article) => article.source).filter(Boolean));
+    const aggregatedCount = articles.filter((article) => article.sourceKind === 'google_news_rss').length;
+
+    const contextDetails = document.createElement('details');
+    contextDetails.className = 'fintech-summary-details gaming-summary-details';
+    const contextToggle = document.createElement('summary');
+    contextToggle.textContent = '資料範圍與監測口徑';
+    const contextContent = document.createElement('div');
+    contextContent.className = 'fintech-summary-details-content';
+    contextDetails.append(contextToggle, contextContent);
+
+    const state = document.createElement('p');
+    state.className = 'fintech-summary-state';
+    state.textContent = `官方 RSS＋Google News RSS 聚合資料；資料範圍 ${range.from} 至 ${range.to}。只納入智冠集團與旗下遊戲、遊戲競業、平台／主機／電競等精準規則；每則新聞皆保留來源類型、原文連結與命中詞。${aggregatedCount ? ` 其中 ${aggregatedCount} 篇為 Google News RSS 聚合，非媒體官方 RSS。` : ''}`;
+    contextContent.appendChild(state);
+    summary.appendChild(contextDetails);
+
+    const grid = document.createElement('div');
+    grid.className = 'fintech-stat-grid gaming-stat-grid';
+    [
+        [String(articles.length), '全部遊戲新聞'],
+        [String(softworldCount), '智冠集團與旗下遊戲'],
+        [String(competitorCount), '遊戲競業'],
+        [String(platformCount), '平台／主機／電競'],
+        [String(sources.size), '真實新聞來源'],
+        [range.from + ' 至 ' + range.to, '資料範圍']
+    ].forEach(([value, label]) => {
+        const item = document.createElement('div');
+        item.className = 'fintech-stat gaming-stat';
+        const statValue = document.createElement('strong');
+        statValue.className = 'fintech-stat-value gaming-stat-value';
+        statValue.textContent = value;
+        const statLabel = document.createElement('span');
+        statLabel.className = 'fintech-stat-label';
+        statLabel.textContent = label;
+        item.append(statValue, statLabel);
+        grid.appendChild(item);
+    });
+    summary.appendChild(grid);
+}
+
+function createGamingArticleCard(news) {
+    return createFintechArticleCard(news, {
+        cardClass: 'fintech-news-card gaming-news-card',
+        categoryLabels: getGamingCategoryLabels(news),
+        categoryBadgeClass: 'fintech-category-badge gaming-category-badge',
+        priorityLabel: '',
+        additionalMatchedTerms: [],
+        disableKeyPoint: true
+    });
+}
+
+function renderGamingMonitoring() {
+    const summary = document.getElementById('gamingMonitoringSummary');
+    const grid = document.getElementById('gamingNewsGrid');
+    const resultCount = document.getElementById('gamingResultCount');
+    const loadMore = document.getElementById('gamingLoadMore');
+    if (!summary || !grid || !resultCount || !loadMore) return;
+    updateGamingModeButtons();
+
+    if (monitoringDataMode !== 'verified') {
+        const isLoading = monitoringDataMode === 'loading';
+        summary.replaceChildren();
+        const state = document.createElement('p');
+        state.className = 'fintech-summary-state';
+        state.textContent = isLoading
+            ? '正在讀取官方 RSS 與 Google News RSS 聚合來源、近兩個月資料與遊戲規則命中結果。'
+            : '真實新聞服務目前無法驗證，頁面不會改以展示資料替代。';
+        summary.appendChild(state);
+        renderGamingKeywordPills([]);
+        grid.replaceChildren();
+        grid.appendChild(makeFintechEmptyState(
+            isLoading ? '⏳' : '⚠️',
+            isLoading ? '正在讀取遊戲產業新聞' : '真實新聞服務暫時無法驗證',
+            isLoading
+                ? '系統正在確認來源健康狀態、Google News 聚合結果與兩個月資料窗口。'
+                : '為避免未驗證內容被誤認為新聞，請稍後重新整理。'
+        ));
+        resultCount.textContent = isLoading ? '正在載入遊戲產業真實新聞' : '真實新聞服務目前無法驗證';
+        loadMore.hidden = true;
+        return;
+    }
+
+    const allArticles = getGamingMonitoringArticles();
+    refreshMonitoringSourceOptions('gamingSourceFilter', allArticles);
+    renderGamingSummary(summary, allArticles);
+    renderGamingKeywordPills(allArticles);
+
+    const selectedSource = document.getElementById('gamingSourceFilter')?.value || '';
+    const keyword = document.getElementById('gamingKeywordFilter')?.value.trim().toLowerCase() || '';
+    const clearButton = document.getElementById('gamingClearFilters');
+    if (clearButton) clearButton.disabled = gamingMode === 'all' && !selectedSource && !keyword;
+    const selectedRuleIds = GAMING_MODE_RULE_IDS[gamingMode] || new Set();
+    const filtered = allArticles.filter((article) => {
+        const matchMode = gamingMode === 'all' || articleHasAnyMonitoringRule(article, selectedRuleIds);
+        const matchSource = !selectedSource || article.source === selectedSource;
+        const matchKeyword = !keyword || gamingSearchText(article).includes(keyword);
+        return matchMode && matchSource && matchKeyword;
+    });
+
+    const visible = filtered.slice(0, gamingPage * GAMING_PER_PAGE);
+    const aggregatedVisible = visible.filter((article) => article.sourceKind === 'google_news_rss').length;
+    const aggregationLabel = aggregatedVisible ? `（含 ${aggregatedVisible} 篇 Google News 聚合）` : '';
+    resultCount.textContent = `顯示 ${visible.length}／${filtered.length} 篇真實新聞${aggregationLabel}`;
+    grid.replaceChildren();
+    if (!filtered.length) {
+        const emptyMessage = !allArticles.length
+            ? '近兩個月目前沒有符合遊戲核心規則的文章；資料服務正常，請稍後重試。'
+            : (selectedSource || keyword || gamingMode !== 'all'
+                ? '目前篩選條件沒有命中；請調整分類、來源或搜尋文字。'
+                : '資料服務已連線，但目前沒有可公開的官方 RSS 或 Google News 聚合文章。');
+        grid.appendChild(makeFintechEmptyState(
+            '🔍',
+            '目前沒有符合條件的真實新聞',
+            emptyMessage + ' 頁面不會以展示資料補足結果。'
+        ));
+    } else {
+        visible.forEach((article) => grid.appendChild(createGamingArticleCard(article)));
+    }
+    loadMore.hidden = visible.length >= filtered.length;
+}
+
+function initGamingMonitoringPage() {
+    const modeButtons = document.getElementById('gamingModeButtons');
+    const sourceFilter = document.getElementById('gamingSourceFilter');
+    const keywordFilter = document.getElementById('gamingKeywordFilter');
+    const clearButton = document.getElementById('gamingClearFilters');
+    const loadMoreButton = document.getElementById('gamingLoadMoreBtn');
+
+    if (modeButtons && !modeButtons.dataset.bound) {
+        modeButtons.dataset.bound = 'true';
+        modeButtons.querySelectorAll('[data-gaming-mode]').forEach((button) => {
+            button.addEventListener('click', () => {
+                gamingMode = button.getAttribute('data-gaming-mode') || 'all';
+                gamingPage = 1;
+                renderGamingMonitoring();
+            });
+        });
+    }
+    if (sourceFilter && !sourceFilter.dataset.bound) {
+        sourceFilter.dataset.bound = 'true';
+        sourceFilter.addEventListener('change', () => {
+            gamingPage = 1;
+            renderGamingMonitoring();
+        });
+    }
+    if (keywordFilter && !keywordFilter.dataset.bound) {
+        keywordFilter.dataset.bound = 'true';
+        keywordFilter.addEventListener('input', () => {
+            gamingPage = 1;
+            renderGamingMonitoring();
+        });
+    }
+    if (clearButton && !clearButton.dataset.bound) {
+        clearButton.dataset.bound = 'true';
+        clearButton.addEventListener('click', () => {
+            gamingMode = 'all';
+            gamingPage = 1;
+            if (sourceFilter) sourceFilter.value = '';
+            if (keywordFilter) keywordFilter.value = '';
+            renderGamingMonitoring();
+        });
+    }
+    if (loadMoreButton && !loadMoreButton.dataset.bound) {
+        loadMoreButton.dataset.bound = 'true';
+        loadMoreButton.addEventListener('click', () => {
+            gamingPage++;
+            renderGamingMonitoring();
+        });
+    }
+    renderGamingMonitoring();
 }
 
 // 初始化 2025 智冠慧科五大監測分類導航

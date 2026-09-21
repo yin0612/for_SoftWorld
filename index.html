@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="css/index.css?v=20260914_03">
     <link rel="stylesheet" href="css/components.css?v=20260918_02">
     <link rel="stylesheet" href="css/animations.css?v=20260914_03">
-    <link rel="stylesheet" href="css/enhancements.css?v=20260918_02">
+    <link rel="stylesheet" href="css/enhancements.css?v=20260921_01">
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
@@ -43,6 +43,7 @@
             <ul class="navbar-menu" id="navbarMenu">
                 <li><a href="#/companies" class="navbar-link">產業總覽</a></li>
                 <li><a href="#/news" class="navbar-link">關鍵字監測</a></li>
+                <li><a href="#/gaming" class="navbar-link">遊戲產業</a></li>
                 <li><a href="#/fintech" class="navbar-link">金融科技</a></li>
                 <li><a href="#/analytics" class="navbar-link">數據分析</a></li>
                 <li><a href="#/compare" class="navbar-link">對比工具</a></li>
@@ -368,6 +369,56 @@
     </section>
 
     <!-- ======================================
+         遊戲產業真實新聞監測
+    ====================================== -->
+    <section class="section" id="gaming">
+        <div class="container">
+            <div class="section-header animate-on-scroll">
+                <span class="section-tag">GAMING INDUSTRY MONITORING</span>
+                <h2 class="section-title">遊戲產業<span class="text-gradient">真實新聞監測</span></h2>
+                <details class="section-context-details">
+                    <summary class="section-context-toggle">本頁監測說明</summary>
+                    <p class="section-subtitle section-context-content">聚焦智冠集團與旗下遊戲、國內外遊戲競業，以及主機、PC、手遊、遊戲平台與電競技術。僅呈現近兩個月、命中遊戲核心規則且附原文連結的官方 RSS 或 Google News RSS 聚合新聞。</p>
+                </details>
+            </div>
+
+            <div class="fintech-monitoring-summary gaming-monitoring-summary animate-on-scroll" id="gamingMonitoringSummary" aria-live="polite">
+                <p class="fintech-summary-state">正在讀取遊戲產業真實新聞（官方 RSS＋Google News RSS 聚合）。</p>
+            </div>
+
+            <div class="fintech-toolbar gaming-toolbar animate-on-scroll">
+                <div class="fintech-mode-buttons gaming-mode-buttons" id="gamingModeButtons" role="group" aria-label="遊戲產業監測分類">
+                    <button class="fintech-mode-button gaming-mode-button active" type="button" data-gaming-mode="all">全部遊戲產業</button>
+                    <button class="fintech-mode-button gaming-mode-button" type="button" data-gaming-mode="softworld">智冠集團與旗下遊戲</button>
+                    <button class="fintech-mode-button gaming-mode-button" type="button" data-gaming-mode="competitor">遊戲競業</button>
+                    <button class="fintech-mode-button gaming-mode-button" type="button" data-gaming-mode="platform">平台、主機與電競</button>
+                </div>
+                <div class="fintech-filter-controls gaming-filter-controls">
+                    <label class="sr-only" for="gamingSourceFilter">依來源篩選</label>
+                    <select class="filter-select fintech-source-select" id="gamingSourceFilter">
+                        <option value="">全部真實新聞來源</option>
+                    </select>
+                    <label class="sr-only" for="gamingKeywordFilter">搜尋遊戲產業新聞</label>
+                    <input class="filter-input fintech-keyword-input" id="gamingKeywordFilter" type="search" placeholder="搜尋標題、摘要或命中詞">
+                    <button class="btn btn-ghost btn-sm fintech-clear-button" id="gamingClearFilters" type="button">清除篩選</button>
+                </div>
+            </div>
+
+            <div class="fintech-keyword-pills gaming-keyword-pills animate-on-scroll" id="gamingKeywordPills" aria-label="本頁遊戲監測範圍"></div>
+            <details class="fintech-glossary gaming-glossary">
+                <summary class="fintech-glossary-toggle">資料範圍與監測口徑</summary>
+                <div class="fintech-glossary-content"><strong>收錄範圍：</strong>本頁只使用智冠集團／旗下遊戲與 IP、遊戲競業，以及遊戲平台、主機與電競技術等正式規則。支付、金融科技、發票、一般行銷與非遊戲商業新聞不會因同時出現在其他分類而列入。<strong>來源標示：</strong>官方 RSS 與 Google News RSS 聚合會分別標示；Google News 聚合並不等同媒體官方 RSS。每則文章均保留命中詞、資料類型與原文連結供追溯。</div>
+            </details>
+            <p class="fintech-result-count gaming-result-count" id="gamingResultCount">正在載入遊戲產業真實新聞</p>
+            <div class="fintech-news-grid gaming-news-grid" id="gamingNewsGrid"></div>
+            <div class="fintech-load-more" id="gamingLoadMore" hidden>
+                <button class="btn btn-secondary" id="gamingLoadMoreBtn" type="button">載入更多新聞</button>
+            </div>
+            <p class="fintech-disclaimer">本頁為媒體監測與來源整理，不構成投資、交易或商業決策意見。</p>
+        </div>
+    </section>
+
+    <!-- ======================================
          金融科技與穩定幣監測
     ====================================== -->
     <section class="section" id="fintech">
@@ -568,6 +619,7 @@
                     <ul class="footer-links">
                         <li><a href="#companies">產業總覽</a></li>
                         <li><a href="#news">關鍵字監測</a></li>
+                        <li><a href="#/gaming">遊戲產業</a></li>
                         <li><a href="#fintech">金融科技監測</a></li>
                         <li><a href="#analytics">數據分析</a></li>
                         <li><a href="#compare">對比工具</a></li>
@@ -656,6 +708,6 @@
     <script src="js/charts.js?v=20260917_01"></script>
     <script src="js/compare.js?v=20260917_01"></script>
     <script src="js/monitoring.js?v=20260917_02"></script>
-    <script src="js/app.js?v=20260918_02"></script>
+    <script src="js/app.js?v=20260921_01"></script>
 </body>
 </html>
