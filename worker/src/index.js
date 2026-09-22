@@ -959,6 +959,7 @@ export default {
           url_kind: article.url_kind || 'publisher_url',
           folder_ids: article.folder_ids,
           rule_ids: article.rule_ids,
+          matched_terms: article.matched_terms,
           evidence_jsons: article.evidence_jsons,
           live_fallback: true
         });
