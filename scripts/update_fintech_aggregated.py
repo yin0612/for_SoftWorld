@@ -43,11 +43,15 @@ QUERY_STABLECOIN_TERMS = ("穩定幣", "stablecoin", "USDT", "USDC", "鏈上支�
 # 再通過 monitoring_rules.json 的完整雙群組條件。
 QUERY_COMPETITOR_TERMS = ("遊戲", "遊戲橘子", "鈊象", "宇峻奧汀", "網銀國際", "Garena", "騰訊", "網易", "NEXON", "SEGA", "CAPCOM")
 QUERY_INDUSTRY_TERMS = ("遊戲", "遊戲市場", "遊戲產值", "Steam", "PS5", "SWITCH", "電競", "雲端遊戲", "GameFi", "數位廣告", "Martech", "發票載具", "發票存摺", "AI", "Google", "Meta", "LINE", "TikTok")
+QUERY_MOBILE_GAME_TERMS = ("天堂M", "神魔之塔", "寒霜啟示錄", "傳說對決", "勝利女神 妮姬", "崩壞 星穹鐵道", "楓之谷M", "SD鋼彈", "鳴潮", "明日方舟", "Pokemon GO", "Roblox")
 AGGREGATE_QUERIES = (
     ("payment", QUERY_PAYMENT_TERMS),
     ("stablecoin", QUERY_STABLECOIN_TERMS),
     ("competitor", QUERY_COMPETITOR_TERMS),
     ("industry", QUERY_INDUSTRY_TERMS),
+    # 完整分類仍由版本化規則逐筆判定；這組只是讓白名單媒體的 Google
+    # News RSS 聚合能主動涵蓋具代表性的高營收手遊名稱。
+    ("mobile_games", QUERY_MOBILE_GAME_TERMS),
 )
 
 
