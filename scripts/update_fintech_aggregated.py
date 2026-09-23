@@ -23,7 +23,7 @@ TAIPEI = timezone(timedelta(hours=8))
 MAX_ITEMS_PER_SOURCE = 80
 
 PAYMENT_TERMS = (
-    "藍新科技", "藍新金流", "newebpay", "簡單付", "ezpay", "歐付寶", "o'pay", "opay",
+    "藍新科技", "藍新金流", "newebpay", "簡單付", "簡單支付", "簡單行動支付", "ezpay", "歐付寶", "o'pay", "opay",
     "街口支付", "街口電子支付", "綠界科技", "ecpay", "全支付", "全盈支付", "台灣pay",
     "悠遊付", "一卡通", "ipass money", "line pay", "line pay money", "line bank", "彈性付", "pi拍錢包",
     "pchomepay", "hami pay", "friday錢包", "蝦皮支付", "電子支付", "行動支付",
@@ -91,6 +91,7 @@ def load_huike_rules() -> list[dict]:
     return [
         rule for rule in config.get("rules", [])
         if rule.get("folder_id") in {"folder_1", "folder_3", "folder_4"}
+        or rule.get("id") == "softworld-fintech-services"
     ]
 
 

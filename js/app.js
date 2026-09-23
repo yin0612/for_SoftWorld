@@ -851,6 +851,7 @@ let fintechMode = 'taiwan';
 let fintechPage = 1;
 const FINTECH_PER_PAGE = 12;
 const FINTECH_FOLDER_IDS = new Set(['folder_2', 'folder_5', 'folder_6']);
+const SOFTWORLD_FINTECH_RULE_IDS = new Set(['softworld-fintech-services']);
 let gamingMode = 'all';
 let gamingPage = 1;
 const GAMING_PER_PAGE = 12;
@@ -1371,8 +1372,13 @@ function getFintechMonitoringArticles() {
         .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
 }
 
+function isSoftworldFintechArticle(news) {
+    return articleHasAnyMonitoringRule(news, SOFTWORLD_FINTECH_RULE_IDS);
+}
+
 function getFintechCategoryLabels(news) {
     const labels = [];
+    if (isSoftworldFintechArticle(news)) labels.push('智冠金融服務');
     if (articleHasMonitoringFolder(news, 'folder_2')) labels.push('台灣支付');
     if (articleHasMonitoringFolder(news, 'folder_5')) labels.push('國際金融科技');
     if (isStablecoinArticle(news)) labels.push('穩定幣');
@@ -1574,6 +1580,7 @@ function renderFintechKeywordPills(articles) {
     if (!container) return;
     container.replaceChildren();
     const scopes = [
+        { label: '智冠金融服務', count: articles.filter(isSoftworldFintechArticle).length },
         { label: '台灣支付與藍新科技', count: articles.filter((article) => articleHasMonitoringFolder(article, 'folder_2')).length },
         { label: '國際支付與金融科技', count: articles.filter((article) => articleHasMonitoringFolder(article, 'folder_5')).length },
         { label: '穩定幣與鏈上結算', count: articles.filter(isStablecoinArticle).length },
@@ -1818,6 +1825,7 @@ function renderFintechMonitoring() {
     if (clearButton) clearButton.disabled = fintechMode === 'all' && !selectedSource && !keyword;
     const filtered = allArticles.filter((article) => {
         const matchMode = fintechMode === 'all'
+            || (fintechMode === 'softworld' && isSoftworldFintechArticle(article))
             || (fintechMode === 'taiwan' && articleHasMonitoringFolder(article, 'folder_2'))
             || (fintechMode === 'international' && articleHasMonitoringFolder(article, 'folder_5'))
             || (fintechMode === 'stablecoin' && isStablecoinArticle(article));
