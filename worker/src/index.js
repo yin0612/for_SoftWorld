@@ -25,6 +25,16 @@ const LIVE_DOMESTIC_SOURCES = [
 
 const LIVE_DOMESTIC_RULES = [
   {
+    id: 'taiwan-payment-peer-oen',
+    folder_id: 'folder_2',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['應援科技','應援金流','Oen Tech','Oen應援科技','OEN應援科技','oen.tw']),
+    all_of_json: '[]',
+    exclude_any_json: '[]',
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['應援科技','應援金流','Oen Tech','Oen應援科技','OEN應援科技','oen.tw'])
+  },
+  {
     id: 'newebpay-brand',
     folder_id: 'folder_2',
     scope: 'full_text',
@@ -95,7 +105,7 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
 // 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
 const LIVE_AGGREGATED_STABLECOIN_SOURCES = LIVE_AGGREGATED_FINTECH_SOURCES;
 // 使用 GitHub raw 內容作為 Actions 產出的公開快照；不依賴 Pages 部署延遲。
-const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260923-3';
+const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260923-4';
 
 const LIVE_STABLECOIN_RULES = [
   {

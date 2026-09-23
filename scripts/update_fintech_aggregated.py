@@ -45,10 +45,14 @@ QUERY_COMPETITOR_TERMS = ("遊戲", "遊戲橘子", "鈊象", "宇峻奧汀", "�
 QUERY_INDUSTRY_TERMS = ("遊戲", "遊戲市場", "遊戲產值", "Steam", "PS5", "SWITCH", "電競", "雲端遊戲", "GameFi", "數位廣告", "Martech", "發票載具", "發票存摺", "AI", "Google", "Meta", "LINE", "TikTok")
 QUERY_MOBILE_GAME_TERMS = ("天堂M", "神魔之塔", "寒霜啟示錄", "傳說對決", "勝利女神 妮姬", "崩壞 星穹鐵道", "楓之谷M", "SD鋼彈", "鳴潮", "明日方舟", "Pokemon GO", "Roblox")
 QUERY_SOFTWORLD_TERMS = ("智冠", "一帆數位", "發票大師", "MyCard", "中華網龍", "網龍", "遊戲新幹線")
+QUERY_OEN_TERMS = ("應援科技", "應援金流", "Oen", "Oen Tech")
 AGGREGATE_QUERIES = (
     # 智冠／MyCard 未提供可驗證官方 RSS 時，僅以其官方網域的 Google
     # News RSS 取回公開 metadata；完整分類仍由 folder_1 規則判定。
     ("softworld", QUERY_SOFTWORLD_TERMS),
+    # 應援科技是台灣支付同業的獨立品牌；僅把具體名稱作為查詢詞，
+    # 回傳資料仍須通過精準的 taiwan-payment-peer-oen 規則。
+    ("oen", QUERY_OEN_TERMS),
     ("payment", QUERY_PAYMENT_TERMS),
     ("stablecoin", QUERY_STABLECOIN_TERMS),
     ("competitor", QUERY_COMPETITOR_TERMS),
@@ -92,7 +96,7 @@ def load_huike_rules() -> list[dict]:
     return [
         rule for rule in config.get("rules", [])
         if rule.get("folder_id") in {"folder_1", "folder_3", "folder_4"}
-        or rule.get("id") == "softworld-fintech-services"
+        or rule.get("id") in {"softworld-fintech-services", "taiwan-payment-peer-oen"}
     ]
 
 

@@ -852,6 +852,7 @@ let fintechPage = 1;
 const FINTECH_PER_PAGE = 12;
 const FINTECH_FOLDER_IDS = new Set(['folder_2', 'folder_5', 'folder_6']);
 const SOFTWORLD_FINTECH_RULE_IDS = new Set(['softworld-fintech-services']);
+const TAIWAN_PAYMENT_PEER_RULE_IDS = new Set(['taiwan-payment-peer-oen']);
 let gamingMode = 'all';
 let gamingPage = 1;
 const GAMING_PER_PAGE = 12;
@@ -1376,9 +1377,14 @@ function isSoftworldFintechArticle(news) {
     return articleHasAnyMonitoringRule(news, SOFTWORLD_FINTECH_RULE_IDS);
 }
 
+function isTaiwanPaymentPeerArticle(news) {
+    return articleHasAnyMonitoringRule(news, TAIWAN_PAYMENT_PEER_RULE_IDS);
+}
+
 function getFintechCategoryLabels(news) {
     const labels = [];
     if (isSoftworldFintechArticle(news)) labels.push('智冠金融服務');
+    if (isTaiwanPaymentPeerArticle(news)) labels.push('支付同業');
     if (articleHasMonitoringFolder(news, 'folder_2')) labels.push('台灣支付');
     if (articleHasMonitoringFolder(news, 'folder_5')) labels.push('國際金融科技');
     if (isStablecoinArticle(news)) labels.push('穩定幣');
@@ -1581,6 +1587,7 @@ function renderFintechKeywordPills(articles) {
     container.replaceChildren();
     const scopes = [
         { label: '智冠金融服務', count: articles.filter(isSoftworldFintechArticle).length },
+        { label: '支付同業（應援科技）', count: articles.filter(isTaiwanPaymentPeerArticle).length },
         { label: '台灣支付與藍新科技', count: articles.filter((article) => articleHasMonitoringFolder(article, 'folder_2')).length },
         { label: '國際支付與金融科技', count: articles.filter((article) => articleHasMonitoringFolder(article, 'folder_5')).length },
         { label: '穩定幣與鏈上結算', count: articles.filter(isStablecoinArticle).length },
