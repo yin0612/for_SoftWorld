@@ -66,7 +66,8 @@ def taipei_now() -> datetime:
 def google_feed_url(domain: str, start: str, end: str, topic_terms: tuple[str, ...] = ()) -> str:
     end_exclusive = (datetime.strptime(end, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
     topic = f"({' OR '.join(topic_terms)}) " if topic_terms else ""
-    query = f"site:{domain} {topic}after:{start} before:{end_exclusive}"
+    site = f"site:{domain} " if domain else ""
+    query = f"{site}{topic}after:{start} before:{end_exclusive}"
     params = {"q": query, "hl": "zh-TW", "gl": "TW", "ceid": "TW:zh-Hant"}
     return "https://news.google.com/rss/search?" + urllib.parse.urlencode(params)
 
@@ -122,9 +123,9 @@ def parse_datetime(value: str) -> str | None:
     return parsed.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def strip_suffix(title: str, source: dict) -> str:
+def strip_suffix(title: str, source: dict, publisher_name: str = "") -> str:
     result = text(title)
-    suffixes = [source.get("name"), source.get("document_name"), *(source.get("domains") or [])]
+    suffixes = [publisher_name, source.get("name"), source.get("document_name"), *(source.get("domains") or [])]
     for suffix in filter(None, (text(value) for value in suffixes)):
         marker = f" - {suffix}"
         if result.endswith(marker):
@@ -145,7 +146,17 @@ def parse_feed(
         return [], f"xml_parse_error:{exc}"
     rows: list[dict] = []
     for item in root.findall(".//item")[:MAX_ITEMS_PER_SOURCE]:
-        title = strip_suffix(item.findtext("title"), source)
+        publisher_node = item.find("source")
+        publisher_name = text(item.findtext("source"))
+        publisher_url = publisher_node.attrib.get("url", "") if publisher_node is not None else ""
+        publisher_domain = urllib.parse.urlparse(publisher_url).netloc.lower().removeprefix("www.")
+        allowed_domains = [str(domain).lower().removeprefix("www.") for domain in source.get("publisher_domains", [])]
+        if allowed_domains and not any(
+            publisher_domain == domain or publisher_domain.endswith("." + domain)
+            for domain in allowed_domains
+        ):
+            continue
+        title = strip_suffix(item.findtext("title"), source, publisher_name)
         link = text(item.findtext("link"))
         published_at = parse_datetime(item.findtext("pubDate"))
         if not title or not link or not published_at:
@@ -154,6 +165,11 @@ def parse_feed(
         payment = any(contains_term(target, term) for term in PAYMENT_TERMS)
         stablecoin = any(contains_term(target, term) for term in STABLECOIN_TERMS)
         huike_matches = classify_huike_title(title, huike_rules)
+        # 全網媒體露出搜尋只收錄智冠相關規則命中的稿件，避免同一則
+        # Google 查詢意外帶入泛支付或加密新聞。
+        if source.get("strict_huike_only"):
+            payment = False
+            stablecoin = False
         if not payment and not stablecoin and not huike_matches:
             continue
         folders = ["folder_2"] if payment else []
@@ -179,10 +195,10 @@ def parse_feed(
             "published_at": published_at,
             "fetched_at": fetched_at,
             "source_id": source["id"],
-            "source": source["name"],
+            "source": publisher_name if source.get("use_feed_publisher") and publisher_name else source["name"],
             "source_region": source.get("region", "TW"),
             "source_feed": feed_url,
-            "source_homepage": source.get("homepage"),
+            "source_homepage": publisher_url or source.get("homepage"),
             "source_kind": "google_news_rss",
             "source_access_mode": "google_news_rss",
             "verification_status": "aggregated",
@@ -208,9 +224,12 @@ def main() -> int:
         if not source.get("enabled") or source.get("access_mode") != "google_news_rss":
             continue
         domain = (source.get("domains") or [""])[0]
+        selected_topics = set(source.get("query_topics") or [])
         # 分主題查詢，避免只取媒體最新的一小段泛新聞內容；競業／產業
         # 結果仍須通過完整規則，且只保留公開 metadata。
         for _topic_name, topic_terms in AGGREGATE_QUERIES:
+            if selected_topics and _topic_name not in selected_topics:
+                continue
             feed_url = google_feed_url(domain, start.isoformat(), end.isoformat(), topic_terms)
             try:
                 request = urllib.request.Request(feed_url, headers={"User-Agent": "SoftWorldMonitoring/1.0"})

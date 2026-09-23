@@ -1,12 +1,12 @@
 # 真實新聞監測 Worker
 
-此 Worker 將公開 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容（不擷取原新聞網站頁面）套用監測文件規則，保存原文連結與命中證據。對沒有穩定官方 RSS 的白名單媒體，另以 `site:<官方網域>` 查詢 Google News RSS，僅保存標題、發布時間與 Google News 原文跳轉連結，並在 API 與頁面標示為「Google News RSS 聚合」。GitHub Pages 的 `#/news` 與 `#/fintech` 只讀取通過規則的真實來源結果。
+此 Worker 將公開 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容（不擷取原新聞網站頁面）套用監測文件規則，保存原文連結與命中證據。對沒有穩定官方 RSS 的白名單媒體，另以 `site:<官方網域>` 查詢 Google News RSS；智冠／一帆的媒體露出則以精準關鍵字查詢後，僅保留核准主流媒體網域的結果。兩者皆只保存標題、發布時間與 Google News 原文跳轉連結，並在 API 與頁面標示為「Google News RSS 聚合」。GitHub Pages 的 `#/news` 與 `#/fintech` 只讀取通過規則的真實來源結果。
 
 ## 資料品質政策
 
 - 收集和公開 API 都硬性限制在台北時間「今天往前兩個月」。無發布日期或超出區間的 RSS 項目不會入庫。
 - 媒體來源必須同時是 `enabled=1`、`auto_publish=1`、`access_mode='rss'`，才會收集並自動公開。
-- `config/fintech_media_sources.json` 是金融科技與智冠集團關鍵字的非 RSS 媒體白名單。清單中的 `access_mode='google_news_rss'` 只走指定官方／媒體網域的 Google News RSS 補位，不寫入 D1，也不宣稱是媒體官方 RSS；MyCard 與智冠新聞中心同樣只會在 Google 已索引時收錄，未確認網域的候選來源維持人工／授權流程。
+- `config/fintech_media_sources.json` 是金融科技與智冠集團關鍵字的非 RSS 媒體白名單。清單中的 `access_mode='google_news_rss'` 只走指定官方／媒體網域的 Google News RSS 補位；「Google News 媒體露出」只接受核准主流媒體網域且必須命中智冠規則，不寫入 D1，也不宣稱是媒體官方 RSS。MyCard 與智冠新聞中心同樣只會在 Google 已索引時收錄，未確認網域的候選來源維持人工／授權流程。
 - `.github/workflows/update_fintech_aggregated.yml` 每 6 小時執行 `scripts/update_fintech_aggregated.py`，將成功取得的公開 metadata 寫入 `data/fintech-aggregated.json`。Worker 只讀取這份 GitHub 快照，不在每次頁面請求時重新查詢 Google News，避免節流／503 造成頁面逾時；若排程暫時失敗，仍可維持上一份可追溯快照，不會以空白或模擬數據取代。
 - 每個來源每次最多處理 RSS 提供的前 200 個條目，避免剛啟用且保留大量歷史項目的來源壓垮資料庫；後續排程會持續補入新條目。
 - 規則也有獨立的 `auto_publish` 與精準詞保護。台灣支付新增「核心新聞」與「主管機關／支付基礎建設」兩條規則；核心規則限定台灣 RSS 來源並命中明確支付／卡片／票證詞，主管機關規則再要求官方機構語境，避免只靠泛稱誤報。穩定幣採獨立詞組；奧丁丁／OwlPay 必須同時命中穩定幣、鏈上支付、加密資產或金融科技語境，符合後自動公開並在前端優先顯示。競業、產業與高營收／重點手遊規則也已啟用自動公開；手遊規則僅接受直接遊戲名稱或明確別名，仍受全域排除詞與 RSS 來源驗證保護。
