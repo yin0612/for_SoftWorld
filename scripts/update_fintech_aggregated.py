@@ -1,4 +1,4 @@
-"""更新金融科技、穩定幣、競業與產業的 Google News RSS 聚合 metadata。
+"""更新智冠、金融科技、穩定幣、競業與產業的 Google News RSS 聚合 metadata。
 
 這條管線只保存 Google News RSS 回傳的標題、發布時間、來源網域與
 Google News 原文跳轉連結；不抓取或鏡像新聞全文，也不把結果標成官方 RSS。
@@ -44,7 +44,11 @@ QUERY_STABLECOIN_TERMS = ("穩定幣", "stablecoin", "USDT", "USDC", "鏈上支�
 QUERY_COMPETITOR_TERMS = ("遊戲", "遊戲橘子", "鈊象", "宇峻奧汀", "網銀國際", "Garena", "騰訊", "網易", "NEXON", "SEGA", "CAPCOM")
 QUERY_INDUSTRY_TERMS = ("遊戲", "遊戲市場", "遊戲產值", "Steam", "PS5", "SWITCH", "電競", "雲端遊戲", "GameFi", "數位廣告", "Martech", "發票載具", "發票存摺", "AI", "Google", "Meta", "LINE", "TikTok")
 QUERY_MOBILE_GAME_TERMS = ("天堂M", "神魔之塔", "寒霜啟示錄", "傳說對決", "勝利女神 妮姬", "崩壞 星穹鐵道", "楓之谷M", "SD鋼彈", "鳴潮", "明日方舟", "Pokemon GO", "Roblox")
+QUERY_SOFTWORLD_TERMS = ("智冠", "一帆數位", "發票大師", "MyCard", "中華網龍", "網龍", "遊戲新幹線")
 AGGREGATE_QUERIES = (
+    # 智冠／MyCard 未提供可驗證官方 RSS 時，僅以其官方網域的 Google
+    # News RSS 取回公開 metadata；完整分類仍由 folder_1 規則判定。
+    ("softworld", QUERY_SOFTWORLD_TERMS),
     ("payment", QUERY_PAYMENT_TERMS),
     ("stablecoin", QUERY_STABLECOIN_TERMS),
     ("competitor", QUERY_COMPETITOR_TERMS),
@@ -86,7 +90,7 @@ def load_huike_rules() -> list[dict]:
     config = json.loads(RULE_CONFIG.read_text(encoding="utf-8"))
     return [
         rule for rule in config.get("rules", [])
-        if rule.get("folder_id") in {"folder_3", "folder_4"}
+        if rule.get("folder_id") in {"folder_1", "folder_3", "folder_4"}
     ]
 
 

@@ -95,7 +95,7 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
 // 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
 const LIVE_AGGREGATED_STABLECOIN_SOURCES = LIVE_AGGREGATED_FINTECH_SOURCES;
 // 使用 GitHub raw 內容作為 Actions 產出的公開快照；不依賴 Pages 部署延遲。
-const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260922-1';
+const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260923-1';
 
 const LIVE_STABLECOIN_RULES = [
   {
@@ -918,7 +918,7 @@ export default {
               fetchLiveStablecoinArticles(from, to),
               fetchStaticAggregatedArticles(from, to, 'folder_6', aggregateDiagnostics)
             ]).then((groups) => groups.flat())
-            : folder === 'folder_3' || folder === 'folder_4'
+            : folder === 'folder_1' || folder === 'folder_3' || folder === 'folder_4'
               ? Promise.all([
                 fetchLiveHuikeArticles(env, from, to, folder, aggregateDiagnostics),
                 fetchStaticAggregatedArticles(from, to, folder, aggregateDiagnostics)

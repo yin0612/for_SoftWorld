@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "purpose": "金融科技與穩定幣監測的非官方 RSS 補位來源清單",
+  "purpose": "金融科技、穩定幣與智冠集團關鍵字監測的非官方 RSS 補位來源清單",
   "input_files": [
     "金融科技&穩定幣監測/關鍵字清單.xlsx",
     "金融科技&穩定幣監測/監測關鍵字及媒體.docx"
@@ -12,6 +12,8 @@
     "no_full_text_mirroring": true
   },
   "sources": [
+    {"id":"mycard-google-news","name":"MyCard 娛樂中心","document_name":"MyCard 娛樂中心","domains":["app.mycard520.com.tw"],"homepage":"https://app.mycard520.com.tw/","region":"TW","category":"智冠集團公告","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
+    {"id":"softworld-google-news","name":"智冠科技 新聞中心","document_name":"智冠科技","domains":["soft-world.com"],"homepage":"https://www.soft-world.com/","region":"TW","category":"智冠集團公告","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
     {"id":"cnyes-google-news","name":"鉅亨網","document_name":"鉅亨網","domains":["news.cnyes.com"],"homepage":"https://news.cnyes.com/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
     {"id":"ebc-google-news","name":"東森財經／東森新聞","document_name":"東森財經新聞網","domains":["news.ebc.net.tw"],"homepage":"https://news.ebc.net.tw/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
     {"id":"ctee-google-news","name":"工商時報","document_name":"工商時報","domains":["ctee.com.tw"],"homepage":"https://www.ctee.com.tw/","region":"TW","category":"財經","access_mode":"google_news_rss","source_kind":"aggregated","enabled":true,"auto_publish":true},
