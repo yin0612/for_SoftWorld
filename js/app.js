@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initNewsSection();
     initFintechMonitoringPage();
     initGamingMonitoringPage();
+    initTrendControls();
     renderRealTrends();
     initNavbar();
     initHashRouter();
@@ -365,51 +366,469 @@ function updateRealStatsOverview(articles = [], status = null) {
     if (methodRange && range?.from && range?.to) methodRange.textContent = `${range.from} — ${range.to}`;
 }
 
-function renderRealTrends() {
-    const summary = document.getElementById('trendsSummary');
-    const timeline = document.getElementById('trendsTimeline');
-    if (!summary || !timeline) return;
-    const articles = typeof monitoringNews !== 'undefined' && Array.isArray(monitoringNews)
-        ? monitoringNews
-        : [];
-    if (!articles.length) {
-        summary.innerHTML = '<p class="method-muted">目前沒有可公開的真實新聞資料。</p>';
-        timeline.innerHTML = '<p class="method-muted">資料服務尚未回傳文章，請稍後重新整理。</p>';
-        return;
-    }
-    const folders = new Map();
-    articles.forEach((article) => {
-        (article.huikeFolders || [article.huikeFolder]).filter(Boolean).forEach((folder) => {
-            folders.set(folder, (folders.get(folder) || 0) + 1);
+function initTrendControls() {
+    const scopeControls = document.getElementById('trendScopeControls');
+    const rangeControls = document.getElementById('trendRangeControls');
+    if (scopeControls && !scopeControls.dataset.bound) {
+        scopeControls.dataset.bound = 'true';
+        scopeControls.querySelectorAll('[data-trend-scope]').forEach((button) => {
+            button.addEventListener('click', () => {
+                trendScope = button.dataset.trendScope || 'focus';
+                renderRealTrends();
+            });
         });
+    }
+    if (rangeControls && !rangeControls.dataset.bound) {
+        rangeControls.dataset.bound = 'true';
+        rangeControls.querySelectorAll('[data-trend-range]').forEach((button) => {
+            button.addEventListener('click', () => {
+                const days = Number(button.dataset.trendRange);
+                trendRangeDays = [7, 30, 60].includes(days) ? days : 60;
+                renderRealTrends();
+            });
+        });
+    }
+    updateTrendControls();
+}
+
+function updateTrendControls() {
+    document.querySelectorAll('[data-trend-scope]').forEach((button) => {
+        const active = button.dataset.trendScope === trendScope;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
     });
-    const folderNames = typeof HUIKE_2025_STRUCTURE !== 'undefined'
-        ? new Map(HUIKE_2025_STRUCTURE.map((folder) => [folder.id, folder.folderName || folder.name]))
-        : new Map();
-    if (typeof monitoringManifest !== 'undefined' && Array.isArray(monitoringManifest?.folders)) {
-        monitoringManifest.folders.forEach((folder) => {
-            if (folder?.id && folder?.name) folderNames.set(folder.id, folder.name);
+    document.querySelectorAll('[data-trend-range]').forEach((button) => {
+        const active = Number(button.dataset.trendRange) === trendRangeDays;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', String(active));
+    });
+}
+
+function trendScopeLabel(scope = trendScope) {
+    return ({
+        focus: '遊戲與金融支付焦點',
+        gaming: '遊戲焦點',
+        payments: '金融支付焦點',
+        stablecoin: '穩定幣焦點'
+    })[scope] || '焦點事件';
+}
+
+function trendDateRange(articles) {
+    const dates = articles.map((article) => String(article?.date || ''))
+        .filter((date) => /^\d{4}-\d{2}-\d{2}$/.test(date)).sort();
+    const to = monitoringLoadState?.range?.to || dates[dates.length - 1] || '';
+    if (!to) return { from: '', to: '' };
+    const [year, month, day] = to.split('-').map(Number);
+    const start = new Date(Date.UTC(year, month - 1, day));
+    start.setUTCDate(start.getUTCDate() - trendRangeDays + 1);
+    return { from: start.toISOString().slice(0, 10), to };
+}
+
+function trendArticleInScope(article, scope) {
+    const folders = getMonitoringFoldersForArticle(article);
+    const isGaming = articleHasAnyMonitoringRule(article, GAMING_RULE_IDS);
+    const isPayment = folders.includes('folder_2') || folders.includes('folder_5');
+    const isStablecoin = folders.includes('folder_6') || articleHasStablecoinRule(article);
+    if (scope === 'gaming') return isGaming;
+    if (scope === 'payments') return isPayment && !isStablecoin;
+    if (scope === 'stablecoin') return isStablecoin;
+    // 預設焦點不把穩定幣新聞混入支付事件；穩定幣有獨立範圍可閱讀。
+    return isGaming || (isPayment && !isStablecoin);
+}
+
+function trendArticleDomain(article, scope = trendScope) {
+    const folders = getMonitoringFoldersForArticle(article);
+    const isStablecoin = folders.includes('folder_6') || articleHasStablecoinRule(article);
+    const isGaming = articleHasAnyMonitoringRule(article, GAMING_RULE_IDS);
+    const isPayment = folders.includes('folder_2') || folders.includes('folder_5');
+    if (scope === 'stablecoin') return isStablecoin ? 'stablecoin' : '';
+    if (scope === 'gaming') return isGaming ? 'gaming' : '';
+    if (scope === 'payments') return isPayment ? 'payments' : '';
+    if (isGaming) return 'gaming';
+    if (isStablecoin) return 'stablecoin';
+    if (isPayment) return 'payments';
+    return '';
+}
+
+function trendTitleHasTerm(title, term) {
+    const text = String(title || '');
+    const query = String(term || '').trim();
+    if (!text || !query) return false;
+    // 英文品牌以完整單字／片語比對，避免 Block 命中 Blockchain、Stablecoin 命中 Stablecoins。
+    if (/^[A-Za-z0-9][A-Za-z0-9 .&/:_-]*$/.test(query)) {
+        const escaped = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        return new RegExp(`(^|[^a-z0-9])${escaped}(?=$|[^a-z0-9])`, 'i').test(text);
+    }
+    return text.toLowerCase().includes(query.toLowerCase());
+}
+
+function trendMatchingTerms(article, terms) {
+    // 焦點事件必須在標題直接點出監測對象，不能只因摘要深處的一句話就佔據焦點版面。
+    const matches = [];
+    [...new Set(terms.filter(Boolean))].forEach((term) => {
+        if (!trendTitleHasTerm(article?.title, term)) return;
+        const duplicateOfLongerMatch = matches.some((matched) => String(matched).toLowerCase().includes(String(term).toLowerCase()));
+        if (!duplicateOfLongerMatch) matches.push(term);
+    });
+    return matches.slice(0, 3);
+}
+
+function trendGamingRuleTerms(article) {
+    if (!Array.isArray(monitoringManifest?.rules)) return [];
+    const ignored = new Set(['遊戲', '玩家', 'ip', 'ip授權', '成長', 'line', 'google', 'ar', '放置', '任務', '競技']);
+    const ruleIds = new Set(getMonitoringRuleIdsForArticle(article));
+    return [...new Set(monitoringManifest.rules
+        .filter((rule) => ruleIds.has(rule.id) && GAMING_RULE_IDS.has(rule.id))
+        .flatMap((rule) => (rule.required_any_groups || []).flat())
+        .map((term) => String(term || '').trim())
+        .filter((term) => term.length > 1 && !ignored.has(term.toLowerCase())))];
+}
+
+function trendEventType(title) {
+    // 「招募資訊」含有「募資」字面，先排除招聘語境以免誤判為融資事件。
+    const value = String(title || '').replace(/(?:人才)?招募資訊|招募職缺|徵才(?:資訊|職缺)?/gi, '');
+    const types = [
+        { label: '風險／資安', score: 34, pattern: /資安|外洩|駭客|攻擊|中斷|異常|停業|清算|倒閉|詐騙|洗錢|裁罰|罰款|fraud|breach|outage|hack/i },
+        { label: '監理／法規', score: 32, pattern: /金管會|金融監督|央行|中央銀行|主管機關|監理|監管|法規|修法|牌照|執照|核准|\bsec\b|\bocc\b|regulat|license|approval|\bact\b/i },
+        { label: '投資／併購', score: 30, pattern: /併購|收購|入股|投資|募資|融資|增資|股權|併入|acquir|funding|raises?\b|investment/i },
+        { label: '財務／營運', score: 26, pattern: /財報|營收|獲利|虧損|法說|掛牌|上櫃|營運|銷售|\b(?:revenue|earnings|profit|ipo)\b/i },
+        { label: '市場／排行', score: 18, pattern: /排行|排名|營收榜|下載量|下載(?:突破|破|達|逾|超|數)|玩家數|市占|market share|ranking|downloads?\s*(?:surpass|million|billion|reaches?|tops?)/i },
+        { label: '策略／合作', score: 22, pattern: /策略合作|結盟|簽署|攜手|partner(ship)?|alliance/i },
+        { label: '產品／上線', score: 15, pattern: /正式上線|上線|推出|發表|開賣|上市|改版|更新|release|launch|rollout/i }
+    ];
+    return types.find((type) => type.pattern.test(value)) || null;
+}
+
+function trendLowSignalTitle(title) {
+    return /免費|不用花錢|贈品|贈送|好禮|回饋|優惠|折扣|最高折|折\d|抽獎|刷卡禮|慶典|活動上線|聯名合作|預先下載|預下載|事前預約|預約活動|開服活動|週年活動|直播|聯動|舉辦.*(?:大會|論壇|研討)|備份方法|功能關閉|攻略|試玩|評測|開箱/i.test(String(title || ''));
+}
+
+function trendRoundupTitle(title) {
+    return /科技早餐|今晨國際頭條|一次看|早報|晨報|懶人包/i.test(String(title || ''));
+}
+
+function trendRoutineGameTitle(title) {
+    return /改版|演唱會|見面會|\b(?:GO\s*)?Fest\b|週年|周年|票價|座位圖|合作活動|限定活動|特別活動|主線|劇情|終章/i.test(String(title || ''));
+}
+
+function trendHasStablecoinTitleReference(title) {
+    const value = String(title || '');
+    return /穩定幣|奧丁丁|\b(?:stablecoins?|owlpay|tether|usdt|usdc|pyusd|rlusd)\b/i.test(value);
+}
+
+function trendEntityLabels(article, domain) {
+    const paymentTerms = ['藍新科技', '藍新金流', 'NewebPay', 'LINE Pay Money', 'LINE Pay', 'LINE Bank', '彈性付', '街口支付', '街口電子支付', '全支付', '全盈支付', '綠界', 'ECPay', '紅陽', 'SunPay', '台灣Pay', '悠遊付', 'iPASS MONEY', '聯卡中心', '財金公司', '金管會', '中央銀行', '央行', 'TWQR', 'Visa', 'Mastercard', 'PayPal', 'Stripe', 'Block', 'Square', 'Adyen'];
+    const gameTerms = ['智冠', '中華網龍', '網龍', 'MyCard', '遊戲新幹線', '大宇', '橘子', 'Gamania', '華義', '鈊象', '宇峻', '歐買尬', '傳奇', '網銀國際', 'Wanin', 'Garena', 'NEXON', '騰訊', '網易', '任天堂', 'Steam', 'PlayStation', 'Xbox', '天堂M', '星城', '神魔之塔', '傳說對決', 'Kingshot', 'Roblox', '皮克敏', 'Fate'];
+    const stablecoinTerms = ['奧丁丁', 'OwlPay', 'Tether', 'USDT', 'USDC', 'PYUSD', 'RLUSD', '穩定幣', 'Stablecoin'];
+    const terms = domain === 'gaming'
+        ? [...gameTerms, ...trendGamingRuleTerms(article)]
+        : domain === 'payments' ? paymentTerms : stablecoinTerms;
+    const matches = trendMatchingTerms(article, terms);
+    if (matches.length) return matches;
+    const ruleIds = getMonitoringRuleIdsForArticle(article);
+    if (domain === 'gaming') {
+        if (ruleIds.some((id) => ['mobile-top-grossing-games', 'mobile-game-watchlist', 'mobile-game-context-watchlist'].includes(id))) return ['重點手遊'];
+        if (ruleIds.some((id) => ['softworld-brand', 'softworld-games', 'softworld-ip'].includes(id))) return ['智冠集團'];
+        if (ruleIds.some((id) => id.startsWith('competitor-'))) return ['遊戲競業'];
+        return ['遊戲產業'];
+    }
+    if (domain === 'payments') return getMonitoringFoldersForArticle(article).includes('folder_2') ? ['台灣支付'] : ['國際支付'];
+    return ['穩定幣'];
+}
+
+function trendCandidate(article, rangeEnd, scope = trendScope) {
+    const domain = trendArticleDomain(article, scope);
+    if (!domain) return null;
+    const title = String(article.title || '');
+    const event = trendEventType(title);
+    const entities = trendEntityLabels(article, domain);
+    const ruleIds = getMonitoringRuleIdsForArticle(article);
+    const genericGamingEntities = new Set(['遊戲競業', '遊戲產業', '重點手遊', '智冠集團', 'Steam', 'PlayStation', 'Xbox']);
+    const hasDirectGamingEntity = entities.some((entity) => !genericGamingEntities.has(entity));
+    const hasTargetGamingRule = ruleIds.some((id) => [
+        'softworld-brand', 'softworld-games', 'softworld-ip', 'competitor-brand',
+        'competitor-tw-game', 'competitor-global-game', 'mobile-top-grossing-games',
+        'mobile-game-watchlist', 'mobile-game-context-watchlist'
+    ].includes(id));
+    const isPriorityGaming = ruleIds.some((id) => [
+        'softworld-brand', 'softworld-games', 'softworld-ip', 'mobile-top-grossing-games',
+        'mobile-game-watchlist'
+    ].includes(id));
+    const isDirectGaming = hasDirectGamingEntity && hasTargetGamingRule;
+    const isDomesticPayment = getMonitoringFoldersForArticle(article).includes('folder_2');
+    const isDirectPayment = domain === 'payments' && (entities[0] !== '台灣支付' && entities[0] !== '國際支付');
+    const isPaymentAuthority = domain === 'payments' && ['金管會', '中央銀行', '央行', '聯卡中心', '財金公司'].some((term) => entities.includes(term));
+    const isSpecificStablecoin = domain === 'stablecoin' && entities.some((entity) => !['穩定幣', 'Stablecoin'].includes(entity));
+    const isOwlPayPriority = domain === 'stablecoin' && isOwlPayPriorityArticle(article);
+    const routineGame = domain === 'gaming' && trendRoutineGameTitle(title);
+    const isOfficialRss = article.sourceKind !== 'google_news_rss';
+    let score = event ? event.score : 0;
+    if (domain === 'gaming') score += isPriorityGaming && isDirectGaming ? 26 : isDirectGaming ? 16 : 8;
+    if (domain === 'payments') score += isDirectPayment ? 26 : isDomesticPayment ? 20 : 12;
+    if (domain === 'stablecoin') score += isSpecificStablecoin ? 20 : 14;
+    if (isDomesticPayment) score += 6;
+    if (isOwlPayPriority) score += 40;
+    if (isOfficialRss) score += 6;
+    if (ruleIds.length > 1) score += 3;
+    const published = String(article.date || '');
+    const daysOld = rangeEnd && published ? Math.max(0, Math.round((Date.parse(`${rangeEnd}T00:00:00Z`) - Date.parse(`${published}T00:00:00Z`)) / 86400000)) : 60;
+    score += Math.max(0, 10 - Math.floor(daysOld / 7));
+    const lowSignal = trendLowSignalTitle(title);
+    if (lowSignal) score -= 34;
+    if (routineGame) score -= 34;
+    if (trendRoundupTitle(title)) score -= 38;
+    if (domain === 'gaming' && event?.label === '產品／上線' && !(isPriorityGaming && isDirectGaming)) score -= 12;
+    if (domain === 'payments' && !isDomesticPayment && !isDirectPayment) score -= 8;
+    const threshold = domain === 'stablecoin' ? 48 : 46;
+    const hasDirectTarget = domain === 'gaming'
+        ? isDirectGaming
+        : domain === 'payments'
+            ? (isDirectPayment || isPaymentAuthority)
+            : (trendHasStablecoinTitleReference(title) && (isSpecificStablecoin || event?.label === '監理／法規'));
+    return {
+        article,
+        domain,
+        event,
+        entities,
+        score,
+        lowSignal,
+        focal: Boolean(event) && hasDirectTarget && !lowSignal && !routineGame && !trendRoundupTitle(title) && score >= threshold
+    };
+}
+
+function normalizedTrendTitle(value) {
+    return String(value || '').toLowerCase()
+        .replace(/\s*[|｜]\s*[^|｜]+$/, '')
+        .replace(/\s+-\s+[^-]+$/, '')
+        .replace(/[^\p{L}\p{N}]+/gu, '');
+}
+
+function trendTitlesSimilar(left, right) {
+    const a = normalizedTrendTitle(left);
+    const b = normalizedTrendTitle(right);
+    if (!a || !b) return false;
+    if (a === b || a.includes(b) || b.includes(a)) return true;
+    let prefix = 0;
+    while (prefix < Math.min(a.length, b.length) && a[prefix] === b[prefix]) prefix += 1;
+    if (prefix >= 12) return true;
+    const grams = (value) => {
+        const set = new Set();
+        for (let index = 0; index < value.length - 1; index += 1) set.add(value.slice(index, index + 2));
+        return set;
+    };
+    const aGrams = grams(a);
+    const bGrams = grams(b);
+    const overlap = [...aGrams].filter((term) => bGrams.has(term)).length;
+    const union = new Set([...aGrams, ...bGrams]).size;
+    return union > 0 && overlap / union >= 0.62;
+}
+
+function trendDatesClose(left, right) {
+    const leftTime = Date.parse(`${String(left || '')}T00:00:00Z`);
+    const rightTime = Date.parse(`${String(right || '')}T00:00:00Z`);
+    return Number.isFinite(leftTime) && Number.isFinite(rightTime) && Math.abs(leftTime - rightTime) <= 3 * 86400000;
+}
+
+function trendCandidateSort(left, right, order = 'score') {
+    const leftDate = String(left.article.date || '');
+    const rightDate = String(right.article.date || '');
+    if (order === 'recent') {
+        return rightDate.localeCompare(leftDate) || right.score - left.score;
+    }
+    return right.score - left.score || rightDate.localeCompare(leftDate);
+}
+
+function trendArticleKey(article) {
+    return String(article?.url || `${article?.source || ''}|${article?.date || ''}|${article?.title || ''}`);
+}
+
+function trendSpecificEntityKeys(candidate) {
+    const generic = new Set(['台灣支付', '國際支付', '遊戲競業', '遊戲產業', '重點手遊', '智冠集團', '穩定幣', 'stablecoin']);
+    return new Set((candidate?.entities || [])
+        .map((entity) => String(entity || '').trim())
+        .filter((entity) => entity && !generic.has(entity.toLowerCase()))
+        .map((entity) => entity.toLowerCase()));
+}
+
+function trendCandidatesDescribeSameEvent(left, right) {
+    if (left.domain !== right.domain || !trendDatesClose(left.article.date, right.article.date)) return false;
+    if (trendTitlesSimilar(left.article.title, right.article.title)) return true;
+    if (!left.event?.label || left.event.label !== right.event?.label) return false;
+    const leftEntities = trendSpecificEntityKeys(left);
+    const rightEntities = trendSpecificEntityKeys(right);
+    return [...leftEntities].some((entity) => rightEntities.has(entity));
+}
+
+function clusterTrendCandidates(candidates, order = 'score') {
+    const clusters = [];
+    [...candidates].sort((left, right) => trendCandidateSort(left, right, order))
+        .slice(0, 120).forEach((candidate) => {
+            const cluster = clusters.find((item) => trendCandidatesDescribeSameEvent(item.primary, candidate));
+            if (cluster) {
+                cluster.items.push(candidate);
+                if (trendCandidateSort(candidate, cluster.primary, order) < 0) cluster.primary = candidate;
+                return;
+            }
+            clusters.push({ domain: candidate.domain, primary: candidate, items: [candidate] });
+        });
+    return clusters.map((cluster) => ({
+        ...cluster,
+        sourceCount: new Set(cluster.items.map((item) => item.article.source).filter(Boolean)).size,
+        articleIds: new Set(cluster.items.map((item) => trendArticleKey(item.article)))
+    })).sort((left, right) => trendCandidateSort(left.primary, right.primary, order));
+}
+
+function trendClusterIsDomesticPayment(cluster) {
+    return cluster?.domain === 'payments' && getMonitoringFoldersForArticle(cluster.primary.article).includes('folder_2');
+}
+
+function selectDiverseTrendClusters(clusters, limit, { domesticQuota = 0 } = {}) {
+    const ordered = [...clusters].sort((left, right) => trendCandidateSort(left.primary, right.primary));
+    const selected = [];
+    const selectedKeys = new Set();
+    const selectedArticles = new Set();
+    const add = (cluster, allowRepeatedEntity = false) => {
+        if (selected.length >= limit || selectedArticles.has(trendArticleKey(cluster.primary.article))) return false;
+        const entityKeys = trendSpecificEntityKeys(cluster.primary);
+        if (!allowRepeatedEntity && [...entityKeys].some((key) => selectedKeys.has(key))) return false;
+        selected.push(cluster);
+        selectedArticles.add(trendArticleKey(cluster.primary.article));
+        entityKeys.forEach((key) => selectedKeys.add(key));
+        return true;
+    };
+    if (domesticQuota > 0) {
+        ordered.filter(trendClusterIsDomesticPayment).forEach((cluster) => {
+            if (selected.filter(trendClusterIsDomesticPayment).length < domesticQuota) add(cluster);
         });
     }
-    const topFolders = [...folders.entries()].sort((a, b) => b[1] - a[1]).slice(0, 4);
-    summary.innerHTML = topFolders.map(([folder, count]) => `
-        <article class="trend-card">
-            <div class="trend-card-icon">📊</div>
-            <h4 class="trend-card-title">${escapeHtml(folderNames.get(folder) || folder)}</h4>
-            <p class="trend-card-desc">目前窗口命中 ${count.toLocaleString()} 篇真實新聞。</p>
-            <span class="trend-card-date">近兩個月</span>
+    ordered.forEach((cluster) => add(cluster));
+    return selected;
+}
+
+function selectTrendClusters(clusters, scope) {
+    if (scope === 'gaming' || scope === 'stablecoin') return selectDiverseTrendClusters(clusters, 8);
+    if (scope === 'payments') return selectDiverseTrendClusters(clusters, 8, { domesticQuota: 2 });
+    const gaming = selectDiverseTrendClusters(clusters.filter((cluster) => cluster.domain === 'gaming'), 4);
+    const payments = selectDiverseTrendClusters(clusters.filter((cluster) => cluster.domain === 'payments'), 4, { domesticQuota: 2 });
+    return [...gaming, ...payments].sort((left, right) => right.primary.score - left.primary.score
+        || String(right.primary.article.date || '').localeCompare(String(left.primary.article.date || ''))).slice(0, 8);
+}
+
+function trendDomainLabel(domain) {
+    return ({ gaming: '遊戲', payments: '金融支付', stablecoin: '穩定幣' })[domain] || '焦點';
+}
+
+function trendReason(candidate, sourceCount) {
+    const parts = [trendDomainLabel(candidate.domain)];
+    if (candidate.entities.length) parts.push(candidate.entities.join('、'));
+    if (candidate.event?.label) parts.push(candidate.event.label);
+    if (sourceCount > 1) parts.push(`${sourceCount} 個來源`);
+    return parts.join('｜');
+}
+
+function renderTrendSummary(summary, clusters, articles, range) {
+    const countByDomain = (domain) => clusters.filter((cluster) => cluster.domain === domain).length;
+    const cards = trendScope === 'focus'
+        ? [
+            ['🎮', '遊戲焦點', countByDomain('gaming'), '符合具名遊戲／作品與事件條件'],
+            ['💳', '金融支付', countByDomain('payments'), '符合支付業者、監理或商業事件條件'],
+            ['🗓️', '資料期間', `${trendRangeDays} 日`, range.from && range.to ? `${range.from} 至 ${range.to}` : '依真實資料更新']
+        ]
+        : [
+            ['🎯', trendScopeLabel(), clusters.length, '符合焦點事件條件'],
+            ['📰', '相關快訊', Math.max(0, articles.length - clusters.reduce((total, cluster) => total + cluster.items.length, 0)), '不與焦點事件混排'],
+            ['🗓️', '資料期間', `${trendRangeDays} 日`, range.from && range.to ? `${range.from} 至 ${range.to}` : '依真實資料更新']
+        ];
+    summary.innerHTML = cards.map(([icon, title, value, detail]) => `
+        <article class="trend-card trend-summary-card">
+            <div class="trend-card-icon" aria-hidden="true">${icon}</div>
+            <h4 class="trend-card-title">${escapeHtml(String(title))}</h4>
+            <p class="trend-summary-value">${escapeHtml(String(value))}</p>
+            <p class="trend-card-desc">${escapeHtml(String(detail))}</p>
         </article>
     `).join('');
-    const latest = [...articles].sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).slice(0, 12);
-    timeline.innerHTML = latest.map((article) => `
-        <div class="event-item">
+}
+
+function renderTrendEventItem(cluster) {
+    const candidate = cluster.primary;
+    const article = candidate.article;
+    const tags = candidate.entities.map((entity) => `<span class="trend-event-tag">${escapeHtml(entity)}</span>`).join('');
+    const sourceNote = cluster.sourceCount > 1 ? `｜同題材 ${cluster.sourceCount} 個來源` : '';
+    return `
+        <article class="trend-event-item" data-trend-domain="${escapeHtml(candidate.domain)}">
+            <div class="trend-event-topline">
+                <span class="trend-domain-badge">${escapeHtml(trendDomainLabel(candidate.domain))}</span>
+                <span class="trend-type-badge">${escapeHtml(candidate.event?.label || '重要動態')}</span>
+                <time class="trend-event-date" datetime="${escapeHtml(article.date || '')}">${escapeHtml(article.date || '日期待確認')}</time>
+            </div>
+            <h4><a href="${escapeHtml(safeHttpUrl(article.url))}" target="_blank" rel="noopener">${escapeHtml(article.title || '未命名新聞')} ↗</a></h4>
+            <p class="trend-event-reason"><strong>入選依據：</strong>${escapeHtml(trendReason(candidate, cluster.sourceCount))}</p>
+            ${tags ? `<div class="trend-event-tags">${tags}</div>` : ''}
+            <p class="trend-event-source">${escapeHtml(article.source || '來源待確認')}｜${escapeHtml(article.verificationLabel || '已驗證監測')}${sourceNote}</p>
+        </article>
+    `;
+}
+
+function renderTrendRelatedItem(cluster) {
+    const candidate = cluster.primary;
+    const article = candidate.article;
+    const sourceNote = cluster.sourceCount > 1 ? `｜同題材 ${cluster.sourceCount} 個來源` : '';
+    const signal = [trendDomainLabel(candidate.domain), candidate.event?.label].filter(Boolean).join('｜');
+    return `
+        <div class="event-item trend-related-item">
             <div class="event-date">${escapeHtml(article.date || '日期待確認')}</div>
             <div class="event-content">
                 <h4><a href="${escapeHtml(safeHttpUrl(article.url))}" target="_blank" rel="noopener">${escapeHtml(article.title || '未命名新聞')} ↗</a></h4>
-                <p>${escapeHtml(article.source || '來源待確認')}｜${escapeHtml(article.verificationLabel || '已驗證監測')}</p>
+                <p>${escapeHtml(article.source || '來源待確認')}｜${escapeHtml(article.verificationLabel || '已驗證監測')}｜${escapeHtml(signal)}${escapeHtml(sourceNote)}</p>
             </div>
         </div>
-    `).join('');
+    `;
+}
+
+function renderRealTrends() {
+    const summary = document.getElementById('trendsSummary');
+    const timeline = document.getElementById('trendsTimeline');
+    const related = document.getElementById('trendsRelated');
+    const relatedSummary = document.getElementById('trendsRelatedSummary');
+    const relatedList = document.getElementById('trendsRelatedList');
+    const note = document.getElementById('trendsFocusNote');
+    const title = document.getElementById('trendsTimelineTitle');
+    const meta = document.getElementById('trendsTimelineMeta');
+    if (!summary || !timeline) return;
+    updateTrendControls();
+    const articles = typeof monitoringNews !== 'undefined' && Array.isArray(monitoringNews) ? monitoringNews : [];
+    if (!articles.length) {
+        const waiting = monitoringDataMode === 'loading';
+        if (note) note.textContent = waiting ? '正在讀取已驗證的真實新聞資料。' : '資料服務暫時無法驗證，頁面不會以展示資料替代。';
+        summary.innerHTML = `<p class="method-muted">${waiting ? '正在整理遊戲與金融支付焦點。' : '目前沒有可公開的真實新聞資料。'}</p>`;
+        timeline.innerHTML = `<p class="method-muted">${waiting ? '資料載入完成後，將只顯示符合焦點條件的事件。' : '請稍後重新整理，或確認資料服務狀態。'}</p>`;
+        if (related) related.hidden = true;
+        return;
+    }
+    const range = trendDateRange(articles);
+    const inRange = articles.filter((article) => !range.from || (String(article.date || '') >= range.from && String(article.date || '') <= range.to));
+    const scopedArticles = inRange.filter((article) => trendArticleInScope(article, trendScope));
+    const candidates = scopedArticles.map((article) => trendCandidate(article, range.to, trendScope)).filter(Boolean);
+    const focalCandidates = candidates.filter((candidate) => candidate.focal);
+    const allClusters = clusterTrendCandidates(focalCandidates);
+    const selectedClusters = selectTrendClusters(allClusters, trendScope);
+    const selectedArticleIds = new Set(selectedClusters.flatMap((cluster) => [...cluster.articleIds]));
+    const relatedClusters = clusterTrendCandidates(
+        candidates.filter((candidate) => !selectedArticleIds.has(trendArticleKey(candidate.article))),
+        'recent'
+    ).slice(0, 8);
+    renderTrendSummary(summary, allClusters, scopedArticles, range);
+    if (note) note.textContent = '焦點僅採用具名監測對象與事件類型（監理、投資／併購、財務、合作、上線、風險等）；一般快訊已收合，穩定幣可切換至獨立範圍。';
+    if (title) title.textContent = trendScopeLabel();
+    if (meta) meta.textContent = `${selectedClusters.length} 則焦點事件｜${range.from} 至 ${range.to}`;
+    timeline.innerHTML = selectedClusters.length
+        ? selectedClusters.map(renderTrendEventItem).join('')
+        : '<p class="method-muted">這段期間尚無符合焦點條件的事件；相關監測快訊仍可展開閱讀。</p>';
+    if (related && relatedSummary && relatedList) {
+        related.hidden = relatedClusters.length === 0;
+        relatedSummary.textContent = `相關快訊（${relatedClusters.length} 則，已收合）`;
+        relatedList.innerHTML = relatedClusters.map(renderTrendRelatedItem).join('');
+    }
 }
 
 // 4. 新聞發布區塊與過濾邏輯
@@ -424,6 +843,9 @@ let monitoringManifest = null;
 let monitoringRuntimeStatus = null;
 let monitoringLoadState = null;
 let monitoringDataMode = 'loading';
+// 趨勢頁的預設焦點只涵蓋遊戲與金融支付；穩定幣保留獨立範圍，避免大量加密新聞淹沒支付事件。
+let trendScope = 'focus';
+let trendRangeDays = 60;
 // 國內支付是此頁主要監測目的；首次進入與清除篩選都回到台灣支付視圖。
 let fintechMode = 'taiwan';
 let fintechPage = 1;

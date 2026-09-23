@@ -1379,6 +1379,273 @@ mark {
   opacity: 0.5;
 }
 
+/* --------------------------------------------------------------------------
+   趨勢分析：遊戲與金融支付焦點事件
+   -------------------------------------------------------------------------- */
+
+.trend-focus-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin: 0 0 var(--spacing-md);
+  padding: 14px 16px;
+  border: 1px solid #dbe7e1;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, #f6fbf8, #fbfdfc);
+}
+
+.trend-control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.trend-control-label,
+.trend-timeline-eyebrow {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.trend-control-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.trend-control-btn {
+  min-height: 34px;
+  padding: 6px 13px;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-full);
+  background: #ffffff;
+  color: #475569;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
+}
+
+.trend-control-btn:hover {
+  border-color: #0f766e;
+  color: #0f766e;
+  transform: translateY(-1px);
+}
+
+.trend-control-btn.active {
+  border-color: #0f766e;
+  background: #0f766e;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.18);
+}
+
+.trend-control-btn:focus-visible,
+.trend-related-details summary:focus-visible,
+.trend-event-item a:focus-visible {
+  outline: 3px solid rgba(72, 202, 228, 0.42);
+  outline-offset: 2px;
+}
+
+.trend-focus-note {
+  margin: 0 0 var(--spacing-lg);
+  color: #526477;
+  font-size: 0.82rem;
+  line-height: 1.6;
+}
+
+.trend-summary-card {
+  min-height: 166px;
+  border-top: 3px solid #0f766e;
+}
+
+.trend-summary-value {
+  margin: 2px 0 4px;
+  color: #0f766e;
+  font-size: 1.65rem;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.trend-timeline-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.trend-timeline-header .subsection-title {
+  margin: 2px 0 0;
+  text-align: left;
+}
+
+.trend-timeline-meta {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+  text-align: right;
+}
+
+.trend-event-item {
+  --trend-accent: #0f766e;
+  padding: 16px 18px;
+  border: 1px solid #dbe4ee;
+  border-left: 4px solid var(--trend-accent);
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.045);
+}
+
+.trend-event-item[data-trend-domain="gaming"] {
+  --trend-accent: #2563eb;
+}
+
+.trend-event-item[data-trend-domain="payments"] {
+  --trend-accent: #0f766e;
+}
+
+.trend-event-item[data-trend-domain="stablecoin"] {
+  --trend-accent: #a16207;
+}
+
+.trend-event-topline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 8px;
+}
+
+.trend-domain-badge,
+.trend-type-badge,
+.trend-event-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.trend-domain-badge {
+  background: #edf7f3;
+  color: var(--trend-accent);
+}
+
+.trend-type-badge {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.trend-event-date {
+  margin-left: auto;
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.trend-event-item h4 {
+  margin: 0 0 7px;
+  color: #1e293b;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
+.trend-event-item h4 a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.trend-event-item h4 a:hover {
+  color: var(--trend-accent);
+  text-decoration: underline;
+}
+
+.trend-event-reason,
+.trend-event-source {
+  margin: 0;
+  color: #526477;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.trend-event-reason strong {
+  color: #334155;
+}
+
+.trend-event-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 7px;
+}
+
+.trend-event-tag {
+  border: 1px solid #c9dfd7;
+  background: #ffffff;
+  color: var(--trend-accent);
+}
+
+.trend-event-source {
+  margin-top: 7px;
+  color: #78889b;
+  font-size: 0.74rem;
+}
+
+.trend-related-details {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+  border-top: 1px dashed #cbd5e1;
+}
+
+.trend-related-details summary {
+  width: fit-content;
+  color: #0f766e;
+  font-size: 0.88rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.trend-related-note {
+  margin: 10px 0;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.trend-related-list {
+  gap: 10px;
+}
+
+.trend-related-item {
+  padding-bottom: 10px;
+}
+
+@media (max-width: 720px) {
+  .trend-focus-controls,
+  .trend-timeline-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trend-timeline-meta {
+    text-align: left;
+  }
+
+  .trend-event-date {
+    margin-left: 0;
+  }
+
+  .trend-event-item {
+    padding: 14px;
+  }
+}
+
 @media (max-width: 768px) {
   .site-data-status {
     top: 72px;

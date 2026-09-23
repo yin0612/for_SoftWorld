@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="css/index.css?v=20260914_03">
     <link rel="stylesheet" href="css/components.css?v=20260918_02">
     <link rel="stylesheet" href="css/animations.css?v=20260914_03">
-    <link rel="stylesheet" href="css/enhancements.css?v=20260921_01">
+    <link rel="stylesheet" href="css/enhancements.css?v=20260923_01">
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
@@ -536,15 +536,46 @@
         <div class="container">
             <div class="section-header animate-on-scroll">
                 <span class="section-tag">VERIFIED TRENDS</span>
-                <h2 class="section-title">近兩個月真實新聞<span class="text-gradient">趨勢與事件</span></h2>
-                <p class="section-subtitle">依實際收錄文章整理熱門分類、來源與發布時間；每則事件均可回到原文查核。</p>
+                <h2 class="section-title"><span class="text-gradient">趨勢分析</span></h2>
+                <p class="section-subtitle">優先整理遊戲與金融支付的重要事件；一般快訊保留於收合區，不與焦點事件混排。</p>
             </div>
+            <div class="trend-focus-controls animate-on-scroll" aria-label="趨勢分析篩選">
+                <div class="trend-control-group" role="group" aria-label="監測範圍">
+                    <span class="trend-control-label">重點範圍</span>
+                    <div class="trend-control-buttons" id="trendScopeControls">
+                        <button class="trend-control-btn active" type="button" data-trend-scope="focus" aria-pressed="true">焦點總覽</button>
+                        <button class="trend-control-btn" type="button" data-trend-scope="gaming" aria-pressed="false">遊戲產業</button>
+                        <button class="trend-control-btn" type="button" data-trend-scope="payments" aria-pressed="false">金融支付</button>
+                        <button class="trend-control-btn" type="button" data-trend-scope="stablecoin" aria-pressed="false">穩定幣</button>
+                    </div>
+                </div>
+                <div class="trend-control-group" role="group" aria-label="資料期間">
+                    <span class="trend-control-label">資料期間</span>
+                    <div class="trend-control-buttons" id="trendRangeControls">
+                        <button class="trend-control-btn" type="button" data-trend-range="7" aria-pressed="false">7 日</button>
+                        <button class="trend-control-btn" type="button" data-trend-range="30" aria-pressed="false">30 日</button>
+                        <button class="trend-control-btn active" type="button" data-trend-range="60" aria-pressed="true">60 日</button>
+                    </div>
+                </div>
+            </div>
+            <p class="trend-focus-note animate-on-scroll" id="trendsFocusNote" aria-live="polite">正在依事件類型、具名監測對象與來源整理焦點。</p>
             <div class="trend-highlights animate-on-scroll" id="trendsSummary" aria-live="polite"></div>
             <div class="events-timeline animate-on-scroll">
-                <h3 class="subsection-title">真實監測新聞時間軸</h3>
+                <div class="trend-timeline-header">
+                    <div>
+                        <span class="trend-timeline-eyebrow">MAJOR EVENTS</span>
+                        <h3 class="subsection-title" id="trendsTimelineTitle">焦點事件</h3>
+                    </div>
+                    <p class="trend-timeline-meta" id="trendsTimelineMeta"></p>
+                </div>
                 <div class="events-list" id="trendsTimeline">
                     <p class="method-muted">正在讀取真實新聞監測資料。</p>
                 </div>
+                <details class="trend-related-details" id="trendsRelated" hidden>
+                    <summary id="trendsRelatedSummary">相關快訊</summary>
+                    <p class="trend-related-note">以下為已命中監測規則、但未達焦點事件條件的近期資料。</p>
+                    <div class="events-list trend-related-list" id="trendsRelatedList"></div>
+                </details>
             </div>
         </div>
     </section>
@@ -709,6 +740,6 @@
     <script src="js/charts.js?v=20260917_01"></script>
     <script src="js/compare.js?v=20260917_01"></script>
     <script src="js/monitoring.js?v=20260922_01"></script>
-    <script src="js/app.js?v=20260922_01"></script>
+    <script src="js/app.js?v=20260923_01"></script>
 </body>
 </html>
