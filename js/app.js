@@ -833,7 +833,8 @@ function renderRealTrends() {
 
 // 4. 新聞發布區塊與過濾邏輯
 let currentNewsPage = 1;
-const NEWS_PER_PAGE = 8;
+// 與金融科技、遊戲產業頁一致，首批與每次載入皆顯示 12 則。
+const NEWS_PER_PAGE = 12;
 let filteredNews = [];
 // 真實監測資料與 data.js 的既有展示/分析資料分離，避免互相污染。
 let monitoringNews = [];
