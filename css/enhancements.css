@@ -1082,69 +1082,104 @@ mark {
   line-height: 1.65;
 }
 
-/* 遊戲產業真實新聞監測：沿用已驗證新聞卡片與來源揭露，
-   只以紫靛色區別瀏覽脈絡，不額外建立圖表或重複資料。 */
+/* 遊戲產業真實新聞監測：以深藍色區別金融科技的藍綠色脈絡，
+   不額外建立圖表或重複資料。 */
+#gaming .text-gradient {
+  background: linear-gradient(135deg, #0b1f4d 0%, #1e4d91 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#gaming .section-context-toggle,
+#gaming .fintech-glossary-toggle {
+  border-color: #b9cdf0;
+  color: #163a70;
+}
+
+#gaming .section-context-toggle:hover,
+#gaming .section-context-toggle:focus-visible,
+#gaming .fintech-glossary-toggle:hover,
+#gaming .fintech-glossary-toggle:focus-visible {
+  border-color: #1e4d91;
+  background: #edf4ff;
+  color: #0b1f4d;
+  outline-color: rgba(30, 77, 145, 0.24);
+}
+
 .gaming-monitoring-summary {
-  background: linear-gradient(135deg, #f5f3ff 0%, #eef2ff 100%);
-  border-color: #c4b5fd;
+  background: linear-gradient(135deg, #f4f8ff 0%, #eaf1ff 100%);
+  border-color: #b9cdf0;
 }
 
 .gaming-summary-details > summary,
 .gaming-glossary-toggle {
-  border-color: #c4b5fd;
-  color: #5b21b6;
+  border-color: #b9cdf0;
+  color: #163a70;
 }
 
 .gaming-summary-details > summary:hover,
 .gaming-summary-details > summary:focus-visible,
 .gaming-glossary-toggle:hover,
 .gaming-glossary-toggle:focus-visible {
-  border-color: #4f46e5;
-  background: #eef2ff;
-  color: #4338ca;
-  outline-color: rgba(99, 102, 241, 0.24);
+  border-color: #1e4d91;
+  background: #edf4ff;
+  color: #0b1f4d;
+  outline-color: rgba(30, 77, 145, 0.24);
 }
 
 .gaming-mode-button:hover,
 .gaming-mode-button.active {
-  border-color: #4f46e5;
-  background: #4f46e5;
+  border-color: #163a70;
+  background: #163a70;
   color: #ffffff;
 }
 
 .gaming-scope-pill {
-  border-color: #ddd6fe;
-  background: #faf5ff;
-  color: #5b21b6;
+  border-color: #c9d8f2;
+  background: #f6f9ff;
+  color: #163a70;
 }
 
 .gaming-stat {
-  border-color: #ddd6fe;
+  border-color: #c9d8f2;
 }
 
 .gaming-stat-value {
-  color: #4f46e5;
+  color: #163a70;
 }
 
 .gaming-news-card:hover {
-  border-color: #a5b4fc;
-  box-shadow: 0 10px 24px rgba(79, 70, 229, 0.11);
+  border-color: #8faddc;
+  box-shadow: 0 10px 24px rgba(22, 58, 112, 0.12);
 }
 
 .gaming-category-badge {
-  background: #eef2ff;
-  color: #4338ca;
+  background: #eaf1ff;
+  color: #163a70;
 }
 
 .gaming-news-card .fintech-card-title a:hover,
 .gaming-news-card .fintech-original-link,
 .gaming-news-card .fintech-card-provenance a {
-  color: #4f46e5;
+  color: #163a70;
 }
 
 .gaming-news-card .fintech-term {
-  background: #eef2ff;
-  color: #4338ca;
+  background: #eaf1ff;
+  color: #163a70;
+}
+
+#gaming .fintech-provenance-toggle:hover,
+#gaming .fintech-provenance-toggle:focus-visible {
+  border-color: #1e4d91;
+  background: #edf4ff;
+  color: #163a70;
+}
+
+#gaming .fintech-load-more .btn-secondary:hover {
+  border-color: #163a70 !important;
+  background: #edf4ff !important;
+  color: #163a70 !important;
 }
 
 /* 新增遊戲產業入口後，中等寬度改用既有選單按鈕，避免導覽列擠壓。 */
