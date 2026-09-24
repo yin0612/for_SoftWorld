@@ -105,7 +105,7 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
 // 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
 const LIVE_AGGREGATED_STABLECOIN_SOURCES = LIVE_AGGREGATED_FINTECH_SOURCES;
 // 使用 GitHub raw 內容作為 Actions 產出的公開快照；不依賴 Pages 部署延遲。
-const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260923-4';
+const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260924-1';
 
 const LIVE_STABLECOIN_RULES = [
   {
@@ -133,10 +133,30 @@ const LIVE_STABLECOIN_RULES = [
     folder_id: 'folder_6',
     scope: 'full_text',
     any_of_json: JSON.stringify(['奧丁丁','OwlPay']),
-    all_of_json: JSON.stringify(['穩定幣','穩定幣支付','穩定幣結算','美元穩定幣','stablecoin','stable coin','USDT','USDC','USDe','PYUSD','RLUSD','FDUSD','EURC','USDG','GUSD','Tether','鏈上結算','鏈上支付','代幣化存款','代幣化貨幣','tokenized deposit','tokenized deposits','stablecoin settlement','stablecoin payment','stablecoin payments','數位資產','加密資產','虛擬資產','加密貨幣','區塊鏈','支付','付款','結算','錢包','入金','出金','金融科技']),
+    all_of_json: JSON.stringify(['穩定幣','穩定幣支付','穩定幣結算','美元穩定幣','stablecoin','stable coin','USDT','USDC','USDe','PYUSD','RLUSD','FDUSD','EURC','USDG','GUSD','Tether','鏈上結算','鏈上支付','代幣化存款','代幣化貨幣','tokenized deposit','tokenized deposits','stablecoin settlement','stablecoin payment','stablecoin payments','數位資產','加密資產','虛擬資產','虛擬通貨','加密貨幣','區塊鏈','支付','付款','結算','錢包','入金','出金','金融科技']),
     exclude_any_json: JSON.stringify(['大宇紡織']),
     auto_publish: 1,
     auto_publish_allowed_terms_json: JSON.stringify(['奧丁丁','OwlPay'])
+  },
+  {
+    id: 'stablecoin-circle',
+    folder_id: 'folder_6',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['Circle','Circle Internet Financial']),
+    all_of_json: JSON.stringify(['穩定幣','穩定幣支付','穩定幣結算','美元穩定幣','stablecoin','stable coin','USDT','USDC','USDe','PYUSD','RLUSD','FDUSD','EURC','USDG','GUSD','Tether','鏈上結算','鏈上支付','代幣化存款','代幣化貨幣','tokenized deposit','tokenized deposits','stablecoin settlement','stablecoin payment','stablecoin payments','數位資產','加密資產','虛擬資產','虛擬通貨','加密貨幣','區塊鏈','支付','付款','結算','錢包','入金','出金','金融科技']),
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['Circle','Circle Internet Financial'])
+  },
+  {
+    id: 'stablecoin-bitopro',
+    folder_id: 'folder_6',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['幣託','BitoPro','BitoGroup']),
+    all_of_json: JSON.stringify(['穩定幣','穩定幣支付','穩定幣結算','美元穩定幣','stablecoin','stable coin','USDT','USDC','USDe','PYUSD','RLUSD','FDUSD','EURC','USDG','GUSD','Tether','鏈上結算','鏈上支付','代幣化存款','代幣化貨幣','tokenized deposit','tokenized deposits','stablecoin settlement','stablecoin payment','stablecoin payments','數位資產','加密資產','虛擬資產','虛擬通貨','加密貨幣','區塊鏈','支付','付款','結算','錢包','入金','出金','金融科技']),
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['幣託','BitoPro','BitoGroup'])
   }
 ];
 

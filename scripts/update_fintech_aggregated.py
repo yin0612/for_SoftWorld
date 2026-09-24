@@ -35,10 +35,10 @@ STABLECOIN_TERMS = (
     "穩定幣", "stablecoin", "stable coin", "usdt", "usdc", "usde", "pyusd", "rlusd",
     "fdusd", "eurc", "usdg", "gusd", "tether", "鏈上結算", "鏈上支付", "代幣化存款",
     "代幣化貨幣", "tokenized deposit", "tokenized deposits", "stablecoin settlement",
-    "stablecoin payment", "stablecoin payments", "奧丁丁", "owlpay",
+    "stablecoin payment", "stablecoin payments",
 )
 QUERY_PAYMENT_TERMS = ("支付", "電子支付", "行動支付", "金流", "信用卡", "第三方支付", "電子票證", "跨境支付", "BNPL", "先買後付", "街口支付", "LINE Pay", "LINE Bank", "彈性付", "台灣Pay")
-QUERY_STABLECOIN_TERMS = ("穩定幣", "stablecoin", "USDT", "USDC", "鏈上支付", "鏈上結算", "代幣化")
+QUERY_STABLECOIN_TERMS = ("穩定幣", "stablecoin", "USDT", "USDC", "鏈上支付", "鏈上結算", "代幣化", "Circle", "Circle Internet Financial", "幣託", "BitoPro", "BitoGroup")
 # 聚合查詢只使用能有效縮小結果集的代表詞；實際是否歸入分類，仍須
 # 再通過 monitoring_rules.json 的完整雙群組條件。
 QUERY_COMPETITOR_TERMS = ("遊戲", "遊戲橘子", "鈊象", "宇峻奧汀", "網銀國際", "Garena", "騰訊", "網易", "NEXON", "SEGA", "CAPCOM")
@@ -95,7 +95,7 @@ def load_huike_rules() -> list[dict]:
     config = json.loads(RULE_CONFIG.read_text(encoding="utf-8"))
     return [
         rule for rule in config.get("rules", [])
-        if rule.get("folder_id") in {"folder_1", "folder_3", "folder_4"}
+        if rule.get("folder_id") in {"folder_1", "folder_3", "folder_4", "folder_6"}
         or rule.get("id") in {"softworld-fintech-services", "taiwan-payment-peer-oen"}
     ]
 
