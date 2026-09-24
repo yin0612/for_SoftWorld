@@ -2512,6 +2512,27 @@ function highlightKeyword(text, keyword) {
     }
 }
 
+function isMostlyEnglishText(value) {
+    const text = String(value || '');
+    const latinCount = (text.match(/[A-Za-z]/g) || []).length;
+    const chineseCount = (text.match(/[\u3400-\u9fff]/g) || []).length;
+    return latinCount >= 24 && latinCount > chineseCount * 2;
+}
+
+function getTimelineDisplayExcerpt(news) {
+    const rawExcerpt = String(news?.excerpt || '');
+    if (!isMostlyEnglishText(rawExcerpt)) return rawExcerpt;
+
+    // 國際英文 RSS 常把全文摘要放在同一欄。先取第一段，再採金融科技
+    // 卡片相同的 300 字摘要上限，避免時間軸被長篇英文占滿。
+    const firstParagraph = plainFintechText(rawExcerpt)
+        .replace(/\r\n?/g, '\n')
+        .split(/\n\s*\n/)[0]
+        .replace(/\s+/g, ' ')
+        .trim();
+    return truncateFintechText(firstParagraph, 300);
+}
+
 function renderNews(append = false) {
     const container = document.getElementById('timelineContainer');
     const loadMoreBtn = document.getElementById('timelineLoadMore');
@@ -2622,7 +2643,7 @@ function renderNews(append = false) {
         const hasOriginalLink = directUrl !== '#';
 
         const displayTitle = highlightKeyword(news.title, currentKeyword);
-        const displayExcerpt = highlightKeyword(news.excerpt, currentKeyword);
+        const displayExcerpt = highlightKeyword(getTimelineDisplayExcerpt(news), currentKeyword);
         const titleContent = hasOriginalLink
             ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.color='${brandColor}'" onmouseout="this.style.color='inherit'">${displayTitle} <span style="font-size:0.85rem;">↗</span></a>`
             : `<span style="color:inherit;">${displayTitle}</span>`;
