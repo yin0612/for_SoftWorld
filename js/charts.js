@@ -46,7 +46,7 @@ function destroyChart(id) {
 }
 
 function chartColors(count) {
-    const palette = ['#0f766e', '#e76f51', '#48cae4', '#f4a261', '#9d4edf', '#4a7c59', '#64748b', '#f59e0b', '#2563eb', '#db2777'];
+    const palette = ['#725d87', '#bd8b9e', '#7f86b5', '#d0a86d', '#9d4edf', '#8aa28e', '#7c7484', '#c79558', '#6477ae', '#b36a91'];
     return Array.from({ length: count }, (_, index) => palette[index % palette.length]);
 }
 
@@ -172,7 +172,7 @@ function renderAnalyticsCharts() {
         makeChart('exposureTrendChart', {
             type: 'line',
             data: { labels: dates.labels, datasets: [
-                { label: '官方 RSS', data: dates.official, borderColor: '#0f766e', backgroundColor: 'rgba(15,118,110,.12)', fill: true, tension: .25 },
+                { label: '官方 RSS', data: dates.official, borderColor: '#725d87', backgroundColor: 'rgba(114,93,135,.12)', fill: true, tension: .25 },
                 { label: 'Google News 聚合', data: dates.aggregated, borderColor: '#e76f51', backgroundColor: 'rgba(231,111,81,.08)', fill: true, tension: .25 }
             ] },
             options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { tooltip: { callbacks: { label: (context) => `${context.dataset.label}：${context.parsed.y} 篇` } } } }

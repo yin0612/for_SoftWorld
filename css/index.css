@@ -5,27 +5,30 @@
    ========================================================================== */
 
 :root {
-  /* 基礎色彩 Palette - 溫柔日系淺色調 */
-  --bg-primary: #f8f9fa;        /* 淡和紙白/輕柔灰白 */
+  /* 基礎色彩 Palette - 低飽和柔紫色調 */
+  --bg-primary: #fbf9fc;        /* 帶一點紫灰的紙白 */
   --bg-secondary: #ffffff;      /* 純白卡片背景 */
-  --bg-tertiary: #f1f4f6;       /* 淺灰襯底 */
+  --bg-tertiary: #f4f1f7;       /* 淺紫灰襯底 */
   --bg-glass: rgba(255, 255, 255, 0.85);
 
   /* 文字顏色 */
-  --text-primary: #2b303a;      /* 深炭灰 (替代純黑，更具日系質感) */
-  --text-secondary: #5a6578;    /* 溫柔中灰 */
-  --text-muted: #8c98a8;        /* 淡灰 */
+  --text-primary: #2d2733;      /* 深葡萄灰（替代純黑） */
+  --text-secondary: #615968;    /* 柔和紫灰 */
+  --text-muted: #91899b;        /* 淡紫灰 */
   --text-light: #ffffff;
 
-  /* 清新主題強調色 */
-  --primary: #4a7c59;           /* 抹茶綠/薄荷綠 */
-  --primary-light: #eef5f0;
-  --secondary: #5b92e5;         /* 空氣藍/晴空藍 */
-  --secondary-light: #edf4fc;
-  --accent: #f4a261;            /* 溫暖杏橙 */
-  --accent-pink: #f48fb1;       /* 櫻花粉 */
-  --border-color: #e5e9f0;      /* 淡雅邊框色 */
-  --border-hover: #cbd5e1;
+  /* 主題強調色：不使用高飽和紫，保留長時間閱讀的舒適度 */
+  --primary: #725d87;           /* 柔和梅紫 */
+  --primary-dark: #5c496f;
+  --primary-light: #f2edf6;
+  --primary-border: #d9cde4;
+  --primary-muted: #f6f2f8;
+  --secondary: #7f86b5;         /* 低飽和靛紫 */
+  --secondary-light: #f0f1f9;
+  --accent: #bd8b9e;            /* 灰粉紫 */
+  --accent-pink: #c58ba8;       /* 低飽和莓紫 */
+  --border-color: #e7e1eb;      /* 淡紫灰邊框 */
+  --border-hover: #d6cbe0;
 
   /* 公司品牌專屬色 (日系莫蘭迪柔和版) */
   --color-softworld: #e76f51;   /* 智冠 - 珊瑚紅 */
@@ -65,10 +68,10 @@
   --radius-full: 9999px;
 
   /* 柔和日系陰影 */
-  --shadow-sm: 0 2px 8px rgba(140, 152, 168, 0.08);
-  --shadow-md: 0 6px 20px rgba(140, 152, 168, 0.12);
-  --shadow-lg: 0 12px 32px rgba(140, 152, 168, 0.16);
-  --shadow-hover: 0 14px 36px rgba(74, 124, 89, 0.15);
+  --shadow-sm: 0 2px 8px rgba(72, 58, 86, 0.07);
+  --shadow-md: 0 6px 20px rgba(72, 58, 86, 0.11);
+  --shadow-lg: 0 12px 32px rgba(72, 58, 86, 0.15);
+  --shadow-hover: 0 14px 36px rgba(114, 93, 135, 0.14);
 
   /* 轉場 */
   --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
@@ -129,7 +132,7 @@ img {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #1e2530 0%, #2d5a3f 100%);
+  background: linear-gradient(135deg, #2d2733 0%, #725d87 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -137,8 +140,8 @@ img {
 /* 數據解讀/觀測洞察對話框 Insight Box */
 .insight-box {
   margin-top: var(--spacing-lg);
-  background: #f4f8f5;
-  border-left: 4px solid #2d5a3f;
+  background: var(--primary-muted);
+  border-left: 4px solid var(--primary);
   border-radius: var(--radius-sm);
   padding: 14px 18px;
   font-size: var(--font-size-sm);
@@ -148,7 +151,7 @@ img {
 }
 
 .insight-box strong {
-  color: #2d5a3f;
+  color: var(--primary);
   display: inline-block;
   margin-right: 4px;
 }

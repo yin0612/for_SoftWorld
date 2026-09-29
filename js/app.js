@@ -191,7 +191,7 @@ function renderCompanyCards() {
         if (company.newsUrl) {
             newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="前往 ${company.name} 官方新聞專區">📰 官方新聞 ↗</a>`;
         } else {
-            newsBtnHtml = `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="color: #2d5a3f; border-color: #2d5a3f; background: #eaf3ed;" title="公開資訊觀測站 MOPS 快捷鍵">🏛️ MOPS觀測站 ↗</a>`;
+            newsBtnHtml = `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="color: #725d87; border-color: #725d87; background: #f2edf6;" title="公開資訊觀測站 MOPS 快捷鍵">🏛️ MOPS觀測站 ↗</a>`;
         }
 
         card.innerHTML = `
@@ -1098,12 +1098,12 @@ function renderMonitoringTransparency() {
     }
     if (monitoringManifest.automatic_publication_note) {
         const note = document.createElement('p');
-        note.style.cssText = 'margin:8px 0 0; font-size:0.82rem; line-height:1.55; color:#0f766e;';
+        note.style.cssText = 'margin:8px 0 0; font-size:0.82rem; line-height:1.55; color:#725d87;';
         note.textContent = `發布保護：${monitoringManifest.automatic_publication_note}`;
         disclosureContent.appendChild(note);
     }
     const rulesNote = document.createElement('p');
-    rulesNote.style.cssText = 'margin:8px 0 0; font-size:0.78rem; line-height:1.5; color:#0f766e;';
+    rulesNote.style.cssText = 'margin:8px 0 0; font-size:0.78rem; line-height:1.5; color:#725d87;';
     rulesNote.textContent = '完整關鍵字與組合規則已放在下方分類導航；選擇分類後即可展開核對。';
     disclosureContent.appendChild(rulesNote);
     renderGlobalDataStatusBar();
@@ -2618,7 +2618,8 @@ function renderNews(append = false) {
     newsToShow.forEach(news => {
         const item = document.createElement('div');
         item.className = 'timeline-item animate-on-scroll is-visible';
-        const brandColor = safeCssColor(news.companyColor);
+        // 關鍵字監測是全站共用監測入口，使用柔紫識別色；金融科技、遊戲頁各自有專屬色系。
+        const brandColor = '#725d87';
         const companyId = escapeHtml(news.companyId || 'monitoring');
         const companyName = escapeHtml(news.companyName || '真實新聞監測');
         const category = escapeHtml(news.category || '關鍵字監測');
@@ -2632,7 +2633,7 @@ function renderNews(append = false) {
         const verifiedBadge = news.sourceKind === 'google_news_rss'
             ? '<span style="background:#e0f2fe;color:#075985;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
             : (news.verifiedMonitoring
-                ? '<span style="background:#dcfce7;color:#166534;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
+                ? '<span style="background:#f2edf6;color:#5c496f;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
                 : '');
 
         const huikeBadge = huikeKeyword
@@ -2687,7 +2688,7 @@ function renderNews(append = false) {
         const ruleIds = [...new Set((news.ruleIds || []).filter(Boolean))];
         if (matchedTerms.length || ruleIds.length) {
             const evidence = document.createElement('div');
-            evidence.style.cssText = 'margin:10px 0; padding:8px 10px; background:#f8fafc; border-left:3px solid #0f766e; border-radius:4px; font-size:0.78rem; color:#475569; line-height:1.55;';
+            evidence.style.cssText = 'margin:10px 0; padding:8px 10px; background:#faf8fc; border-left:3px solid #725d87; border-radius:4px; font-size:0.78rem; color:#615968; line-height:1.55;';
             const label = document.createElement('strong');
             label.textContent = '規則命中證據：';
             evidence.appendChild(label);

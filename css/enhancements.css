@@ -476,10 +476,10 @@
   width: fit-content;
   min-height: 30px;
   padding: 5px 11px;
-  border: 1px solid #99f6e4;
+  border: 1px solid var(--primary-border);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.86);
-  color: #0f766e;
+  color: var(--primary);
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 800;
@@ -505,10 +505,10 @@
 
 .section-context-toggle:hover,
 .section-context-toggle:focus-visible {
-  border-color: #0f766e;
-  background: #ecfdf5;
-  color: #115e59;
-  outline: 2px solid rgba(20, 184, 166, 0.25);
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  outline: 2px solid rgba(114, 93, 135, 0.24);
   outline-offset: 2px;
 }
 
@@ -543,7 +543,7 @@
 
 .huike-rule-card {
   padding: 12px;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--primary-border);
   border-radius: 10px;
   background: #ffffff;
 }
@@ -558,7 +558,7 @@
 
 .huike-rule-title {
   margin: 0;
-  color: #1e3a5f;
+  color: var(--primary-dark);
   font-size: 0.86rem;
   font-weight: 800;
 }
@@ -573,7 +573,7 @@
 }
 
 .huike-rule-logic {
-  color: #0f766e;
+  color: var(--primary);
   font-weight: 700;
 }
 
@@ -764,6 +764,33 @@ mark {
   border-color: #0f766e;
   background: #f0fdfa;
   color: #0f766e;
+}
+
+/* 這些揭露／說明控制項屬於全站共用資訊，不沿用金融科技的藍綠色。 */
+.monitoring-disclosure-toggle,
+.huike-full-keywords-toggle,
+.site-data-status-toggle,
+.timeline-provenance-toggle {
+  border-color: var(--primary-border);
+  color: var(--primary);
+}
+
+.monitoring-disclosure-toggle:hover,
+.monitoring-disclosure-toggle:focus-visible,
+.huike-full-keywords-toggle:hover,
+.huike-full-keywords-toggle:focus-visible,
+.site-data-status-toggle:hover,
+.site-data-status-toggle:focus-visible,
+.timeline-provenance-toggle:hover,
+.timeline-provenance-toggle:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  outline-color: rgba(114, 93, 135, 0.24);
+}
+
+.timeline-provenance-toggle {
+  background: #faf8fc;
 }
 
 .fintech-card-provenance-details > .fintech-card-provenance,
@@ -1182,6 +1209,29 @@ mark {
   color: #163a70 !important;
 }
 
+/* 金融科技與遊戲頁保留各自的識別色；其餘頁面使用全站柔紫主題。 */
+#fintech {
+  --primary: #0f766e;
+  --primary-dark: #115e59;
+  --primary-light: #ecfdf5;
+  --primary-border: #99f6e4;
+  --primary-muted: #f0fdfa;
+}
+
+#fintech .text-gradient {
+  background: linear-gradient(135deg, #1e2530 0%, #0f766e 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+#gaming {
+  --primary: #163a70;
+  --primary-dark: #0b1f4d;
+  --primary-light: #edf4ff;
+  --primary-border: #b9cdf0;
+  --primary-muted: #f6f9ff;
+}
+
 /* 新增遊戲產業入口後，中等寬度改用既有選單按鈕，避免導覽列擠壓。 */
 @media (max-width: 1080px) and (min-width: 769px) {
   .navbar-menu {
@@ -1244,8 +1294,8 @@ mark {
   top: 72px;
   z-index: 900;
   margin-top: 72px;
-  border-bottom: 1px solid #dbe4ee;
-  background: rgba(248, 250, 252, 0.96);
+  border-bottom: 1px solid var(--border-color);
+  background: rgba(251, 249, 252, 0.96);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
 }
@@ -1280,7 +1330,7 @@ mark {
 }
 
 .site-data-status-link {
-  color: #0f766e;
+  color: var(--primary);
   font-size: 0.76rem;
   font-weight: 800;
   text-decoration: underline;
@@ -1305,9 +1355,9 @@ mark {
 }
 
 .data-type-real {
-  border: 1px solid #99f6e4;
-  background: #ecfdf5;
-  color: #047857;
+  border: 1px solid var(--primary-border);
+  background: var(--primary-light);
+  color: var(--primary-dark);
 }
 
 .data-type-model {
@@ -1327,7 +1377,7 @@ mark {
   padding: 10px 12px;
   border-left: 3px solid #94a3b8;
   border-radius: 4px;
-  background: #f8faf9;
+  background: var(--primary-muted);
   font-size: 0.8rem;
 }
 
@@ -1348,7 +1398,7 @@ mark {
 }
 
 .company-event-source a {
-  color: #0f766e;
+  color: var(--primary);
   font-weight: 700;
   text-decoration: underline;
 }
@@ -1361,6 +1411,12 @@ mark {
   line-height: 1.45;
 }
 
+.timeline-provenance a {
+  color: var(--primary);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
 .fintech-card-provenance a {
   color: #0f766e;
   font-weight: 700;
@@ -1370,8 +1426,8 @@ mark {
 .method-update-log {
   margin-top: var(--spacing-2xl);
   padding: 16px 18px;
-  border: 1px solid #dbe4ee;
-  border-left: 4px solid #0f766e;
+  border: 1px solid var(--border-color);
+  border-left: 4px solid var(--primary);
   border-radius: var(--radius-md);
   background: #f8fafc;
 }
@@ -1426,9 +1482,9 @@ mark {
   gap: var(--spacing-md);
   margin: 0 0 var(--spacing-md);
   padding: 14px 16px;
-  border: 1px solid #dbe7e1;
+  border: 1px solid var(--primary-border);
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #f6fbf8, #fbfdfc);
+  background: linear-gradient(135deg, #faf8fc, #fdfcff);
 }
 
 .trend-control-group {
@@ -1466,16 +1522,16 @@ mark {
 }
 
 .trend-control-btn:hover {
-  border-color: #0f766e;
-  color: #0f766e;
+  border-color: var(--primary);
+  color: var(--primary);
   transform: translateY(-1px);
 }
 
 .trend-control-btn.active {
-  border-color: #0f766e;
-  background: #0f766e;
+  border-color: var(--primary);
+  background: var(--primary);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(15, 118, 110, 0.18);
+  box-shadow: 0 4px 12px rgba(114, 93, 135, 0.18);
 }
 
 .trend-control-btn:focus-visible,
@@ -1494,12 +1550,12 @@ mark {
 
 .trend-summary-card {
   min-height: 166px;
-  border-top: 3px solid #0f766e;
+  border-top: 3px solid var(--primary);
 }
 
 .trend-summary-value {
   margin: 2px 0 4px;
-  color: #0f766e;
+  color: var(--primary);
   font-size: 1.65rem;
   font-weight: 800;
   line-height: 1.15;
@@ -1526,7 +1582,7 @@ mark {
 }
 
 .trend-event-item {
-  --trend-accent: #0f766e;
+  --trend-accent: var(--primary);
   padding: 16px 18px;
   border: 1px solid #dbe4ee;
   border-left: 4px solid var(--trend-accent);
@@ -1569,7 +1625,7 @@ mark {
 }
 
 .trend-domain-badge {
-  background: #edf7f3;
+  background: var(--primary-light);
   color: var(--trend-accent);
 }
 
@@ -1622,7 +1678,7 @@ mark {
 }
 
 .trend-event-tag {
-  border: 1px solid #c9dfd7;
+  border: 1px solid var(--primary-border);
   background: #ffffff;
   color: var(--trend-accent);
 }
@@ -1641,7 +1697,7 @@ mark {
 
 .trend-related-details summary {
   width: fit-content;
-  color: #0f766e;
+  color: var(--primary);
   font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
