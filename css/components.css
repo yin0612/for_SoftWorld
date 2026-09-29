@@ -117,7 +117,7 @@
   align-items: center;
   justify-content: center;
   padding: 120px 0 60px;
-  background: linear-gradient(180deg, var(--primary-muted) 0%, var(--bg-primary) 100%);
+  background: var(--primary-muted);
   overflow: hidden;
   text-align: center;
 }
@@ -137,7 +137,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: radial-gradient(circle at 50% 30%, rgba(255, 255, 255, 0.7) 0%, transparent 80%);
+  background: transparent;
 }
 
 .hero-content {
@@ -368,7 +368,7 @@
   border-left: 4px solid var(--group-accent, var(--primary));
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
-  background: linear-gradient(90deg, var(--group-soft, var(--primary-light)) 0%, transparent 72%);
+  background: var(--group-soft, var(--primary-light));
 }
 
 .company-grid-heading:first-child {
@@ -387,7 +387,7 @@
 
 .company-grid-heading strong {
   font-size: 1rem;
-  color: var(--group-accent, var(--text-primary));
+  color: var(--text-primary);
 }
 
 .company-grid-heading div span {
@@ -876,8 +876,8 @@
 
 /* 9. 頁尾與回頂部 Footer & Back to top */
 .footer {
-  background: #30283a;
-  color: #ded5e5;
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
   padding: var(--spacing-3xl) 0 var(--spacing-xl);
   border-top: 1px solid var(--border-color);
 }
@@ -895,20 +895,20 @@
   gap: var(--spacing-xs);
   font-size: var(--font-size-lg);
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: var(--spacing-md);
 }
 
 .footer-desc {
   font-size: var(--font-size-sm);
   line-height: 1.65;
-  color: #c9bed4;
+  color: var(--text-secondary);
 }
 
 .footer-links-title {
   font-size: var(--font-size-md);
   font-weight: 700;
-  color: #ffffff;
+  color: var(--text-primary);
   margin-bottom: var(--spacing-md);
 }
 
@@ -918,21 +918,21 @@
 
 .footer-links a {
   font-size: var(--font-size-sm);
-  color: #d8cede;
+  color: var(--text-secondary);
   text-decoration: none;
   transition: color var(--transition-fast);
 }
 
 .footer-links a:hover {
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
 .footer-bottom {
   text-align: center;
   padding-top: var(--spacing-lg);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid var(--border-color);
   font-size: var(--font-size-xs);
-  color: #b9aabd;
+  color: var(--text-muted);
 }
 
 .back-to-top {

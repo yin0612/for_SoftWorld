@@ -643,7 +643,7 @@ mark {
 .fintech-monitoring-summary {
   margin: 0 0 22px;
   padding: 20px 22px;
-  background: linear-gradient(135deg, #f3fbf9 0%, #e7f6f2 100%);
+  background: #e7f6f2;
   border: 1px solid #b8dfd7;
   border-radius: 14px;
 }
@@ -1112,9 +1112,10 @@ mark {
 /* 遊戲產業真實新聞監測：以深藍色區別金融科技的藍綠色脈絡，
    不額外建立圖表或重複資料。 */
 #gaming .text-gradient {
-  background: linear-gradient(135deg, #0b1f4d 0%, #1e4d91 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  color: var(--text-primary);
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary);
 }
 
 #gaming .section-context-toggle,
@@ -1134,7 +1135,7 @@ mark {
 }
 
 .gaming-monitoring-summary {
-  background: linear-gradient(135deg, #f4f8ff 0%, #eaf1ff 100%);
+  background: #eaf1ff;
   border-color: #b9cdf0;
 }
 
@@ -1215,9 +1216,9 @@ body[data-page="fintech"] {
   --bg-tertiary: #ecf8f6;
   --border-color: #c7e4df;
   --border-hover: #9bd0c7;
-  --text-primary: #164f4c;
-  --text-secondary: #39736e;
-  --text-muted: #6d928d;
+  --text-primary: #1f2937;
+  --text-secondary: #374151;
+  --text-muted: #64748b;
   --primary: #0f766e;
   --primary-dark: #0d5e58;
   --primary-light: #e7f6f3;
@@ -1233,9 +1234,9 @@ body[data-page="gaming"] {
   --bg-tertiary: #edf2fb;
   --border-color: #cad7ed;
   --border-hover: #a8bbdc;
-  --text-primary: #243d6b;
-  --text-secondary: #4a6090;
-  --text-muted: #7787ae;
+  --text-primary: #1f2937;
+  --text-secondary: #374151;
+  --text-muted: #64748b;
   --primary: #163a70;
   --primary-dark: #102c59;
   --primary-light: #e8eef9;
@@ -1257,9 +1258,10 @@ body[data-page="gaming"] {
 }
 
 #fintech .text-gradient {
-  background: linear-gradient(135deg, #1e2530 0%, #0f766e 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  color: var(--text-primary);
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary);
 }
 
 #gaming {
@@ -1271,17 +1273,13 @@ body[data-page="gaming"] {
   color: var(--text-primary);
 }
 
-/* 每個專頁保留自己的標題漸層與文字層級；白字只保留在填色按鈕上。 */
-#fintech .text-gradient {
-  background: linear-gradient(135deg, #0f766e 0%, #53a99d 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
+/* 非按鈕文字統一採黑色系；金融科技／遊戲僅保留色塊、邊框與按鈕識別。 */
+#fintech .text-gradient,
 #gaming .text-gradient {
-  background: linear-gradient(135deg, #163a70 0%, #6f90c3 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  color: var(--text-primary);
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary);
 }
 
 #fintech .section-context-toggle,
@@ -1343,28 +1341,6 @@ body[data-page="gaming"] {
 }
 
 /* 頁尾也跟隨目前頁面的整體配色，避免專頁底部突然回到紫色。 */
-body[data-page="fintech"] .footer {
-  background: #155d57;
-  border-top-color: #9fd8cf;
-}
-
-body[data-page="fintech"] .footer-desc,
-body[data-page="fintech"] .footer-links a,
-body[data-page="fintech"] .footer-bottom {
-  color: #d9f0ec;
-}
-
-body[data-page="gaming"] .footer {
-  background: #1c3768;
-  border-top-color: #aebfe0;
-}
-
-body[data-page="gaming"] .footer-desc,
-body[data-page="gaming"] .footer-links a,
-body[data-page="gaming"] .footer-bottom {
-  color: #dde6f5;
-}
-
 /* 遊戲頁共用新聞卡改用藍色資訊面，不帶入金融科技的藍綠色底。 */
 #gaming .fintech-card-key-point {
   border-left-color: #163a70;
@@ -1627,7 +1603,7 @@ body[data-page="gaming"] .footer-bottom {
   padding: 14px 16px;
   border: 1px solid var(--primary-border);
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, #faf8fc, #fdfcff);
+  background: #faf8fc;
 }
 
 .trend-control-group {

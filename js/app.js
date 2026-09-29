@@ -185,7 +185,7 @@ function renderCompanyCards() {
         const eventSummaryHtml = newsText ? `
             <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
                 <div class="company-event-heading">
-                    <span style="font-weight: 700; color: ${company.brandColor || company.color};">近期重要事件</span>
+                    <span style="font-weight: 700; color: var(--text-primary);">近期重要事件</span>
                     <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
                 </div>
                 <span style="color: var(--text-primary); line-height: 1.5; display: block;">${newsText}</span>
@@ -197,13 +197,13 @@ function renderCompanyCards() {
         if (company.newsUrl) {
             newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="前往 ${company.name} 官方新聞專區">📰 官方新聞 ↗</a>`;
         } else {
-            newsBtnHtml = `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="color: #4b3a58; border-color: #725d87; background: #f2edf6;" title="公開資訊觀測站 MOPS 快捷鍵">🏛️ MOPS觀測站 ↗</a>`;
+            newsBtnHtml = `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="color: var(--text-primary); border-color: #725d87; background: #f2edf6;" title="公開資訊觀測站 MOPS 快捷鍵">🏛️ MOPS觀測站 ↗</a>`;
         }
 
         card.innerHTML = `
             <div class="company-card-header">
                 <div>
-                    <h3 class="company-name" style="color: ${company.brandColor || company.color}">${company.name}</h3>
+                    <h3 class="company-name" style="color: var(--text-primary)">${company.name}</h3>
                     <div class="company-meta">
                         ${metaHtml}
                     </div>
@@ -263,8 +263,8 @@ function showCompanyModal(companyId) {
 
     modalBody.innerHTML = `
         <div style="margin-bottom: 20px;">
-            <span class="section-tag" style="background: ${company.brandColor}15; color: ${company.brandColor}">${company.stock || company.stockTicker}</span>
-            <h2 style="font-size: 1.8rem; color: ${company.brandColor}; margin-top: 8px;">${company.name}</h2>
+            <span class="section-tag" style="background: ${company.brandColor}15; color: var(--text-primary)">${company.stock || company.stockTicker}</span>
+            <h2 style="font-size: 1.8rem; color: var(--text-primary); margin-top: 8px;">${company.name}</h2>
             <p style="color: var(--text-muted); font-size: 0.9rem;">${company.enName || company.englishName || ''}</p>
         </div>
         <div style="margin-bottom: 16px;">
@@ -278,7 +278,7 @@ function showCompanyModal(companyId) {
         ${newsText ? `
         <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
             <div class="company-event-heading">
-                <h4 style="font-size: 0.9rem; color: ${company.brandColor || company.color}; margin: 0;">近期重要事件</h4>
+                <h4 style="font-size: 0.9rem; color: var(--text-primary); margin: 0;">近期重要事件</h4>
                 <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
             </div>
             <p style="font-size: 0.9rem; color: var(--text-primary);">${newsText}</p>
@@ -2637,13 +2637,13 @@ function renderNews(append = false) {
         item.style.setProperty('--item-brand-color', brandColor);
         
         const verifiedBadge = news.sourceKind === 'google_news_rss'
-                ? '<span style="background:#eef0f7;color:#4b3a58;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
+                ? '<span style="background:#eef0f7;color:var(--text-primary);font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
             : (news.verifiedMonitoring
-                ? '<span style="background:#f2edf6;color:#4b3a58;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
+                ? '<span style="background:#f2edf6;color:var(--text-primary);font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
                 : '');
 
         const huikeBadge = huikeKeyword
-            ? `<span class="tag-huike-chip" data-kw="${huikeKeyword}" style="background:#f6f2f8; color:#4b3a58; border:1px solid #d9cde4; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${huikeKeyword}</span>`
+            ? `<span class="tag-huike-chip" data-kw="${huikeKeyword}" style="background:#f6f2f8; color:var(--text-primary); border:1px solid #d9cde4; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${huikeKeyword}</span>`
             : '';
 
         const directUrl = safeHttpUrl(news.url);

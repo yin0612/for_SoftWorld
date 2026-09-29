@@ -12,11 +12,11 @@
   --bg-glass: rgba(255, 255, 255, 0.85);
 
   /* 文字顏色 */
-  --text-primary: #4d3b58;      /* 一般頁面：明亮但清楚的深梅紫 */
-  --text-secondary: #6d5a76;    /* 同色系閱讀層級 */
-  --text-muted: #9a8ba3;        /* 同色系輔助資訊 */
+  --text-primary: #1f2937;      /* 非按鈕內容以近黑色為主 */
+  --text-secondary: #374151;
+  --text-muted: #64748b;
   --text-light: #ffffff;
-  --site-brand-color: #4d3b58;  /* 左上角網站名稱固定使用，不隨分頁切換 */
+  --site-brand-color: #1f2937;  /* 左上角網站名稱固定使用，不隨分頁切換 */
 
   /* 主題強調色：不使用高飽和紫，保留長時間閱讀的舒適度 */
   --primary: #8b67a7;           /* 舒適而較有層次的梅紫 */
@@ -133,9 +133,10 @@ img {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #805d9e 0%, #b67c9f 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  color: var(--text-primary);
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary);
 }
 
 /* 數據解讀/觀測洞察對話框 Insight Box */

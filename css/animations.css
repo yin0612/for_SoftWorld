@@ -98,12 +98,6 @@
   }
 }
 
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
 @keyframes typing {
   from { width: 0; }
   to { width: 100%; }
@@ -190,13 +184,7 @@
 }
 
 .skeleton-loading {
-  background: linear-gradient(90deg, 
-    rgba(255, 255, 255, 0.05) 25%, 
-    rgba(255, 255, 255, 0.1) 37%, 
-    rgba(255, 255, 255, 0.05) 63%
-  );
-  background-size: 400% 100%;
-  animation: shimmer 1.5s infinite ease-in-out;
+  background: #eef1f5;
   border-radius: var(--radius-sm);
 }
 
