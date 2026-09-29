@@ -179,10 +179,10 @@ function renderCompanyCards() {
         const eventSummaryHtml = newsText ? `
             <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
                 <div class="company-event-heading">
-                    <span style="font-weight: 700; color: ${company.brandColor || company.color};">近期重要事件</span>
+                    <span style="font-weight: 700; color: var(--text-primary);">近期重要事件</span>
                     <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
                 </div>
-                <span style="color: #475569; line-height: 1.5; display: block;">${newsText}</span>
+                <span style="color: var(--text-primary); line-height: 1.5; display: block;">${newsText}</span>
                 <span class="company-event-source">來源入口：<a href="${eventSourceUrl}" target="_blank" rel="noopener">${eventSourceLabel} ↗</a>｜最後查核：待補</span>
             </div>` : '';
         
@@ -191,13 +191,13 @@ function renderCompanyCards() {
         if (company.newsUrl) {
             newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="前往 ${company.name} 官方新聞專區">📰 官方新聞 ↗</a>`;
         } else {
-            newsBtnHtml = `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="color: #725d87; border-color: #725d87; background: #f2edf6;" title="公開資訊觀測站 MOPS 快捷鍵">🏛️ MOPS觀測站 ↗</a>`;
+            newsBtnHtml = `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="color: #4b3a58; border-color: #725d87; background: #f2edf6;" title="公開資訊觀測站 MOPS 快捷鍵">🏛️ MOPS觀測站 ↗</a>`;
         }
 
         card.innerHTML = `
             <div class="company-card-header">
                 <div>
-                    <h3 class="company-name" style="color: ${company.brandColor || company.color}">${company.name}</h3>
+                    <h3 class="company-name" style="color: var(--text-primary)">${company.name}</h3>
                     <div class="company-meta">
                         ${metaHtml}
                     </div>
@@ -257,8 +257,8 @@ function showCompanyModal(companyId) {
 
     modalBody.innerHTML = `
         <div style="margin-bottom: 20px;">
-            <span class="section-tag" style="background: ${company.brandColor}15; color: ${company.brandColor}">${company.stock || company.stockTicker}</span>
-            <h2 style="font-size: 1.8rem; color: ${company.brandColor}; margin-top: 8px;">${company.name}</h2>
+            <span class="section-tag" style="background: ${company.brandColor}15; color: var(--text-primary)">${company.stock || company.stockTicker}</span>
+            <h2 style="font-size: 1.8rem; color: var(--text-primary); margin-top: 8px;">${company.name}</h2>
             <p style="color: var(--text-muted); font-size: 0.9rem;">${company.enName || company.englishName || ''}</p>
         </div>
         <div style="margin-bottom: 16px;">
@@ -272,7 +272,7 @@ function showCompanyModal(companyId) {
         ${newsText ? `
         <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
             <div class="company-event-heading">
-                <h4 style="font-size: 0.9rem; color: var(--primary); margin: 0;">近期重要事件</h4>
+                <h4 style="font-size: 0.9rem; color: var(--text-primary); margin: 0;">近期重要事件</h4>
                 <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
             </div>
             <p style="font-size: 0.9rem; color: var(--text-primary);">${newsText}</p>
@@ -1064,7 +1064,7 @@ function renderMonitoringTransparency() {
     panel.appendChild(disclosure);
 
     const summary = document.createElement('p');
-    summary.style.cssText = 'margin:0; font-size:0.86rem; line-height:1.6; color:#334155;';
+    summary.style.cssText = 'margin:0; font-size:0.86rem; line-height:1.6; color:var(--text-primary);';
     const sources = monitoringRuntimeStatus?.source_summary || {};
     const articles = monitoringRuntimeStatus?.article_summary || {};
     const catalog = monitoringRuntimeStatus?.media_catalog_summary || {};
@@ -1098,12 +1098,12 @@ function renderMonitoringTransparency() {
     }
     if (monitoringManifest.automatic_publication_note) {
         const note = document.createElement('p');
-        note.style.cssText = 'margin:8px 0 0; font-size:0.82rem; line-height:1.55; color:#725d87;';
+        note.style.cssText = 'margin:8px 0 0; font-size:0.82rem; line-height:1.55; color:var(--text-primary);';
         note.textContent = `發布保護：${monitoringManifest.automatic_publication_note}`;
         disclosureContent.appendChild(note);
     }
     const rulesNote = document.createElement('p');
-    rulesNote.style.cssText = 'margin:8px 0 0; font-size:0.78rem; line-height:1.5; color:#725d87;';
+    rulesNote.style.cssText = 'margin:8px 0 0; font-size:0.78rem; line-height:1.5; color:var(--text-primary);';
     rulesNote.textContent = '完整關鍵字與組合規則已放在下方分類導航；選擇分類後即可展開核對。';
     disclosureContent.appendChild(rulesNote);
     renderGlobalDataStatusBar();
@@ -2222,7 +2222,7 @@ function renderHuikeTabs() {
         const isActive = (folder.id === currentHuikeFolderId);
         tabBtn.className = `btn btn-sm ${isActive ? 'btn-primary' : 'btn-ghost'}`;
         tabBtn.style.cssText = 'font-size: 0.85rem; padding: 6px 14px; border-radius: 20px; display: inline-flex; align-items: center; gap: 6px;';
-        tabBtn.innerHTML = `<span>${folder.icon}</span> <strong>${folder.folderName}</strong> <span style="background:${isActive ? 'rgba(255,255,255,0.25)' : '#e2e8f0'}; color:${isActive ? '#fff' : '#475569'}; font-size:0.75rem; padding:1px 6px; border-radius:10px; font-weight:700;">${count}</span>`;
+        tabBtn.innerHTML = `<span>${folder.icon}</span> <strong>${folder.folderName}</strong> <span style="background:${isActive ? 'rgba(255,255,255,0.25)' : '#e2e8f0'}; color:${isActive ? '#fff' : '#4b3a58'}; font-size:0.75rem; padding:1px 6px; border-radius:10px; font-weight:700;">${count}</span>`;
         
         tabBtn.addEventListener('click', () => {
             currentHuikeFolderId = folder.id;
@@ -2352,7 +2352,7 @@ function renderHuikeChips() {
         chip.style.cssText = `
             border: 1px solid ${isActive ? '#e76f51' : (count > 0 ? '#fb923c' : '#cbd5e1')};
             background: ${isActive ? '#e76f51' : (count > 0 ? '#fff7ed' : '#ffffff')};
-            color: ${isActive ? '#ffffff' : (count > 0 ? '#c2410c' : '#334155')};
+            color: ${isActive ? '#ffffff' : '#4b3a58'};
             font-size: 0.8rem;
             padding: 4px 10px;
             border-radius: 16px;
@@ -2365,7 +2365,7 @@ function renderHuikeChips() {
         `;
         
         const countBadge = count > 0 
-            ? `<span style="background:${isActive ? '#ffffff' : '#f97316'}; color:${isActive ? '#e76f51' : '#ffffff'}; font-size:0.7rem; padding:1px 5px; border-radius:10px; font-weight:800;">${count}</span>` 
+            ? `<span style="background:${isActive ? '#ffffff' : '#f97316'}; color:${isActive ? '#4b3a58' : '#ffffff'}; font-size:0.7rem; padding:1px 5px; border-radius:10px; font-weight:800;">${count}</span>`
             : '';
         chip.innerHTML = `${kw} ${countBadge}`;
 
@@ -2507,7 +2507,7 @@ function highlightKeyword(text, keyword) {
     if (!cleanKw) return safeText;
     try {
         const regex = new RegExp(`(${cleanKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return safeText.replace(regex, '<mark style="background:#fef08a; color:#854d0e; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>');
+        return safeText.replace(regex, '<mark style="background:#fef08a; color:#4b3a58; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>');
     } catch (e) {
         return safeText;
     }
@@ -2583,8 +2583,8 @@ function renderNews(append = false) {
         container.innerHTML = `
             <div style="text-align:center; padding: 48px 20px; color: var(--text-muted); background: #f8fafc; border-radius: 12px; border: 1px dashed var(--border-color);">
                 <div style="font-size: 2rem; margin-bottom: 8px;">${state.icon}</div>
-                <h4 style="font-size: 1.1rem; color: #334155; margin-bottom: 6px;">${state.title}</h4>
-                <p style="font-size: 0.9rem; color: #64748b; margin-bottom: 16px;">${state.message}</p>
+                <h4 style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 6px;">${state.title}</h4>
+                <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">${state.message}</p>
                 ${state.reset ? '<button class="btn btn-primary btn-sm" id="resetNewsFiltersBtn" style="padding: 6px 18px; border-radius: 20px;">↻ 一鍵重設為近兩個月全部新聞</button>' : ''}
             </div>
         `;
@@ -2631,13 +2631,13 @@ function renderNews(append = false) {
         item.style.setProperty('--item-brand-color', brandColor);
         
         const verifiedBadge = news.sourceKind === 'google_news_rss'
-            ? '<span style="background:#e0f2fe;color:#075985;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
+                ? '<span style="background:#eef0f7;color:#4b3a58;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
             : (news.verifiedMonitoring
-                ? '<span style="background:#f2edf6;color:#5c496f;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
+                ? '<span style="background:#f2edf6;color:#4b3a58;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
                 : '');
 
         const huikeBadge = huikeKeyword
-            ? `<span class="tag-huike-chip" data-kw="${huikeKeyword}" style="background:#fff1ee; color:#c84b31; border:1px solid #ffd8d0; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${huikeKeyword}</span>`
+            ? `<span class="tag-huike-chip" data-kw="${huikeKeyword}" style="background:#f6f2f8; color:#4b3a58; border:1px solid #d9cde4; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${huikeKeyword}</span>`
             : '';
 
         const directUrl = safeHttpUrl(news.url);
@@ -2647,18 +2647,18 @@ function renderNews(append = false) {
         const displayTitle = highlightKeyword(news.title, currentKeyword);
         const displayExcerpt = highlightKeyword(getTimelineDisplayExcerpt(news), currentKeyword);
         const titleContent = hasOriginalLink
-            ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;" onmouseover="this.style.color='${brandColor}'" onmouseout="this.style.color='inherit'">${displayTitle} <span style="font-size:0.85rem;">↗</span></a>`
+            ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${displayTitle} <span style="font-size:0.85rem;">↗</span></a>`
             : `<span style="color:inherit;">${displayTitle}</span>`;
         const originalLink = hasOriginalLink
-            ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: var(--primary); text-decoration: underline; font-weight: 600; font-size:0.82rem;">開啟完整新聞 ↗</a>`
-            : '<span style="color:#64748b; font-size:0.82rem;">原文連結不可用</span>';
+            ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: var(--text-primary); text-decoration: underline; font-weight: 600; font-size:0.82rem;">開啟完整新聞 ↗</a>`
+            : '<span style="color:var(--text-muted); font-size:0.82rem;">原文連結不可用</span>';
 
         item.innerHTML = `
             <div class="timeline-dot"></div>
             <div class="timeline-card">
                 <div class="timeline-card-header">
                     <div>
-                        <span class="timeline-company-badge" data-comp-id="${companyId}" style="background: ${brandColor}18; color: ${brandColor}; cursor:pointer;" title="${news.sourceKind === 'google_news_rss' ? 'Google News RSS 聚合監測' : '官方 RSS 監測'}">
+                        <span class="timeline-company-badge" data-comp-id="${companyId}" style="background: ${brandColor}18; color: var(--text-primary); cursor:pointer;" title="${news.sourceKind === 'google_news_rss' ? 'Google News RSS 聚合監測' : '官方 RSS 監測'}">
                             ${companyName}
                         </span>
                         ${huikeBadge}
@@ -2673,7 +2673,7 @@ function renderNews(append = false) {
                 <div class="timeline-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                     <div style="display:flex; gap:8px; align-items:center;">
                         <span class="timeline-category" data-cat="${category}" style="cursor:pointer;" title="點擊篩選該類別">🏷️ ${category}</span>
-                        <span class="timeline-source-badge" data-src="${source}" style="background:#f1f5f9; color:#475569; font-size:0.75rem; padding:3px 8px; border-radius:6px; cursor:pointer; font-weight:600;" title="點擊篩選此媒體">📰 ${source}</span>
+                        <span class="timeline-source-badge" data-src="${source}" style="background:#f6f2f8; color:var(--text-primary); font-size:0.75rem; padding:3px 8px; border-radius:6px; cursor:pointer; font-weight:600;" title="點擊篩選此媒體">📰 ${source}</span>
                     </div>
                     ${originalLink}
                 </div>
@@ -2688,7 +2688,7 @@ function renderNews(append = false) {
         const ruleIds = [...new Set((news.ruleIds || []).filter(Boolean))];
         if (matchedTerms.length || ruleIds.length) {
             const evidence = document.createElement('div');
-            evidence.style.cssText = 'margin:10px 0; padding:8px 10px; background:#faf8fc; border-left:3px solid #725d87; border-radius:4px; font-size:0.78rem; color:#615968; line-height:1.55;';
+            evidence.style.cssText = 'margin:10px 0; padding:8px 10px; background:#faf8fc; border-left:3px solid #725d87; border-radius:4px; font-size:0.78rem; color:var(--text-primary); line-height:1.55;';
             const label = document.createElement('strong');
             label.textContent = '規則命中證據：';
             evidence.appendChild(label);

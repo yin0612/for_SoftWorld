@@ -120,7 +120,7 @@
 
 .year-chip:hover {
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--text-primary);
 }
 
 .year-chip.is-active {
@@ -159,7 +159,7 @@
 .chart-tool-btn:hover,
 .compare-action-btn:hover {
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--text-primary);
   background: var(--primary-light);
 }
 
@@ -260,13 +260,13 @@
 
 .method-card li::before {
   content: "▪";
-  color: var(--primary);
+  color: var(--text-primary);
   margin-right: 8px;
 }
 
 .method-figure {
   font-weight: 700;
-  color: var(--primary);
+  color: var(--text-primary);
   font-variant-numeric: tabular-nums;
 }
 
@@ -282,13 +282,13 @@
 .method-notice h3 {
   font-size: var(--font-size-md);
   font-weight: 700;
-  color: #92400e;
+  color: var(--text-primary);
   margin-bottom: var(--spacing-sm);
 }
 
 .method-notice p {
   font-size: var(--font-size-sm);
-  color: #7a5216;
+  color: var(--text-primary);
   line-height: 1.75;
 }
 
@@ -354,12 +354,12 @@
 
 .method-tag-real {
   background: #e4f1e9;
-  color: #2f6b4a;
+  color: var(--text-primary);
 }
 
 .method-tag-model {
   background: #fef3c7;
-  color: #92400e;
+  color: var(--text-primary);
 }
 
 /* --------------------------------------------------------------------------
@@ -479,7 +479,7 @@
   border: 1px solid var(--primary-border);
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.86);
-  color: var(--primary);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 800;
@@ -507,7 +507,7 @@
 .section-context-toggle:focus-visible {
   border-color: var(--primary);
   background: var(--primary-light);
-  color: var(--primary-dark);
+  color: var(--text-primary);
   outline: 2px solid rgba(114, 93, 135, 0.24);
   outline-offset: 2px;
 }
@@ -536,7 +536,7 @@
 
 .huike-full-keywords-intro {
   margin: 0;
-  color: #475569;
+  color: var(--text-primary);
   font-size: 0.78rem;
   line-height: 1.6;
 }
@@ -558,7 +558,7 @@
 
 .huike-rule-title {
   margin: 0;
-  color: var(--primary-dark);
+  color: var(--text-primary);
   font-size: 0.86rem;
   font-weight: 800;
 }
@@ -567,18 +567,18 @@
 .huike-rule-logic,
 .huike-rule-exclusions {
   margin: 5px 0 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.75rem;
   line-height: 1.5;
 }
 
 .huike-rule-logic {
-  color: var(--primary);
+  color: var(--text-primary);
   font-weight: 700;
 }
 
 .huike-rule-exclusions {
-  color: #b45309;
+  color: var(--text-primary);
 }
 
 .huike-rule-groups {
@@ -596,7 +596,7 @@
 
 .huike-rule-group h5 {
   margin: 0 0 7px;
-  color: #475569;
+  color: var(--text-primary);
   font-size: 0.74rem;
   font-weight: 800;
 }
@@ -615,7 +615,7 @@
   border: 1px solid #cbd5e1;
   border-radius: 999px;
   background: #ffffff;
-  color: #334155;
+  color: var(--text-primary);
   font-size: 0.73rem;
   line-height: 1.3;
 }
@@ -634,7 +634,7 @@
 
 mark {
   background-color: #fef08a;
-  color: #854d0e;
+  color: var(--text-primary);
   border-radius: 3px;
   padding: 0 2px;
 }
@@ -650,7 +650,7 @@ mark {
 
 .fintech-summary-state {
   margin: 0;
-  color: #334155;
+  color: var(--text-primary);
   font-size: 0.92rem;
   line-height: 1.65;
 }
@@ -674,7 +674,7 @@ mark {
   border: 1px solid #99f6e4;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.86);
-  color: #0f766e;
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 800;
@@ -732,7 +732,7 @@ mark {
 .timeline-provenance-toggle:focus-visible {
   border-color: #0f766e;
   background: #ecfdf5;
-  color: #115e59;
+  color: var(--text-primary);
   outline: 2px solid rgba(20, 184, 166, 0.25);
   outline-offset: 2px;
 }
@@ -752,7 +752,7 @@ mark {
   padding: 3px 8px;
   border-color: #cbd5e1;
   background: #f8fafc;
-  color: #64748b;
+  color: var(--text-primary);
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -763,7 +763,7 @@ mark {
 .timeline-provenance-toggle:focus-visible {
   border-color: #0f766e;
   background: #f0fdfa;
-  color: #0f766e;
+  color: var(--text-primary);
 }
 
 /* 這些揭露／說明控制項屬於全站共用資訊，不沿用金融科技的藍綠色。 */
@@ -772,7 +772,7 @@ mark {
 .site-data-status-toggle,
 .timeline-provenance-toggle {
   border-color: var(--primary-border);
-  color: var(--primary);
+  color: var(--text-primary);
 }
 
 .monitoring-disclosure-toggle:hover,
@@ -785,7 +785,7 @@ mark {
 .timeline-provenance-toggle:focus-visible {
   border-color: var(--primary);
   background: var(--primary-light);
-  color: var(--primary-dark);
+  color: var(--text-primary);
   outline-color: rgba(114, 93, 135, 0.24);
 }
 
@@ -800,7 +800,7 @@ mark {
 
 .fintech-priority-note {
   margin: 8px 0 0;
-  color: #9a3412;
+  color: var(--text-primary);
   font-size: 0.82rem;
   font-weight: 700;
   line-height: 1.6;
@@ -824,7 +824,7 @@ mark {
 .fintech-stat-value {
   display: block;
   overflow: hidden;
-  color: #0f766e;
+  color: var(--text-primary);
   font-size: 1.15rem;
   font-weight: 800;
   line-height: 1.35;
@@ -835,7 +835,7 @@ mark {
 .fintech-stat-label {
   display: block;
   margin-top: 2px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.76rem;
   font-weight: 600;
 }
@@ -866,7 +866,7 @@ mark {
   border-radius: 999px;
   padding: 7px 13px;
   background: #ffffff;
-  color: #475569;
+  color: var(--text-primary);
   cursor: pointer;
   font: inherit;
   font-size: 0.82rem;
@@ -901,7 +901,7 @@ mark {
   border: 1px solid #dbeafe;
   border-radius: 999px;
   background: #f8fafc;
-  color: #1e3a5f;
+  color: var(--text-primary);
   font-size: 0.77rem;
   font-weight: 700;
 }
@@ -909,12 +909,12 @@ mark {
 .fintech-priority-pill {
   border-color: #fed7aa;
   background: #fff7ed;
-  color: #c2410c;
+  color: var(--text-primary);
 }
 
 .fintech-result-count {
   margin: 0 0 16px;
-  color: #475569;
+  color: var(--text-primary);
   font-size: 0.9rem;
   font-weight: 700;
 }
@@ -962,7 +962,7 @@ mark {
   padding: 2px 8px;
   border-radius: 999px;
   background: #ecfdf5;
-  color: #047857;
+  color: var(--text-primary);
   font-size: 0.71rem;
   font-weight: 800;
 }
@@ -970,12 +970,12 @@ mark {
 .fintech-priority-badge {
   border: 1px solid #fed7aa;
   background: #fff7ed;
-  color: #c2410c;
+  color: var(--text-primary);
 }
 
 .fintech-card-date,
 .fintech-card-source {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.77rem;
   font-weight: 600;
 }
@@ -989,14 +989,14 @@ mark {
   border-left: 3px solid #0f766e;
   border-radius: 7px;
   background: #f0fdfa;
-  color: #115e59;
+  color: var(--text-primary);
   font-size: 0.82rem;
   line-height: 1.55;
 }
 
 .fintech-key-point-label {
   flex: 0 0 auto;
-  color: #0f766e;
+  color: var(--text-primary);
   font-size: 0.71rem;
   font-weight: 800;
   letter-spacing: 0.02em;
@@ -1008,7 +1008,7 @@ mark {
 
 .fintech-card-title {
   margin: 0 0 10px;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 1.03rem;
   line-height: 1.5;
 }
@@ -1019,7 +1019,7 @@ mark {
 }
 
 .fintech-card-title a:hover {
-  color: #0f766e;
+  color: var(--text-primary);
   text-decoration: underline;
 }
 
@@ -1027,7 +1027,7 @@ mark {
   display: -webkit-box;
   overflow: hidden;
   margin: 0 0 14px;
-  color: #475569;
+  color: var(--text-primary);
   font-size: 0.86rem;
   line-height: 1.7;
   -webkit-box-orient: vertical;
@@ -1041,7 +1041,7 @@ mark {
 }
 
 .fintech-evidence-label {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 700;
 }
@@ -1053,7 +1053,7 @@ mark {
   padding: 2px 7px;
   border-radius: 6px;
   background: #eff6ff;
-  color: #1d4ed8;
+  color: var(--text-primary);
   font-size: 0.7rem;
   font-weight: 700;
 }
@@ -1063,7 +1063,7 @@ mark {
 }
 
 .fintech-original-link {
-  color: #0f766e;
+  color: var(--text-primary);
   font-size: 0.8rem;
   font-weight: 800;
   text-decoration: underline;
@@ -1076,7 +1076,7 @@ mark {
 
 .fintech-disclaimer {
   margin: 18px 0 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.78rem;
   text-align: center;
 }
@@ -1087,7 +1087,7 @@ mark {
   border: 1px dashed #cbd5e1;
   border-radius: 14px;
   background: #f8fafc;
-  color: #64748b;
+  color: var(--text-muted);
   text-align: center;
 }
 
@@ -1098,7 +1098,7 @@ mark {
 
 .fintech-empty-state h3 {
   margin: 0 0 6px;
-  color: #334155;
+  color: var(--text-primary);
   font-size: 1.08rem;
 }
 
@@ -1120,7 +1120,7 @@ mark {
 #gaming .section-context-toggle,
 #gaming .fintech-glossary-toggle {
   border-color: #b9cdf0;
-  color: #163a70;
+  color: var(--text-primary);
 }
 
 #gaming .section-context-toggle:hover,
@@ -1129,7 +1129,7 @@ mark {
 #gaming .fintech-glossary-toggle:focus-visible {
   border-color: #1e4d91;
   background: #edf4ff;
-  color: #0b1f4d;
+  color: var(--text-primary);
   outline-color: rgba(30, 77, 145, 0.24);
 }
 
@@ -1141,7 +1141,7 @@ mark {
 .gaming-summary-details > summary,
 .gaming-glossary-toggle {
   border-color: #b9cdf0;
-  color: #163a70;
+  color: var(--text-primary);
 }
 
 .gaming-summary-details > summary:hover,
@@ -1150,7 +1150,7 @@ mark {
 .gaming-glossary-toggle:focus-visible {
   border-color: #1e4d91;
   background: #edf4ff;
-  color: #0b1f4d;
+  color: var(--text-primary);
   outline-color: rgba(30, 77, 145, 0.24);
 }
 
@@ -1164,7 +1164,7 @@ mark {
 .gaming-scope-pill {
   border-color: #c9d8f2;
   background: #f6f9ff;
-  color: #163a70;
+  color: var(--text-primary);
 }
 
 .gaming-stat {
@@ -1172,7 +1172,7 @@ mark {
 }
 
 .gaming-stat-value {
-  color: #163a70;
+  color: var(--text-primary);
 }
 
 .gaming-news-card:hover {
@@ -1182,31 +1182,31 @@ mark {
 
 .gaming-category-badge {
   background: #eaf1ff;
-  color: #163a70;
+  color: var(--text-primary);
 }
 
 .gaming-news-card .fintech-card-title a:hover,
 .gaming-news-card .fintech-original-link,
 .gaming-news-card .fintech-card-provenance a {
-  color: #163a70;
+  color: var(--text-primary);
 }
 
 .gaming-news-card .fintech-term {
   background: #eaf1ff;
-  color: #163a70;
+  color: var(--text-primary);
 }
 
 #gaming .fintech-provenance-toggle:hover,
 #gaming .fintech-provenance-toggle:focus-visible {
   border-color: #1e4d91;
   background: #edf4ff;
-  color: #163a70;
+  color: var(--text-primary);
 }
 
 #gaming .fintech-load-more .btn-secondary:hover {
   border-color: #163a70 !important;
   background: #edf4ff !important;
-  color: #163a70 !important;
+  color: var(--text-primary) !important;
 }
 
 /* 金融科技與遊戲頁保留各自的識別色；其餘頁面使用全站柔紫主題。 */
@@ -1230,6 +1230,73 @@ mark {
   --primary-light: #edf4ff;
   --primary-border: #b9cdf0;
   --primary-muted: #f6f9ff;
+}
+
+/* 所有頁面採同一深灰紫字色；金融科技、遊戲頁僅保留背景與邊框識別。 */
+#fintech .text-gradient,
+#gaming .text-gradient {
+  background: none;
+  color: var(--text-primary);
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary);
+}
+
+#fintech .section-context-toggle,
+#fintech .fintech-summary-state,
+#fintech .fintech-summary-details > summary,
+#fintech .fintech-glossary-toggle,
+#fintech .fintech-provenance-toggle,
+#fintech .fintech-priority-note,
+#fintech .fintech-stat-value,
+#fintech .fintech-stat-label,
+#fintech .fintech-mode-button:not(.active):not(:hover),
+#fintech .fintech-scope-pill,
+#fintech .fintech-result-count,
+#fintech .fintech-category-badge,
+#fintech .fintech-priority-badge,
+#fintech .fintech-card-date,
+#fintech .fintech-card-source,
+#fintech .fintech-card-key-point,
+#fintech .fintech-key-point-label,
+#fintech .fintech-card-title,
+#fintech .fintech-card-title a,
+#fintech .fintech-card-excerpt,
+#fintech .fintech-evidence-label,
+#fintech .fintech-term,
+#fintech .fintech-original-link,
+#fintech .fintech-card-provenance a,
+#gaming .section-context-toggle,
+#gaming .fintech-summary-state,
+#gaming .gaming-summary-details > summary,
+#gaming .gaming-glossary-toggle,
+#gaming .fintech-glossary-toggle,
+#gaming .fintech-provenance-toggle,
+#gaming .gaming-stat-value,
+#gaming .fintech-stat-label,
+#gaming .gaming-mode-button:not(.active):not(:hover),
+#gaming .gaming-scope-pill,
+#gaming .gaming-result-count,
+#gaming .gaming-category-badge,
+#gaming .fintech-card-date,
+#gaming .fintech-card-source,
+#gaming .fintech-card-title,
+#gaming .fintech-card-title a,
+#gaming .fintech-card-excerpt,
+#gaming .fintech-evidence-label,
+#gaming .fintech-term,
+#gaming .fintech-original-link,
+#gaming .fintech-card-provenance a {
+  color: var(--text-primary) !important;
+}
+
+#fintech .fintech-card-title a:hover,
+#gaming .fintech-card-title a:hover,
+#gaming .fintech-load-more .btn-secondary:hover {
+  color: var(--text-primary) !important;
+}
+
+.trend-event-item[data-trend-domain] {
+  --trend-accent: var(--text-primary);
 }
 
 /* 新增遊戲產業入口後，中等寬度改用既有選單按鈕，避免導覽列擠壓。 */
@@ -1312,7 +1379,7 @@ mark {
 
 .site-data-status-text {
   flex: 1 1 320px;
-  color: #475569;
+  color: var(--text-primary);
   font-size: 0.76rem;
   line-height: 1.45;
 }
@@ -1330,7 +1397,7 @@ mark {
 }
 
 .site-data-status-link {
-  color: var(--primary);
+  color: var(--text-primary);
   font-size: 0.76rem;
   font-weight: 800;
   text-decoration: underline;
@@ -1357,19 +1424,19 @@ mark {
 .data-type-real {
   border: 1px solid var(--primary-border);
   background: var(--primary-light);
-  color: var(--primary-dark);
+  color: var(--text-primary);
 }
 
 .data-type-model {
   border: 1px solid #fed7aa;
   background: #fff7ed;
-  color: #9a3412;
+  color: var(--text-primary);
 }
 
 .data-type-curated {
   border: 1px solid #bfdbfe;
   background: #eff6ff;
-  color: #1d4ed8;
+  color: var(--text-primary);
 }
 
 .company-event-summary {
@@ -1392,13 +1459,13 @@ mark {
 .company-event-source {
   display: block;
   margin-top: 7px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.73rem;
   line-height: 1.5;
 }
 
 .company-event-source a {
-  color: var(--primary);
+  color: var(--text-primary);
   font-weight: 700;
   text-decoration: underline;
 }
@@ -1406,19 +1473,19 @@ mark {
 .timeline-provenance,
 .fintech-card-provenance {
   margin-top: 8px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.7rem;
   line-height: 1.45;
 }
 
 .timeline-provenance a {
-  color: var(--primary);
+  color: var(--text-primary);
   font-weight: 700;
   text-decoration: underline;
 }
 
 .fintech-card-provenance a {
-  color: #0f766e;
+  color: var(--text-primary);
   font-weight: 700;
   text-decoration: underline;
 }
@@ -1434,19 +1501,19 @@ mark {
 
 .method-update-log h3 {
   margin-bottom: 6px;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 1rem;
 }
 
 .method-update-log p {
-  color: #475569;
+  color: var(--text-primary);
   font-size: 0.84rem;
   line-height: 1.65;
 }
 
 .method-update-log .method-muted {
   margin-top: 4px;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.76rem;
 }
 
@@ -1456,7 +1523,7 @@ mark {
   border: 1px solid #dbeafe;
   border-radius: 8px;
   background: #f8fbff;
-  color: #475569;
+  color: var(--text-primary);
   font-size: 0.8rem;
   line-height: 1.6;
 }
@@ -1495,7 +1562,7 @@ mark {
 
 .trend-control-label,
 .trend-timeline-eyebrow {
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.08em;
@@ -1513,7 +1580,7 @@ mark {
   border: 1px solid #cbd5e1;
   border-radius: var(--radius-full);
   background: #ffffff;
-  color: #475569;
+  color: var(--text-primary);
   font: inherit;
   font-size: 0.82rem;
   font-weight: 700;
@@ -1523,7 +1590,7 @@ mark {
 
 .trend-control-btn:hover {
   border-color: var(--primary);
-  color: var(--primary);
+  color: var(--text-primary);
   transform: translateY(-1px);
 }
 
@@ -1543,7 +1610,7 @@ mark {
 
 .trend-focus-note {
   margin: 0 0 var(--spacing-lg);
-  color: #526477;
+  color: var(--text-muted);
   font-size: 0.82rem;
   line-height: 1.6;
 }
@@ -1555,7 +1622,7 @@ mark {
 
 .trend-summary-value {
   margin: 2px 0 4px;
-  color: var(--primary);
+  color: var(--text-primary);
   font-size: 1.65rem;
   font-weight: 800;
   line-height: 1.15;
@@ -1576,7 +1643,7 @@ mark {
 
 .trend-timeline-meta {
   margin: 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.8rem;
   text-align: right;
 }
@@ -1626,24 +1693,24 @@ mark {
 
 .trend-domain-badge {
   background: var(--primary-light);
-  color: var(--trend-accent);
+  color: var(--text-primary);
 }
 
 .trend-type-badge {
   background: #f1f5f9;
-  color: #475569;
+  color: var(--text-primary);
 }
 
 .trend-event-date {
   margin-left: auto;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.76rem;
   font-weight: 700;
 }
 
 .trend-event-item h4 {
   margin: 0 0 7px;
-  color: #1e293b;
+  color: var(--text-primary);
   font-size: 1rem;
   line-height: 1.55;
 }
@@ -1654,20 +1721,20 @@ mark {
 }
 
 .trend-event-item h4 a:hover {
-  color: var(--trend-accent);
+  color: var(--text-primary);
   text-decoration: underline;
 }
 
 .trend-event-reason,
 .trend-event-source {
   margin: 0;
-  color: #526477;
+  color: var(--text-muted);
   font-size: 0.8rem;
   line-height: 1.6;
 }
 
 .trend-event-reason strong {
-  color: #334155;
+  color: var(--text-primary);
 }
 
 .trend-event-tags {
@@ -1680,12 +1747,12 @@ mark {
 .trend-event-tag {
   border: 1px solid var(--primary-border);
   background: #ffffff;
-  color: var(--trend-accent);
+  color: var(--text-primary);
 }
 
 .trend-event-source {
   margin-top: 7px;
-  color: #78889b;
+  color: var(--text-muted);
   font-size: 0.74rem;
 }
 
@@ -1697,7 +1764,7 @@ mark {
 
 .trend-related-details summary {
   width: fit-content;
-  color: var(--primary);
+  color: var(--text-primary);
   font-size: 0.88rem;
   font-weight: 800;
   cursor: pointer;
@@ -1705,7 +1772,7 @@ mark {
 
 .trend-related-note {
   margin: 10px 0;
-  color: #64748b;
+  color: var(--text-muted);
   font-size: 0.78rem;
 }
 

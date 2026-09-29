@@ -111,7 +111,7 @@ function dateCounts(articles) {
 
 function applyChartDefaults() {
     if (!window.Chart) return;
-    window.Chart.defaults.color = '#5a6578';
+    window.Chart.defaults.color = '#4b3a58';
     window.Chart.defaults.font.family = "'Noto Sans TC', 'Inter', sans-serif";
     window.Chart.defaults.plugins.tooltip.backgroundColor = 'rgba(43, 48, 58, 0.9)';
     window.Chart.defaults.plugins.tooltip.padding = 10;

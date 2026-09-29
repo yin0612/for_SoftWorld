@@ -12,9 +12,9 @@
   --bg-glass: rgba(255, 255, 255, 0.85);
 
   /* 文字顏色 */
-  --text-primary: #2d2733;      /* 深葡萄灰（替代純黑） */
-  --text-secondary: #615968;    /* 柔和紫灰 */
-  --text-muted: #91899b;        /* 淡紫灰 */
+  --text-primary: #4b3a58;      /* 全站統一深灰紫 */
+  --text-secondary: #4b3a58;
+  --text-muted: #4b3a58;        /* 所有標準文字統一使用同一深灰紫 */
   --text-light: #ffffff;
 
   /* 主題強調色：不使用高飽和紫，保留長時間閱讀的舒適度 */
@@ -132,9 +132,10 @@ img {
 }
 
 .text-gradient {
-  background: linear-gradient(135deg, #2d2733 0%, #725d87 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  background: none;
+  color: var(--text-primary);
+  -webkit-background-clip: border-box;
+  -webkit-text-fill-color: var(--text-primary);
 }
 
 /* 數據解讀/觀測洞察對話框 Insight Box */
@@ -145,13 +146,13 @@ img {
   border-radius: var(--radius-sm);
   padding: 14px 18px;
   font-size: var(--font-size-sm);
-  color: #334155;
+  color: var(--text-primary);
   line-height: 1.65;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
 }
 
 .insight-box strong {
-  color: var(--primary);
+  color: var(--text-primary);
   display: inline-block;
   margin-right: 4px;
 }
