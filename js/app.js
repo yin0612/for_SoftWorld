@@ -159,6 +159,11 @@ function renderCompanyCards() {
             currentIndustry = industry;
             const groupHeading = document.createElement('div');
             groupHeading.className = 'company-grid-heading';
+            const groupPalette = industry === '金融支付'
+                ? { accent: '#168174', soft: '#e7f6f2' }
+                : { accent: '#8a62a4', soft: '#f4ebfa' };
+            groupHeading.style.setProperty('--group-accent', groupPalette.accent);
+            groupHeading.style.setProperty('--group-soft', groupPalette.soft);
             groupHeading.innerHTML = `<span class="company-grid-heading-icon">${industry === '金融支付' ? '💳' : '🎮'}</span><div><strong>${industry}${industry === '金融支付' ? '（大型業者）' : ''}</strong><span>以官方網站與即時監測新聞作為查核入口</span></div>`;
             container.appendChild(groupHeading);
         }
@@ -180,7 +185,7 @@ function renderCompanyCards() {
         const eventSummaryHtml = newsText ? `
             <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
                 <div class="company-event-heading">
-                    <span style="font-weight: 700; color: var(--text-primary);">近期重要事件</span>
+                    <span style="font-weight: 700; color: ${company.brandColor || company.color};">近期重要事件</span>
                     <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
                 </div>
                 <span style="color: var(--text-primary); line-height: 1.5; display: block;">${newsText}</span>
@@ -198,7 +203,7 @@ function renderCompanyCards() {
         card.innerHTML = `
             <div class="company-card-header">
                 <div>
-                    <h3 class="company-name" style="color: var(--text-primary)">${company.name}</h3>
+                    <h3 class="company-name" style="color: ${company.brandColor || company.color}">${company.name}</h3>
                     <div class="company-meta">
                         ${metaHtml}
                     </div>
@@ -258,8 +263,8 @@ function showCompanyModal(companyId) {
 
     modalBody.innerHTML = `
         <div style="margin-bottom: 20px;">
-            <span class="section-tag" style="background: ${company.brandColor}15; color: var(--text-primary)">${company.stock || company.stockTicker}</span>
-            <h2 style="font-size: 1.8rem; color: var(--text-primary); margin-top: 8px;">${company.name}</h2>
+            <span class="section-tag" style="background: ${company.brandColor}15; color: ${company.brandColor}">${company.stock || company.stockTicker}</span>
+            <h2 style="font-size: 1.8rem; color: ${company.brandColor}; margin-top: 8px;">${company.name}</h2>
             <p style="color: var(--text-muted); font-size: 0.9rem;">${company.enName || company.englishName || ''}</p>
         </div>
         <div style="margin-bottom: 16px;">
@@ -273,7 +278,7 @@ function showCompanyModal(companyId) {
         ${newsText ? `
         <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
             <div class="company-event-heading">
-                <h4 style="font-size: 0.9rem; color: var(--text-primary); margin: 0;">近期重要事件</h4>
+                <h4 style="font-size: 0.9rem; color: ${company.brandColor || company.color}; margin: 0;">近期重要事件</h4>
                 <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
             </div>
             <p style="font-size: 0.9rem; color: var(--text-primary);">${newsText}</p>

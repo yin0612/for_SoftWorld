@@ -6,29 +6,30 @@
 
 :root {
   /* 基礎色彩 Palette - 低飽和柔紫色調 */
-  --bg-primary: #fbf9fc;        /* 帶一點紫灰的紙白 */
+  --bg-primary: #fdfaff;        /* 明亮的淡薰衣草白 */
   --bg-secondary: #ffffff;      /* 純白卡片背景 */
-  --bg-tertiary: #f4f1f7;       /* 淺紫灰襯底 */
+  --bg-tertiary: #f7f1fb;       /* 明亮的淡紫襯底 */
   --bg-glass: rgba(255, 255, 255, 0.85);
 
   /* 文字顏色 */
-  --text-primary: #3f314a;      /* 一般頁面：柔和深梅紫 */
-  --text-secondary: #63556c;    /* 同色系閱讀層級 */
-  --text-muted: #887b91;        /* 同色系輔助資訊 */
+  --text-primary: #4d3b58;      /* 一般頁面：明亮但清楚的深梅紫 */
+  --text-secondary: #6d5a76;    /* 同色系閱讀層級 */
+  --text-muted: #9a8ba3;        /* 同色系輔助資訊 */
   --text-light: #ffffff;
+  --site-brand-color: #4d3b58;  /* 左上角網站名稱固定使用，不隨分頁切換 */
 
   /* 主題強調色：不使用高飽和紫，保留長時間閱讀的舒適度 */
-  --primary: #725d87;           /* 柔和梅紫 */
-  --primary-dark: #5c496f;
-  --primary-light: #f2edf6;
-  --primary-border: #d9cde4;
-  --primary-muted: #f6f2f8;
-  --secondary: #7f86b5;         /* 低飽和靛紫 */
-  --secondary-light: #f0f1f9;
-  --accent: #bd8b9e;            /* 灰粉紫 */
-  --accent-pink: #c58ba8;       /* 低飽和莓紫 */
-  --border-color: #e7e1eb;      /* 淡紫灰邊框 */
-  --border-hover: #d6cbe0;
+  --primary: #8b67a7;           /* 舒適而較有層次的梅紫 */
+  --primary-dark: #6f4f88;
+  --primary-light: #f2e9f8;
+  --primary-border: #ddc9e9;
+  --primary-muted: #faf4fc;
+  --secondary: #8e9bc8;         /* 柔和靛紫 */
+  --secondary-light: #f0f2fb;
+  --accent: #d09ab4;            /* 柔粉紫 */
+  --accent-pink: #d69ab6;       /* 低飽和莓紫 */
+  --border-color: #ece2f1;      /* 明亮淡紫邊框 */
+  --border-hover: #dac8e5;
 
   /* 公司品牌專屬色 (日系莫蘭迪柔和版) */
   --color-softworld: #e76f51;   /* 智冠 - 珊瑚紅 */
@@ -132,10 +133,9 @@ img {
 }
 
 .text-gradient {
-  background: none;
-  color: var(--text-primary);
-  -webkit-background-clip: border-box;
-  -webkit-text-fill-color: var(--text-primary);
+  background: linear-gradient(135deg, #805d9e 0%, #b67c9f 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 /* 數據解讀/觀測洞察對話框 Insight Box */

@@ -1271,13 +1271,17 @@ body[data-page="gaming"] {
   color: var(--text-primary);
 }
 
-/* 每個專頁使用自己的文字色系；白字只保留在填色按鈕上。 */
-#fintech .text-gradient,
+/* 每個專頁保留自己的標題漸層與文字層級；白字只保留在填色按鈕上。 */
+#fintech .text-gradient {
+  background: linear-gradient(135deg, #0f766e 0%, #53a99d 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 #gaming .text-gradient {
-  background: none;
-  color: var(--text-primary);
-  -webkit-background-clip: border-box;
-  -webkit-text-fill-color: var(--text-primary);
+  background: linear-gradient(135deg, #163a70 0%, #6f90c3 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
 }
 
 #fintech .section-context-toggle,

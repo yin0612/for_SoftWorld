@@ -34,7 +34,7 @@
   gap: 10px;
   font-weight: 700;
   font-size: var(--font-size-lg);
-  color: var(--text-primary);
+  color: var(--site-brand-color);
   text-decoration: none;
 }
 
@@ -365,10 +365,10 @@
   gap: 10px;
   margin-top: var(--spacing-sm);
   padding: 10px 14px;
-  border-left: 4px solid var(--primary);
+  border-left: 4px solid var(--group-accent, var(--primary));
   border-bottom: 1px solid var(--border-color);
   color: var(--text-primary);
-  background: linear-gradient(90deg, var(--primary-light) 0%, transparent 72%);
+  background: linear-gradient(90deg, var(--group-soft, var(--primary-light)) 0%, transparent 72%);
 }
 
 .company-grid-heading:first-child {
@@ -387,6 +387,7 @@
 
 .company-grid-heading strong {
   font-size: 1rem;
+  color: var(--group-accent, var(--text-primary));
 }
 
 .company-grid-heading div span {
