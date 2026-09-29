@@ -2,7 +2,12 @@
   "name": "softworld-monitoring-api",
   "main": "src/index.js",
   "compatibility_date": "2026-09-14",
-  "triggers": { "crons": ["17 * * * *"] },
+  "triggers": {
+    "crons": [
+      "17 * * * *",
+      "0 4,9 * * *"
+    ]
+  },
   "d1_databases": [
     {
       "binding": "DB",
