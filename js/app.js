@@ -946,6 +946,10 @@ function renderGlobalDataStatusBar() {
     const aggregatedSourceCount = Number(monitoringRuntimeStatus?.aggregated_source_count || 0);
     const aggregatedCount = Number(monitoringLoadState?.aggregatedCount || 0);
     if (monitoringDataMode === 'verified') {
+        if (monitoringLoadState?.degraded) {
+            statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜資料庫讀取暫時受限，現正顯示 ${aggregatedCount} 篇已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。`;
+            return;
+        }
         const updated = lastRun ? `最後成功更新 ${lastRun}（台北時間）` : '最後成功更新時間待服務回報';
         const liveSourceText = liveSourceCount ? `；台灣即時補位來源設定 ${liveSourceCount} 個` : '';
         const liveText = liveFallback ? `；新增台灣來源即時補位 ${liveFallback} 篇` : '';
@@ -1083,6 +1087,9 @@ function renderMonitoringTransparency() {
     const aggregatedText = monitoringLoadState?.aggregatedCount
         ? ` 其中 ${monitoringLoadState.aggregatedCount} 篇為 Google News RSS 聚合（非媒體官方 RSS），僅保留標題、發布時間與原文跳轉連結。`
         : '';
+    const degradedText = monitoringLoadState?.degraded
+        ? ' 資料庫讀取暫時受限，目前僅顯示已驗證的 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入，不以模擬資料補足。'
+        : '';
     const pendingConfigMessages = [
         monitoringRuntimeStatus?.domestic_config?.pending
             ? '台灣支付規則／來源尚有設定待同步，期間由唯讀即時補位維持資料可見。'
@@ -1095,7 +1102,7 @@ function renderMonitoringTransparency() {
     const statusText = monitoringRuntimeStatus
         ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個；台灣來源 ${Array.isArray(monitoringRuntimeStatus.enabled_sources) ? monitoringRuntimeStatus.enabled_sources.filter((source) => source?.region === 'TW' && source?.health_status === 'healthy').length : 0} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個官方 RSS 即時唯讀補位來源與 ${monitoringRuntimeStatus.aggregated_source_count || 0} 個 Google News RSS 聚合來源；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇資料庫文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
         : '正在讀取來源健康與收錄狀態。';
-    summary.textContent = `真實性原則：官方 RSS 與 Google News RSS 聚合來源分開標示；兩者都必須命中年度監測規則且附可開啟的原文跳轉連結，不顯示展示資料。${statusText}${loadText}${liveFallbackText}${aggregatedText}${configSyncText}`;
+    summary.textContent = `真實性原則：官方 RSS 與 Google News RSS 聚合來源分開標示；兩者都必須命中年度監測規則且附可開啟的原文跳轉連結，不顯示展示資料。${statusText}${loadText}${liveFallbackText}${aggregatedText}${degradedText}${configSyncText}`;
     disclosureContent.appendChild(summary);
 
     if (!monitoringManifest) {
@@ -1210,7 +1217,9 @@ function initNewsSection() {
             liveFallbackCount: result.liveFallbackCount || 0,
             officialLiveFallbackCount: result.officialLiveFallbackCount || 0,
             aggregatedCount: result.aggregatedCount || 0,
-            officialRssCount: result.officialRssCount || 0
+            officialRssCount: result.officialRssCount || 0,
+            degraded: result.degraded === true,
+            degradationReason: result.degradationReason || ''
         };
         updateRealStatsOverview(monitoringNews, status);
         setVerifiedNewsTotal(monitoringLoadState.total);
@@ -1628,7 +1637,10 @@ function renderFintechSummary(summary, articles) {
     const state = document.createElement('p');
     state.className = 'fintech-summary-state';
     const aggregatedCount = Number(monitoringLoadState?.aggregatedCount || 0);
-    state.textContent = '官方 RSS＋Google News RSS 聚合資料，台灣支付為預設視圖。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留來源類型、原文跳轉連結與命中證據。' + (aggregatedCount ? ` 本次聚合來源 ${aggregatedCount} 篇，非媒體官方 RSS。` : '');
+    const degradedText = monitoringLoadState?.degraded
+        ? ' 資料庫讀取暫時受限，目前僅顯示已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。'
+        : '';
+    state.textContent = '官方 RSS＋Google News RSS 聚合資料，台灣支付為預設視圖。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留來源類型、原文跳轉連結與命中證據。' + (aggregatedCount ? ` 本次聚合來源 ${aggregatedCount} 篇，非媒體官方 RSS。` : '') + degradedText;
     contextContent.appendChild(state);
     const priorityNote = document.createElement('p');
     priorityNote.className = 'fintech-priority-note';
@@ -2005,7 +2017,7 @@ function renderGamingSummary(summary, articles) {
 
     const state = document.createElement('p');
     state.className = 'fintech-summary-state';
-    state.textContent = `官方 RSS＋Google News RSS 聚合資料；資料範圍 ${range.from} 至 ${range.to}。只納入智冠集團與旗下遊戲、遊戲競業、高營收手遊／重點手遊、平台／主機／電競等精準規則；手遊僅以直接遊戲名稱或明確別名命中。每則新聞皆保留來源類型、原文連結與命中詞。${sources.size ? ` 可追溯來源 ${sources.size} 個。` : ''}${aggregatedCount ? ` 其中 ${aggregatedCount} 篇為 Google News RSS 聚合，非媒體官方 RSS。` : ''}`;
+    state.textContent = `官方 RSS＋Google News RSS 聚合資料；資料範圍 ${range.from} 至 ${range.to}。只納入智冠集團與旗下遊戲、遊戲競業、高營收手遊／重點手遊、平台／主機／電競等精準規則；手遊僅以直接遊戲名稱或明確別名命中。每則新聞皆保留來源類型、原文連結與命中詞。${sources.size ? ` 可追溯來源 ${sources.size} 個。` : ''}${aggregatedCount ? ` 其中 ${aggregatedCount} 篇為 Google News RSS 聚合，非媒體官方 RSS。` : ''}${monitoringLoadState?.degraded ? ' 資料庫讀取暫時受限，目前僅顯示已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。' : ''}`;
     contextContent.appendChild(state);
     summary.appendChild(contextDetails);
 
@@ -2559,7 +2571,9 @@ function renderNews(append = false) {
             verified: '官方 RSS＋Google News 聚合真實新聞',
             unavailable: '真實新聞服務目前無法驗證'
         };
-        const mode = modes[dataMode] || modes.unavailable;
+        const mode = dataMode === 'verified' && monitoringLoadState?.degraded
+            ? '已驗證 Google News RSS 聚合快照（官方 RSS 暫時受限）'
+            : (modes[dataMode] || modes.unavailable);
         countEl.textContent = `共 ${filteredNews.length} 則符合條件｜${mode}`;
     }
 

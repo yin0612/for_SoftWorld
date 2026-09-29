@@ -13,6 +13,7 @@
 - Google News RSS 聚合快照現在同時查詢智冠集團、支付、穩定幣、競業、產業與具代表性的高營收手遊主題；聚合結果只保留標題符合完整規則的公開 metadata，並在 API／前端標示為聚合來源。
 - 台灣來源白名單包含中央社產經／科技 RSS、聯合信用卡處理中心最新消息／卡友活動／特約商店公告 RSS、卡優、自由、科技報橘、動區動趨與 ABMedia；所有來源均先以公開 RSS 可讀取、近期有內容及原文連結檢查後才啟用。
 - `GET /api/articles` 會對新增台灣來源做唯讀即時補位，並以原文 URL 與 D1 內容去重；補位不取代 D1 排程，排程恢復後會自動轉為持久化收錄。
+- 公開 `GET /api/articles` 會以 5 分鐘 Cloudflare 快取回應，前端一次取得近兩個月資料，避免多次 offset 請求重複掃描 D1。若 D1 免費方案的當日讀取額度暫時用盡，API 僅回傳已驗證的 Google News RSS 聚合快照，並附 `degraded=true`／資料來源標示；快照最多快取 1 分鐘，官方 RSS 資料在服務恢復後會自動重新併入。
 - 公開 API 固定只回傳 `articles.review_status='approved'` 且 `article_matches.status='approved'` 的資料，忽略外部傳入的 `status` 參數。
 - 不鏡像未取得授權的全文。資料庫僅保存原始 URL、標題、RSS 摘要、發布／擷取時間與規則命中證據。
 

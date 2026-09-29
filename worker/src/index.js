@@ -6,6 +6,11 @@ const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(d
 // Some publisher feeds retain years of entries. Bound each run to the most
 // recent feed entries so a newly enabled source cannot overwhelm D1.
 const MAX_RSS_ITEMS_PER_SOURCE = 200;
+// 公開頁每次載入會取得近兩個月完整資料；提高單次回傳上限並以短快取保護
+// D1 免費方案，避免前端用十多個 offset 請求重複掃描同一批文章。
+const MAX_PUBLIC_ARTICLES_PER_REQUEST = 2000;
+const ARTICLE_CACHE_SECONDS = 300;
+const DEGRADED_ARTICLE_CACHE_SECONDS = 60;
 
 // 新增的台灣支付來源先提供「即時唯讀」補位，避免來源已驗證但 D1
 // seed 尚未完成時，公開頁仍只看到舊資料。資料仍以 RSS 標題／摘要與
@@ -176,9 +181,82 @@ const LIVE_AGGREGATED_DOMESTIC_RULES = [
 ];
 
 function cors(request, env) {
-  const origin = request.headers.get('Origin');
   const allowed = env.CORS_ORIGIN || '';
-  return origin && origin === allowed ? { 'access-control-allow-origin': origin, vary: 'Origin' } : {};
+  // 公開 API 只允許既定的 Pages 網域；固定回傳該網域可讓 Cloudflare
+  // Cache API 的快取不會因第一個請求缺少 Origin 而失去 CORS 標頭。
+  return allowed ? { 'access-control-allow-origin': allowed, vary: 'Origin' } : {};
+}
+
+function isD1ReadQuotaError(error) {
+  return /D1_ERROR:.*(?:row read limit|free tier daily row read limit|exceeded D1)/i.test(String(error || ''));
+}
+
+function publicArticleFromCandidate(article, liveFallback = true) {
+  return {
+    id: article.id,
+    title: article.title,
+    excerpt: article.excerpt,
+    url: article.canonical_url || article.url,
+    published_at: article.published_at,
+    fetched_at: article.fetched_at,
+    review_status: article.review_status || 'approved',
+    source: article.source,
+    source_region: article.source_region,
+    source_feed: article.source_feed,
+    source_homepage: article.source_homepage || null,
+    source_kind: article.source_kind || 'official_rss',
+    source_access_mode: article.source_access_mode || 'rss',
+    verification_status: article.verification_status || 'verified_rss',
+    url_kind: article.url_kind || 'publisher_url',
+    folder_ids: article.folder_ids,
+    rule_ids: article.rule_ids,
+    matched_terms: article.matched_terms,
+    evidence_jsons: article.evidence_jsons,
+    live_fallback: liveFallback
+  };
+}
+
+function makeArticlePayload(articles, { offset, limit, fromDate, toDate, dataMode, degraded = false, degradationReason = '' }) {
+  const unique = new Map();
+  articles.forEach((article) => {
+    const url = article?.url || article?.canonical_url;
+    if (url && !unique.has(url)) unique.set(url, article.url ? article : publicArticleFromCandidate(article));
+  });
+  const ordered = [...unique.values()].sort((a, b) => String(b.published_at || b.fetched_at || '').localeCompare(String(a.published_at || a.fetched_at || '')));
+  const page = ordered.slice(offset, offset + limit);
+  const nextOffset = offset + page.length;
+  const aggregated = ordered.filter((article) => article.source_kind === 'google_news_rss');
+  const officialLive = ordered.filter((article) => article.live_fallback === true && article.source_kind !== 'google_news_rss');
+  return {
+    articles: page,
+    total: ordered.length,
+    has_more: nextOffset < ordered.length,
+    next_offset: nextOffset,
+    data_mode: dataMode,
+    degraded,
+    degradation_reason: degradationReason || undefined,
+    range: { from: fromDate, to: toDate },
+    live_fallback_count: ordered.filter((article) => article.live_fallback === true).length,
+    live_fallback_sources: [...new Set(officialLive.map((article) => article.source).filter(Boolean))],
+    aggregated_count: aggregated.length,
+    aggregated_sources: [...new Set(aggregated.map((article) => article.source).filter(Boolean))]
+  };
+}
+
+async function articleResponseWithCache(request, url, headers, payload) {
+  const cacheSeconds = payload.degraded ? DEGRADED_ARTICLE_CACHE_SECONDS : ARTICLE_CACHE_SECONDS;
+  const response = json(payload, 200, {
+    ...headers,
+    'cache-control': `public, max-age=${cacheSeconds}, s-maxage=${cacheSeconds}`,
+    'x-monitoring-data-mode': payload.data_mode
+  });
+  if (request.method !== 'GET') return response;
+  try {
+    await caches.default.put(new Request(url.toString(), { method: 'GET' }), response.clone());
+  } catch (error) {
+    console.warn('Unable to cache public monitoring response.', String(error).slice(0, 120));
+  }
+  return response;
 }
 
 function normalize(text = '') {
@@ -907,11 +985,21 @@ export default {
 
     if (url.pathname === '/api/articles') {
       const requestedLimit = Number(url.searchParams.get('limit') || 30);
-      const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(Math.trunc(requestedLimit), 1), 100) : 30;
+      const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(Math.trunc(requestedLimit), 1), MAX_PUBLIC_ARTICLES_PER_REQUEST) : 30;
       const requestedOffset = Number(url.searchParams.get('offset') || 0);
       const offset = Number.isFinite(requestedOffset) ? Math.max(Math.trunc(requestedOffset), 0) : 0;
       const folder = url.searchParams.get('folder');
       const { fromDate, toDate, from, to } = articleQueryRange(url.searchParams);
+      const cacheEnabled = request.method === 'GET' && url.searchParams.get('debug') !== '1';
+      const cacheRequest = new Request(url.toString(), { method: 'GET' });
+      if (cacheEnabled) {
+        try {
+          const cached = await caches.default.match(cacheRequest);
+          if (cached) return cached;
+        } catch (error) {
+          console.warn('Unable to read public monitoring cache.', String(error).slice(0, 120));
+        }
+      }
       const where = [
         "a.review_status = 'approved'",
         "m.status = 'approved'",
@@ -933,7 +1021,6 @@ export default {
           GROUP_CONCAT(m.evidence_json, '|||') AS evidence_jsons
           ${joins} ${whereSql}
           GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC LIMIT 5000`;
-      const totalSql = `SELECT COUNT(DISTINCT a.id) AS total ${joins} ${whereSql}`;
       const aggregateDiagnostics = [];
       // Google News RSS 聚合改由 GitHub Actions 產出的公開快照提供。
       // 全分類頁只讀取 D1 與快照，避免前端分頁時重複觸發大量 RSS 請求而被
@@ -956,11 +1043,32 @@ export default {
                 fetchStaticAggregatedArticles(from, to, folder, aggregateDiagnostics)
               ]).then((groups) => groups.flat())
               : Promise.resolve([]);
-      const [result, totalResult, liveCandidates] = await Promise.all([
-        env.DB.prepare(articlesSql).bind(...values).all(),
-        env.DB.prepare(totalSql).bind(...values).first(),
-        livePromise
-      ]);
+      let result;
+      let liveCandidates;
+      try {
+        [result, liveCandidates] = await Promise.all([
+          env.DB.prepare(articlesSql).bind(...values).all(),
+          livePromise
+        ]);
+      } catch (error) {
+        // D1 免費方案若當日讀取額度用盡，仍只顯示已驗證、可追溯的
+        // Google News RSS 快照，並由前端清楚提示，不以模擬資料補位。
+        const snapshotArticles = await fetchStaticAggregatedArticles(from, to, folder || '', aggregateDiagnostics);
+        if (!snapshotArticles.length) throw error;
+        const payload = makeArticlePayload(snapshotArticles, {
+          offset,
+          limit,
+          fromDate,
+          toDate,
+          dataMode: 'verified_google_news_snapshot_fallback',
+          degraded: true,
+          degradationReason: isD1ReadQuotaError(error) ? 'd1_read_quota' : 'temporary_data_store_error'
+        });
+        if (url.searchParams.get('debug') === '1') payload.aggregated_diagnostics = aggregateDiagnostics;
+        return cacheEnabled
+          ? articleResponseWithCache(request, url, headers, payload)
+          : json(payload, 200, headers);
+      }
       const existingLiveUrls = await findExistingArticleUrls(env, liveCandidates.map((article) => article.canonical_url));
       const liveArticles = [...new Map(
         liveCandidates
@@ -973,54 +1081,21 @@ export default {
         if (article?.url) merged.set(article.url, article);
       });
       liveArticles.forEach((article) => {
-        if (article?.canonical_url && !merged.has(article.canonical_url)) merged.set(article.canonical_url, {
-          id: article.id,
-          title: article.title,
-          excerpt: article.excerpt,
-          url: article.canonical_url,
-          published_at: article.published_at,
-          fetched_at: article.fetched_at,
-          review_status: article.review_status,
-          source: article.source,
-          source_region: article.source_region,
-          source_feed: article.source_feed,
-          source_homepage: article.source_homepage || null,
-          source_kind: article.source_kind || 'official_rss',
-          source_access_mode: article.source_access_mode || 'rss',
-          verification_status: article.verification_status || 'verified_rss',
-          url_kind: article.url_kind || 'publisher_url',
-          folder_ids: article.folder_ids,
-          rule_ids: article.rule_ids,
-          matched_terms: article.matched_terms,
-          evidence_jsons: article.evidence_jsons,
-          live_fallback: true
-        });
+        if (article?.canonical_url && !merged.has(article.canonical_url)) {
+          merged.set(article.canonical_url, publicArticleFromCandidate(article));
+        }
       });
-      const mergedArticles = [...merged.values()].sort((a, b) => String(b.published_at || b.fetched_at || '').localeCompare(String(a.published_at || a.fetched_at || '')));
-      const resultPage = mergedArticles.slice(offset, offset + limit);
-      const persistedTotal = Number(totalResult?.total || 0);
-      const total = persistedTotal + liveArticles.length;
-      const nextOffset = offset + resultPage.length;
-      const responsePayload = {
-        articles: resultPage,
-        total,
-        has_more: nextOffset < total,
-        next_offset: nextOffset,
-        data_mode: 'verified_rss_plus_google_news_aggregation',
-        range: { from: fromDate, to: toDate },
-        live_fallback_count: liveArticles.length,
-        live_fallback_sources: [...new Set(liveArticles
-          .filter((article) => article.source_kind !== 'google_news_rss')
-          .map((article) => article.source)
-          .filter(Boolean))],
-        aggregated_count: liveArticles.filter((article) => article.source_kind === 'google_news_rss').length,
-        aggregated_sources: [...new Set(liveArticles
-          .filter((article) => article.source_kind === 'google_news_rss')
-          .map((article) => article.source)
-          .filter(Boolean))]
-      };
+      const responsePayload = makeArticlePayload([...merged.values()], {
+        offset,
+        limit,
+        fromDate,
+        toDate,
+        dataMode: 'verified_rss_plus_google_news_aggregation'
+      });
       if (url.searchParams.get('debug') === '1') responsePayload.aggregated_diagnostics = aggregateDiagnostics;
-      return json(responsePayload, 200, headers);
+      return cacheEnabled
+        ? articleResponseWithCache(request, url, headers, responsePayload)
+        : json(responsePayload, 200, headers);
     }
     return json({ error: 'Not found' }, 404, headers);
   },

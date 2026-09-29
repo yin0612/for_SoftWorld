@@ -107,7 +107,9 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     const base = monitoringApiBase();
     if (!base) return { loaded: false, reason: 'not_configured' };
 
-    const baseParams = new URLSearchParams({ limit: '100' });
+    // Worker 已提供較大的安全上限；近兩個月資料通常可在一次請求完成，
+    // 避免多個 offset 請求重複掃描資料庫而消耗免費 D1 讀取額度。
+    const baseParams = new URLSearchParams({ limit: '2000' });
     if (typeof getRollingMonitoringDateRange === 'function') {
         const range = getRollingMonitoringDateRange();
         baseParams.set('from', range.from);
@@ -122,6 +124,8 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     let total = null;
     let range = null;
     let complete = true;
+    let degraded = false;
+    let degradationReason = '';
 
     // The Worker returns a total and cursor-like offset. Fetch every page so the
     // client never silently treats the first 100 articles as the full result set.
@@ -132,6 +136,10 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
             headers: { Accept: 'application/json' }
         });
         const pageArticles = Array.isArray(payload.articles) ? payload.articles : [];
+        if (payload.degraded === true) {
+            degraded = true;
+            degradationReason = payload.degradation_reason || degradationReason;
+        }
         pageArticles.forEach((article) => {
             if (article.live_fallback === true) {
                 liveFallbackCount += 1;
@@ -162,6 +170,8 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
         officialLiveFallbackCount,
         aggregatedCount,
         officialRssCount,
+        degraded,
+        degradationReason,
         articles
     };
 };
