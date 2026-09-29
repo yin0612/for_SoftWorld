@@ -6,7 +6,7 @@
 
 :root {
   /* 基礎色彩 Palette - 低飽和柔紫色調 */
-  --bg-primary: #fdfaff;        /* 明亮的淡薰衣草白 */
+  --bg-primary: #ffffff;        /* 網頁最底層統一為純白 */
   --bg-secondary: #ffffff;      /* 純白卡片背景 */
   --bg-tertiary: #f7f1fb;       /* 明亮的淡紫襯底 */
   --bg-glass: rgba(255, 255, 255, 0.85);

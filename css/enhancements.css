@@ -1212,7 +1212,7 @@ mark {
 
 /* 依路由切換整體配色：一般頁為柔紫、金融科技為藍綠、遊戲產業為深藍。 */
 body[data-page="fintech"] {
-  --bg-primary: #f6fcfb;
+  --bg-primary: #ffffff;
   --bg-tertiary: #ecf8f6;
   --border-color: #c7e4df;
   --border-hover: #9bd0c7;
@@ -1230,7 +1230,7 @@ body[data-page="fintech"] {
 }
 
 body[data-page="gaming"] {
-  --bg-primary: #f6f8fd;
+  --bg-primary: #ffffff;
   --bg-tertiary: #edf2fb;
   --border-color: #cad7ed;
   --border-hover: #a8bbdc;
