@@ -12,9 +12,9 @@
   --bg-glass: rgba(255, 255, 255, 0.85);
 
   /* 文字顏色 */
-  --text-primary: #4b3a58;      /* 全站統一深灰紫 */
-  --text-secondary: #4b3a58;
-  --text-muted: #4b3a58;        /* 所有標準文字統一使用同一深灰紫 */
+  --text-primary: #3f314a;      /* 一般頁面：柔和深梅紫 */
+  --text-secondary: #63556c;    /* 同色系閱讀層級 */
+  --text-muted: #887b91;        /* 同色系輔助資訊 */
   --text-light: #ffffff;
 
   /* 主題強調色：不使用高飽和紫，保留長時間閱讀的舒適度 */

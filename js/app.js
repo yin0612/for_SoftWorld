@@ -32,6 +32,7 @@ function initHashRouter() {
                 targetPage = p;
             }
         });
+        document.body.dataset.page = targetPage;
 
         // 1. 隱藏/顯示區塊
         const heroSection = document.getElementById('hero');
@@ -2507,7 +2508,7 @@ function highlightKeyword(text, keyword) {
     if (!cleanKw) return safeText;
     try {
         const regex = new RegExp(`(${cleanKw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-        return safeText.replace(regex, '<mark style="background:#fef08a; color:#4b3a58; padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>');
+        return safeText.replace(regex, '<mark style="background:#fef08a; color:var(--text-primary); padding:1px 4px; border-radius:3px; font-weight:700;">$1</mark>');
     } catch (e) {
         return safeText;
     }

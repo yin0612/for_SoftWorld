@@ -643,8 +643,8 @@ mark {
 .fintech-monitoring-summary {
   margin: 0 0 22px;
   padding: 20px 22px;
-  background: linear-gradient(135deg, #eff6ff 0%, #f0fdfa 100%);
-  border: 1px solid #bae6fd;
+  background: linear-gradient(135deg, #f3fbf9 0%, #e7f6f2 100%);
+  border: 1px solid #b8dfd7;
   border-radius: 14px;
 }
 
@@ -817,7 +817,7 @@ mark {
   min-width: 0;
   padding: 12px 14px;
   background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(186, 230, 253, 0.9);
+  border: 1px solid rgba(169, 220, 211, 0.9);
   border-radius: 10px;
 }
 
@@ -862,7 +862,7 @@ mark {
 
 .fintech-mode-button {
   appearance: none;
-  border: 1px solid #cbd5e1;
+  border: 1px solid #b8dcd5;
   border-radius: 999px;
   padding: 7px 13px;
   background: #ffffff;
@@ -898,9 +898,9 @@ mark {
   align-items: center;
   min-height: 28px;
   padding: 4px 10px;
-  border: 1px solid #dbeafe;
+  border: 1px solid #c7e5df;
   border-radius: 999px;
-  background: #f8fafc;
+  background: #f3fbf9;
   color: var(--text-primary);
   font-size: 0.77rem;
   font-weight: 700;
@@ -930,7 +930,7 @@ mark {
   flex-direction: column;
   min-width: 0;
   padding: 20px;
-  border: 1px solid #dbe4ee;
+  border: 1px solid #cce3de;
   border-radius: 14px;
   background: #ffffff;
   box-shadow: 0 3px 14px rgba(15, 23, 42, 0.05);
@@ -939,7 +939,7 @@ mark {
 
 .fintech-news-card:hover {
   transform: translateY(-3px);
-  border-color: #5eead4;
+  border-color: #8fcfc5;
   box-shadow: 0 10px 24px rgba(15, 118, 110, 0.1);
 }
 
@@ -1037,7 +1037,7 @@ mark {
 .fintech-evidence {
   margin-top: auto;
   padding-top: 12px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #d7e9e5;
 }
 
 .fintech-evidence-label {
@@ -1052,7 +1052,7 @@ mark {
   min-height: 22px;
   padding: 2px 7px;
   border-radius: 6px;
-  background: #eff6ff;
+  background: #e7f6f3;
   color: var(--text-primary);
   font-size: 0.7rem;
   font-weight: 700;
@@ -1084,9 +1084,9 @@ mark {
 .fintech-empty-state {
   grid-column: 1 / -1;
   padding: 48px 20px;
-  border: 1px dashed #cbd5e1;
+  border: 1px dashed #b9ded7;
   border-radius: 14px;
-  background: #f8fafc;
+  background: #f3fbf9;
   color: var(--text-muted);
   text-align: center;
 }
@@ -1209,13 +1209,51 @@ mark {
   color: var(--text-primary) !important;
 }
 
-/* 金融科技與遊戲頁保留各自的識別色；其餘頁面使用全站柔紫主題。 */
+/* 依路由切換整體配色：一般頁為柔紫、金融科技為藍綠、遊戲產業為深藍。 */
+body[data-page="fintech"] {
+  --bg-primary: #f6fcfb;
+  --bg-tertiary: #ecf8f6;
+  --border-color: #c7e4df;
+  --border-hover: #9bd0c7;
+  --text-primary: #164f4c;
+  --text-secondary: #39736e;
+  --text-muted: #6d928d;
+  --primary: #0f766e;
+  --primary-dark: #0d5e58;
+  --primary-light: #e7f6f3;
+  --primary-border: #a9dcd3;
+  --primary-muted: #f0faf8;
+  --secondary: #4e978e;
+  --secondary-light: #e5f5f1;
+  --accent: #77aaa2;
+}
+
+body[data-page="gaming"] {
+  --bg-primary: #f6f8fd;
+  --bg-tertiary: #edf2fb;
+  --border-color: #cad7ed;
+  --border-hover: #a8bbdc;
+  --text-primary: #243d6b;
+  --text-secondary: #4a6090;
+  --text-muted: #7787ae;
+  --primary: #163a70;
+  --primary-dark: #102c59;
+  --primary-light: #e8eef9;
+  --primary-border: #b9cdf0;
+  --primary-muted: #f2f6fd;
+  --secondary: #5976ae;
+  --secondary-light: #e9eff9;
+  --accent: #7f95c0;
+}
+
+/* 金融科技與遊戲頁的內容繼承各自的頁面色系。 */
 #fintech {
   --primary: #0f766e;
-  --primary-dark: #115e59;
-  --primary-light: #ecfdf5;
-  --primary-border: #99f6e4;
-  --primary-muted: #f0fdfa;
+  --primary-dark: #0d5e58;
+  --primary-light: #e7f6f3;
+  --primary-border: #a9dcd3;
+  --primary-muted: #f0faf8;
+  color: var(--text-primary);
 }
 
 #fintech .text-gradient {
@@ -1226,13 +1264,14 @@ mark {
 
 #gaming {
   --primary: #163a70;
-  --primary-dark: #0b1f4d;
-  --primary-light: #edf4ff;
+  --primary-dark: #102c59;
+  --primary-light: #e8eef9;
   --primary-border: #b9cdf0;
-  --primary-muted: #f6f9ff;
+  --primary-muted: #f2f6fd;
+  color: var(--text-primary);
 }
 
-/* 所有頁面採同一深灰紫字色；金融科技、遊戲頁僅保留背景與邊框識別。 */
+/* 每個專頁使用自己的文字色系；白字只保留在填色按鈕上。 */
 #fintech .text-gradient,
 #gaming .text-gradient {
   background: none;
@@ -1297,6 +1336,39 @@ mark {
 
 .trend-event-item[data-trend-domain] {
   --trend-accent: var(--text-primary);
+}
+
+/* 頁尾也跟隨目前頁面的整體配色，避免專頁底部突然回到紫色。 */
+body[data-page="fintech"] .footer {
+  background: #155d57;
+  border-top-color: #9fd8cf;
+}
+
+body[data-page="fintech"] .footer-desc,
+body[data-page="fintech"] .footer-links a,
+body[data-page="fintech"] .footer-bottom {
+  color: #d9f0ec;
+}
+
+body[data-page="gaming"] .footer {
+  background: #1c3768;
+  border-top-color: #aebfe0;
+}
+
+body[data-page="gaming"] .footer-desc,
+body[data-page="gaming"] .footer-links a,
+body[data-page="gaming"] .footer-bottom {
+  color: #dde6f5;
+}
+
+/* 遊戲頁共用新聞卡改用藍色資訊面，不帶入金融科技的藍綠色底。 */
+#gaming .fintech-card-key-point {
+  border-left-color: #163a70;
+  background: #edf3fc;
+}
+
+#gaming .fintech-evidence {
+  border-top-color: #d8e2f2;
 }
 
 /* 新增遊戲產業入口後，中等寬度改用既有選單按鈕，避免導覽列擠壓。 */
