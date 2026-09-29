@@ -2637,13 +2637,13 @@ function renderNews(append = false) {
         item.style.setProperty('--item-brand-color', brandColor);
         
         const verifiedBadge = news.sourceKind === 'google_news_rss'
-                ? '<span style="background:#eef0f7;color:var(--text-primary);font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
+                ? '<span style="background:#e7ecf9;color:#3d5483;border:1px solid #c8d4ec;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">↗ Google News 聚合</span>'
             : (news.verifiedMonitoring
-                ? '<span style="background:#f2edf6;color:var(--text-primary);font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
+                ? '<span style="background:#eee4f4;color:#5c3e70;border:1px solid #d4bee1;font-size:0.7rem;padding:2px 7px;border-radius:20px;font-weight:700;margin-left:8px;vertical-align:middle;">✓ 已驗證官方 RSS</span>'
                 : '');
 
         const huikeBadge = huikeKeyword
-            ? `<span class="tag-huike-chip" data-kw="${huikeKeyword}" style="background:#f6f2f8; color:var(--text-primary); border:1px solid #d9cde4; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${huikeKeyword}</span>`
+            ? `<span class="tag-huike-chip" data-kw="${huikeKeyword}" style="background:#eee3f5; color:#5d3e72; border:1px solid #cbaeda; font-size:0.75rem; padding:2px 8px; border-radius:12px; font-weight:700; margin-left:6px; vertical-align:middle; cursor:pointer;" title="點擊以此關鍵字篩選">📌 ${huikeKeyword}</span>`
             : '';
 
         const directUrl = safeHttpUrl(news.url);
@@ -2656,7 +2656,7 @@ function renderNews(append = false) {
             ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${displayTitle} <span style="font-size:0.85rem;">↗</span></a>`
             : `<span style="color:inherit;">${displayTitle}</span>`;
         const originalLink = hasOriginalLink
-            ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: var(--text-primary); text-decoration: underline; font-weight: 600; font-size:0.82rem;">開啟完整新聞 ↗</a>`
+            ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color:#5d3e72; text-decoration: underline; font-weight: 700; font-size:0.82rem;">開啟完整新聞 ↗</a>`
             : '<span style="color:var(--text-muted); font-size:0.82rem;">原文連結不可用</span>';
 
         item.innerHTML = `
@@ -2664,7 +2664,7 @@ function renderNews(append = false) {
             <div class="timeline-card">
                 <div class="timeline-card-header">
                     <div>
-                        <span class="timeline-company-badge" data-comp-id="${companyId}" style="background: ${brandColor}18; color: var(--text-primary); cursor:pointer;" title="${news.sourceKind === 'google_news_rss' ? 'Google News RSS 聚合監測' : '官方 RSS 監測'}">
+                        <span class="timeline-company-badge" data-comp-id="${companyId}" style="background: ${brandColor}2b; color: ${brandColor}; border-color: ${brandColor}66; cursor:pointer;" title="${news.sourceKind === 'google_news_rss' ? 'Google News RSS 聚合監測' : '官方 RSS 監測'}">
                             ${companyName}
                         </span>
                         ${huikeBadge}
@@ -2679,7 +2679,7 @@ function renderNews(append = false) {
                 <div class="timeline-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                     <div style="display:flex; gap:8px; align-items:center;">
                         <span class="timeline-category" data-cat="${category}" style="cursor:pointer;" title="點擊篩選該類別">🏷️ ${category}</span>
-                        <span class="timeline-source-badge" data-src="${source}" style="background:#f6f2f8; color:var(--text-primary); font-size:0.75rem; padding:3px 8px; border-radius:6px; cursor:pointer; font-weight:600;" title="點擊篩選此媒體">📰 ${source}</span>
+                        <span class="timeline-source-badge" data-src="${source}" style="background:#eee3f5; color:#5d3e72; border:1px solid #d5c1e2; font-size:0.75rem; padding:3px 8px; border-radius:6px; cursor:pointer; font-weight:700;" title="點擊篩選此媒體">📰 ${source}</span>
                     </div>
                     ${originalLink}
                 </div>
@@ -2694,7 +2694,7 @@ function renderNews(append = false) {
         const ruleIds = [...new Set((news.ruleIds || []).filter(Boolean))];
         if (matchedTerms.length || ruleIds.length) {
             const evidence = document.createElement('div');
-            evidence.style.cssText = 'margin:10px 0; padding:8px 10px; background:#faf8fc; border-left:3px solid #725d87; border-radius:4px; font-size:0.78rem; color:var(--text-primary); line-height:1.55;';
+            evidence.style.cssText = 'margin:10px 0; padding:8px 10px; background:#f7f1fa; border-left:3px solid #725d87; border-radius:4px; font-size:0.78rem; color:#4d4656; line-height:1.55;';
             const label = document.createElement('strong');
             label.textContent = '規則命中證據：';
             evidence.appendChild(label);

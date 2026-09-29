@@ -1273,7 +1273,7 @@ body[data-page="gaming"] {
   color: var(--text-primary);
 }
 
-/* 非按鈕文字統一採黑色系；金融科技／遊戲僅保留色塊、邊框與按鈕識別。 */
+/* 一般說明與未選取控制項維持黑色系；新聞卡另外使用同色系深淺建立閱讀層級。 */
 #fintech .text-gradient,
 #gaming .text-gradient {
   background: none;
@@ -1293,19 +1293,6 @@ body[data-page="gaming"] {
 #fintech .fintech-mode-button:not(.active):not(:hover),
 #fintech .fintech-scope-pill,
 #fintech .fintech-result-count,
-#fintech .fintech-category-badge,
-#fintech .fintech-priority-badge,
-#fintech .fintech-card-date,
-#fintech .fintech-card-source,
-#fintech .fintech-card-key-point,
-#fintech .fintech-key-point-label,
-#fintech .fintech-card-title,
-#fintech .fintech-card-title a,
-#fintech .fintech-card-excerpt,
-#fintech .fintech-evidence-label,
-#fintech .fintech-term,
-#fintech .fintech-original-link,
-#fintech .fintech-card-provenance a,
 #gaming .section-context-toggle,
 #gaming .fintech-summary-state,
 #gaming .gaming-summary-details > summary,
@@ -1316,24 +1303,123 @@ body[data-page="gaming"] {
 #gaming .fintech-stat-label,
 #gaming .gaming-mode-button:not(.active):not(:hover),
 #gaming .gaming-scope-pill,
-#gaming .gaming-result-count,
-#gaming .gaming-category-badge,
-#gaming .fintech-card-date,
-#gaming .fintech-card-source,
-#gaming .fintech-card-title,
-#gaming .fintech-card-title a,
-#gaming .fintech-card-excerpt,
-#gaming .fintech-evidence-label,
-#gaming .fintech-term,
-#gaming .fintech-original-link,
-#gaming .fintech-card-provenance a {
+#gaming .gaming-result-count {
   color: var(--text-primary) !important;
 }
 
-#fintech .fintech-card-title a:hover,
-#gaming .fintech-card-title a:hover,
 #gaming .fintech-load-more .btn-secondary:hover {
   color: var(--text-primary) !important;
+}
+
+/* 新聞卡：不使用漸層，以單色深淺讓分類、標題、摘要與來源一眼分層。 */
+#fintech .fintech-category-badge {
+  background: #ccefe8;
+  border: 1px solid #83c9bc;
+  color: #075d56 !important;
+}
+
+#fintech .fintech-priority-badge {
+  background: #ffe5cf;
+  border-color: #f5bb87;
+  color: #9a3c12 !important;
+}
+
+#fintech .fintech-card-date {
+  background: #eff9f7;
+  border: 1px solid #c5e5de;
+  border-radius: 999px;
+  color: #58756f !important;
+  padding: 3px 8px;
+}
+
+#fintech .fintech-card-key-point {
+  background: #ddf4ef;
+  border-left-color: #0b766c;
+  color: #314b47 !important;
+}
+
+#fintech .fintech-key-point-label {
+  color: #076b61 !important;
+}
+
+#fintech .fintech-card-title,
+#fintech .fintech-card-title a {
+  color: #18342f !important;
+}
+
+#fintech .fintech-card-title a:hover {
+  color: #076b61 !important;
+}
+
+#fintech .fintech-card-excerpt {
+  color: #48615b !important;
+}
+
+#fintech .fintech-evidence-label {
+  color: #4e6d67 !important;
+}
+
+#fintech .fintech-term {
+  background: #ccefe8;
+  border: 1px solid #9bd8cd;
+  color: #075d56 !important;
+}
+
+#fintech .fintech-card-source,
+#fintech .fintech-card-provenance {
+  color: #58756f !important;
+}
+
+#fintech .fintech-original-link,
+#fintech .fintech-card-provenance a {
+  color: #076b61 !important;
+}
+
+#gaming .gaming-category-badge {
+  background: #dce8fa;
+  border: 1px solid #aac2e8;
+  color: #214e89 !important;
+}
+
+#gaming .fintech-card-date {
+  background: #f1f5fc;
+  border: 1px solid #ccd9ed;
+  border-radius: 999px;
+  color: #61718a !important;
+  padding: 3px 8px;
+}
+
+#gaming .fintech-card-title,
+#gaming .fintech-card-title a {
+  color: #1f2d40 !important;
+}
+
+#gaming .fintech-card-title a:hover {
+  color: #1e4d91 !important;
+}
+
+#gaming .fintech-card-excerpt {
+  color: #4e6077 !important;
+}
+
+#gaming .fintech-evidence-label {
+  color: #53657d !important;
+}
+
+#gaming .fintech-term {
+  background: #dce9fb;
+  border: 1px solid #b8cce9;
+  color: #244f89 !important;
+}
+
+#gaming .fintech-card-source,
+#gaming .fintech-card-provenance {
+  color: #61718a !important;
+}
+
+#gaming .fintech-original-link,
+#gaming .fintech-card-provenance a {
+  color: #1e4d91 !important;
 }
 
 .trend-event-item[data-trend-domain] {

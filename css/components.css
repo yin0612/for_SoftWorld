@@ -651,6 +651,7 @@
 .timeline-card {
   background: #ffffff;
   border: 1px solid var(--border-color);
+  border-top: 3px solid var(--item-brand-color, var(--primary));
   border-radius: var(--radius-md);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow-sm);
@@ -674,26 +675,31 @@
   font-size: 0.75rem;
   font-weight: 700;
   padding: 3px 12px;
+  border: 1px solid currentColor;
   border-radius: var(--radius-full);
 }
 
 .timeline-date {
   font-size: var(--font-size-xs);
   font-weight: 600;
-  color: var(--text-muted);
+  color: #6a5878;
+  background: #f3edf7;
+  border: 1px solid #dfd0e8;
+  border-radius: var(--radius-full);
+  padding: 3px 8px;
 }
 
 .timeline-title {
   font-size: var(--font-size-md);
   font-weight: 700;
-  color: var(--text-primary);
+  color: #253142;
   margin-bottom: var(--spacing-xs);
   line-height: 1.45;
 }
 
 .timeline-excerpt {
   font-size: var(--font-size-sm);
-  color: var(--text-secondary);
+  color: #526176;
   line-height: 1.65;
   margin-bottom: var(--spacing-md);
 }
@@ -707,11 +713,12 @@
 }
 
 .timeline-category {
-  background: var(--primary-muted);
-  color: var(--text-primary);
+  background: #e9ddf1;
+  border: 1px solid #cfb8dc;
+  color: #5b3d70;
   padding: 3px 10px;
   border-radius: var(--radius-sm);
-  font-weight: 500;
+  font-weight: 700;
 }
 
 .timeline-load-more {
