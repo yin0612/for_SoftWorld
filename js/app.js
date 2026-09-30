@@ -839,8 +839,8 @@ function renderRealTrends() {
 
 // 4. 新聞發布區塊與過濾邏輯
 let currentNewsPage = 1;
-// 與金融科技、遊戲產業頁一致，首批與每次載入皆顯示 12 則。
-const NEWS_PER_PAGE = 12;
+// 關鍵字監測、金融科技與遊戲產業頁統一：首批與每次載入皆顯示 20 則。
+const NEWS_PER_PAGE = 20;
 let filteredNews = [];
 // 真實監測資料與 data.js 的既有展示/分析資料分離，避免互相污染。
 let monitoringNews = [];
@@ -856,13 +856,13 @@ let trendRangeDays = 60;
 // 國內支付是此頁主要監測目的；首次進入與清除篩選都回到台灣支付視圖。
 let fintechMode = 'taiwan';
 let fintechPage = 1;
-const FINTECH_PER_PAGE = 12;
+const FINTECH_PER_PAGE = 20;
 const FINTECH_FOLDER_IDS = new Set(['folder_2', 'folder_5', 'folder_6']);
 const SOFTWORLD_FINTECH_RULE_IDS = new Set(['softworld-fintech-services']);
 const TAIWAN_PAYMENT_PEER_RULE_IDS = new Set(['taiwan-payment-peer-oen']);
 let gamingMode = 'all';
 let gamingPage = 1;
-const GAMING_PER_PAGE = 12;
+const GAMING_PER_PAGE = 20;
 const GAMING_MODE_RULE_IDS = {
     softworld: new Set(['softworld-brand', 'softworld-games', 'softworld-ip']),
     competitor: new Set(['competitor-tw-game', 'competitor-global-game']),
