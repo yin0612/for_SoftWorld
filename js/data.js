@@ -262,6 +262,18 @@ const HUIKE_2025_STRUCTURE = [
             "Buy Now Pay Later", "Paypal", "Stripe", "Block Inc/Square", "Adyen", 
             "Visa", "Mastercard", "跨境收單"
         ]
+    },
+    {
+        id: "folder_6",
+        folderName: "6. 穩定幣與鏈上結算",
+        badge: "穩定幣／VASP",
+        icon: "🪙",
+        desc: "涵蓋穩定幣、鏈上支付與結算、Circle／幣託，以及 VASP 虛擬資產服務商的監理與登記動態",
+        keywords: [
+            "穩定幣", "stablecoin", "USDT", "USDC", "Circle", "幣託", "BitoPro",
+            "奧丁丁", "OwlPay", "鏈上支付", "鏈上結算", "代幣化貨幣",
+            "VASP", "VSAP", "虛擬資產服務商", "虛擬資產服務提供者"
+        ]
     }
 ];
 

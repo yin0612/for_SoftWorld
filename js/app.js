@@ -1358,6 +1358,13 @@ function isOwlPayPriorityArticle(news) {
     return STABLECOIN_PRIORITY_TERMS.some((term) => matchesStablecoinTerm(target, term));
 }
 
+// 奧丁丁／OwlPay 維持穩定幣頁首要優先；VASP 的監理、登記與牌照消息
+// 則列為第二優先，讓台灣重要監管動態不會被大量泛加密新聞擠出首批 20 則。
+function stablecoinDisplayPriority(news) {
+    if (isOwlPayPriorityArticle(news)) return 2;
+    return articleHasMonitoringRule(news, 'stablecoin-vasp') ? 1 : 0;
+}
+
 function getStablecoinTermMatches(news) {
     const target = stablecoinSearchText(news);
     const matches = [];
@@ -1862,7 +1869,7 @@ function renderFintechMonitoring() {
     });
     if (fintechMode === 'stablecoin') {
         filtered.sort((a, b) => {
-            const priorityDelta = Number(isOwlPayPriorityArticle(b)) - Number(isOwlPayPriorityArticle(a));
+            const priorityDelta = stablecoinDisplayPriority(b) - stablecoinDisplayPriority(a);
             return priorityDelta || String(b.date || '').localeCompare(String(a.date || ''));
         });
     }
@@ -2348,7 +2355,7 @@ function renderHuikeChips() {
 
     const currentFolder = HUIKE_2025_STRUCTURE.find(f => f.id === currentHuikeFolderId);
     if (!currentFolder) {
-        if (descEl) descEl.textContent = '全部五大監測分類：選擇一個資料夾可使用其精選關鍵字快速篩選。';
+        if (descEl) descEl.textContent = '全部監測分類：選擇一個資料夾可使用其精選關鍵字快速篩選。';
         chipsContainer.innerHTML = '';
         if (clearBtn) clearBtn.style.display = 'none';
         renderHuikeFullKeywordDisclosure(null);
