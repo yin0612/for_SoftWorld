@@ -2531,25 +2531,39 @@ function highlightKeyword(text, keyword) {
     }
 }
 
-function isMostlyEnglishText(value) {
-    const text = String(value || '');
-    const latinCount = (text.match(/[A-Za-z]/g) || []).length;
-    const chineseCount = (text.match(/[\u3400-\u9fff]/g) || []).length;
-    return latinCount >= 24 && latinCount > chineseCount * 2;
+function splitTimelineExcerptSentences(value) {
+    // 中英文句號、問號與驚嘆號都作為斷句；保留句末標點，讓摘要讀起來完整。
+    return String(value || '')
+        .match(/[^。！？!?]+[。！？!?]+(?:[」』”’）)\]]+)?|[^。！？!?]+$/g)
+        ?.map((sentence) => sentence.replace(/\s+/g, ' ').trim())
+        .filter(Boolean) || [];
 }
 
-function getTimelineDisplayExcerpt(news) {
-    const rawExcerpt = String(news?.excerpt || '');
-    if (!isMostlyEnglishText(rawExcerpt)) return rawExcerpt;
-
-    // 國際英文 RSS 常把全文摘要放在同一欄。先取第一段，再採金融科技
-    // 卡片相同的 300 字摘要上限，避免時間軸被長篇英文占滿。
-    const firstParagraph = plainFintechText(rawExcerpt)
+function getTimelineExcerptDisplay(news) {
+    const full = plainFintechText(news?.excerpt || '')
         .replace(/\r\n?/g, '\n')
-        .split(/\n\s*\n/)[0]
-        .replace(/\s+/g, ' ')
+        .replace(/\n{3,}/g, '\n\n')
         .trim();
-    return truncateFintechText(firstParagraph, 300);
+    if (!full) return { preview: '', full: '', truncated: false };
+
+    const sentences = splitTimelineExcerptSentences(full);
+    // 預設保留新聞開頭五句：第一段的重點仍在，同時避免 RSS 全文把
+    // 時間軸卡片拉得過長。若來源沒有可辨識句點，才以字數作保護。
+    if (sentences.length > 5) {
+        return {
+            preview: sentences.slice(0, 5).join(' '),
+            full,
+            truncated: true
+        };
+    }
+    if (full.length > 520) {
+        return {
+            preview: full.slice(0, 520).trimEnd() + '…',
+            full,
+            truncated: true
+        };
+    }
+    return { preview: full, full, truncated: false };
 }
 
 function renderNews(append = false) {
@@ -2665,7 +2679,9 @@ function renderNews(append = false) {
         const hasOriginalLink = directUrl !== '#';
 
         const displayTitle = highlightKeyword(news.title, currentKeyword);
-        const displayExcerpt = highlightKeyword(getTimelineDisplayExcerpt(news), currentKeyword);
+        const excerptDisplay = getTimelineExcerptDisplay(news);
+        const displayExcerpt = highlightKeyword(excerptDisplay.preview, currentKeyword);
+        const fullExcerpt = highlightKeyword(excerptDisplay.full, currentKeyword);
         const titleContent = hasOriginalLink
             ? `<a href="${targetUrl}" target="_blank" rel="noopener" style="color: inherit; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">${displayTitle} <span style="font-size:0.85rem;">↗</span></a>`
             : `<span style="color:inherit;">${displayTitle}</span>`;
@@ -2690,6 +2706,12 @@ function renderNews(append = false) {
                     ${verifiedBadge}
                 </h4>
                 <p class="timeline-excerpt">${displayExcerpt}</p>
+                ${excerptDisplay.truncated ? `
+                    <details class="timeline-excerpt-details">
+                        <summary class="timeline-excerpt-toggle">展開完整摘要</summary>
+                        <p class="timeline-excerpt-full">${fullExcerpt}</p>
+                    </details>
+                ` : ''}
                 <div class="timeline-footer" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
                     <div style="display:flex; gap:8px; align-items:center;">
                         <span class="timeline-category" data-cat="${category}" style="cursor:pointer;" title="點擊篩選該類別">🏷️ ${category}</span>

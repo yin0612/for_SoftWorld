@@ -793,6 +793,65 @@ mark {
   background: #faf8fc;
 }
 
+/* 關鍵字新聞保留開頭五句；較長的 RSS 摘要改為按需展開，避免時間軸被全文撐長。 */
+.timeline-excerpt {
+  margin-bottom: 8px;
+}
+
+.timeline-excerpt-details {
+  margin: 0 0 var(--spacing-md);
+}
+
+.timeline-excerpt-toggle {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 3px 9px;
+  border: 1px solid var(--primary-border);
+  border-radius: 999px;
+  background: #faf8fc;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 700;
+  line-height: 1.35;
+  list-style: none;
+}
+
+.timeline-excerpt-toggle::-webkit-details-marker {
+  display: none;
+}
+
+.timeline-excerpt-toggle::before {
+  content: '＋';
+  margin-right: 5px;
+  font-size: 0.85rem;
+}
+
+.timeline-excerpt-details[open] > .timeline-excerpt-toggle::before {
+  content: '−';
+}
+
+.timeline-excerpt-toggle:hover,
+.timeline-excerpt-toggle:focus-visible {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  outline: 2px solid rgba(114, 93, 135, 0.24);
+  outline-offset: 2px;
+}
+
+.timeline-excerpt-full {
+  margin: 8px 0 0;
+  padding: 10px 12px;
+  border-left: 3px solid var(--primary-border);
+  border-radius: 0 7px 7px 0;
+  background: #faf8fc;
+  color: #526176;
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+  white-space: pre-line;
+}
+
 .fintech-card-provenance-details > .fintech-card-provenance,
 .timeline-provenance-details > .timeline-provenance {
   margin-top: 6px;
