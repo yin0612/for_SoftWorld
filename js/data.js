@@ -272,7 +272,7 @@ const HUIKE_2025_STRUCTURE = [
         keywords: [
             "穩定幣", "stablecoin", "USDT", "USDC", "Circle", "幣託", "BitoPro",
             "奧丁丁", "OwlPay", "鏈上支付", "鏈上結算", "代幣化貨幣",
-            "VASP", "VSAP", "虛擬資產服務商", "虛擬資產服務提供者"
+            "VASP", "虛擬資產服務商", "虛擬資產服務提供者"
         ]
     }
 ];

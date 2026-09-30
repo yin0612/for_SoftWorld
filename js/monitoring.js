@@ -46,7 +46,7 @@ function formatMonitoringDate(value) {
 }
 
 window.loadMonitoringManifest = async function loadMonitoringManifest() {
-    return fetchMonitoringJson('config/monitoring_rules.json?v=20260930_01', {
+    return fetchMonitoringJson('config/monitoring_rules.json?v=20260930_02', {
         headers: { Accept: 'application/json' }
     });
 };
