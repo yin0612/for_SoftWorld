@@ -98,6 +98,7 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
   { id: 'wealth-google-news', name: '財訊', region: 'TW', type: 'editorial', domain: 'wealth.com.tw', homepage: 'https://www.wealth.com.tw/' },
   { id: 'businessweekly-google-news', name: '商業周刊', region: 'TW', type: 'editorial', domain: 'businessweekly.com.tw', homepage: 'https://www.businessweekly.com.tw/' },
   { id: 'bnext-google-news', name: '數位時代', region: 'TW', type: 'editorial', domain: 'bnext.com.tw', homepage: 'https://www.bnext.com.tw/' },
+  { id: 'udn-money-google-news', name: '經濟日報 金融', region: 'TW', type: 'editorial', domain: 'money.udn.com', homepage: 'https://money.udn.com/' },
   { id: 'setn-google-news', name: '三立新聞網', region: 'TW', type: 'editorial', domain: 'setn.com', homepage: 'https://www.setn.com/' },
   { id: 'tvbs-google-news', name: 'TVBS新聞網', region: 'TW', type: 'editorial', domain: 'news.tvbs.com.tw', homepage: 'https://news.tvbs.com.tw/' },
   { id: 'ftv-google-news', name: '民視新聞網', region: 'TW', type: 'editorial', domain: 'ftvnews.com.tw', homepage: 'https://www.ftvnews.com.tw/' },
@@ -110,7 +111,7 @@ const LIVE_AGGREGATED_FINTECH_SOURCES = [
 // 穩定幣頁同樣使用上述白名單，但最後仍須通過穩定幣／鏈上結算規則。
 const LIVE_AGGREGATED_STABLECOIN_SOURCES = LIVE_AGGREGATED_FINTECH_SOURCES;
 // 使用 GitHub raw 內容作為 Actions 產出的公開快照；不依賴 Pages 部署延遲。
-const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260924-2';
+const AGGREGATED_STATIC_URL = 'https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json?v=20260930-udn-vasp';
 
 const LIVE_STABLECOIN_RULES = [
   {
@@ -961,7 +962,7 @@ async function monitoringStatus(env) {
     })),
     // 15 個既有具名媒體加上 config/fintech_media_sources.json 的 30 個
     // 免費 Google News 網域補位；公司官方動態與泛媒體露出搜尋另計。
-    aggregated_source_count: 45,
+    aggregated_source_count: 46,
     domestic_config: domesticConfig,
     stablecoin_config: stablecoinConfig,
     active_rule_count: ruleCount?.active || 0,
