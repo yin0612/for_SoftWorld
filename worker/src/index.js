@@ -162,6 +162,17 @@ const LIVE_STABLECOIN_RULES = [
     exclude_any_json: JSON.stringify(['大宇紡織']),
     auto_publish: 1,
     auto_publish_allowed_terms_json: JSON.stringify(['幣託','BitoPro','BitoGroup'])
+  },
+  {
+    // VASP 是正確國際縮寫；同時保留使用者輸入的 VSAP，避免拼寫差異漏報。
+    id: 'stablecoin-vasp',
+    folder_id: 'folder_6',
+    scope: 'full_text',
+    any_of_json: JSON.stringify(['VASP','VSAP','虛擬資產服務商','虛擬資產服務提供者','Virtual Asset Service Provider','Virtual Asset Service Providers']),
+    all_of_json: '[]',
+    exclude_any_json: JSON.stringify(['大宇紡織']),
+    auto_publish: 1,
+    auto_publish_allowed_terms_json: JSON.stringify(['VASP','VSAP','虛擬資產服務商','虛擬資產服務提供者','Virtual Asset Service Provider','Virtual Asset Service Providers'])
   }
 ];
 

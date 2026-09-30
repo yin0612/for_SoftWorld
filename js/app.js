@@ -525,7 +525,7 @@ function trendHasStablecoinTitleReference(title) {
 function trendEntityLabels(article, domain) {
     const paymentTerms = ['藍新科技', '藍新金流', 'NewebPay', 'LINE Pay Money', 'LINE Pay', 'LINE Bank', '彈性付', '街口支付', '街口電子支付', '全支付', '全盈支付', '綠界', 'ECPay', '紅陽', 'SunPay', '台灣Pay', '悠遊付', 'iPASS MONEY', '聯卡中心', '財金公司', '金管會', '中央銀行', '央行', 'TWQR', 'Visa', 'Mastercard', 'PayPal', 'Stripe', 'Block', 'Square', 'Adyen'];
     const gameTerms = ['智冠', '中華網龍', '網龍', 'MyCard', '遊戲新幹線', '大宇', '橘子', 'Gamania', '華義', '鈊象', '宇峻', '歐買尬', '傳奇', '網銀國際', 'Wanin', 'Garena', 'NEXON', '騰訊', '網易', '任天堂', 'Steam', 'PlayStation', 'Xbox', '天堂M', '星城', '神魔之塔', '傳說對決', 'Kingshot', 'Roblox', '皮克敏', 'Fate'];
-    const stablecoinTerms = ['奧丁丁', 'OwlPay', 'Tether', 'USDT', 'USDC', 'PYUSD', 'RLUSD', '穩定幣', 'Stablecoin'];
+    const stablecoinTerms = ['奧丁丁', 'OwlPay', 'Tether', 'USDT', 'USDC', 'PYUSD', 'RLUSD', 'VASP', 'VSAP', '虛擬資產服務商', '穩定幣', 'Stablecoin'];
     const terms = domain === 'gaming'
         ? [...gameTerms, ...trendGamingRuleTerms(article)]
         : domain === 'payments' ? paymentTerms : stablecoinTerms;
@@ -875,12 +875,13 @@ const GAMING_RULE_IDS = new Set([
     ...GAMING_MODE_RULE_IDS.mobile,
     ...GAMING_MODE_RULE_IDS.platform
 ]);
-const STABLECOIN_RULE_IDS = new Set(['stablecoin-core', 'stablecoin-settlement', 'stablecoin-brand']);
+const STABLECOIN_RULE_IDS = new Set(['stablecoin-core', 'stablecoin-settlement', 'stablecoin-brand', 'stablecoin-circle', 'stablecoin-bitopro', 'stablecoin-vasp']);
 const STABLECOIN_PRIORITY_TERMS = ['奧丁丁', 'OwlPay'];
 const STABLECOIN_TERM_GROUPS = [
     { label: '穩定幣類別', terms: ['穩定幣', 'stablecoin', 'stable coin'] },
     { label: '穩定幣資產', terms: ['USDT', 'USDC', 'USDe', 'PYUSD', 'RLUSD', 'FDUSD', 'EURC', 'USDG', 'GUSD'] },
     { label: '發行與結算', terms: ['Tether', '鏈上結算', '鏈上支付', '代幣化存款', '代幣化貨幣', 'tokenized deposit', 'tokenized deposits', 'stablecoin settlement', 'stablecoin payment', 'stablecoin payments'] },
+    { label: '虛擬資產服務', terms: ['VASP', 'VSAP', '虛擬資產服務商', '虛擬資產服務提供者', 'Virtual Asset Service Provider'] },
     { label: '奧丁丁／OwlPay 優先', terms: STABLECOIN_PRIORITY_TERMS }
 ];
 
