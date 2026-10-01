@@ -92,23 +92,6 @@ function keywordCounts(articles) {
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 15);
 }
 
-function dateCounts(articles) {
-    const counts = new Map();
-    articles.forEach((article) => {
-        if (!article.date) return;
-        const current = counts.get(article.date) || { official: 0, aggregated: 0 };
-        if (article.sourceKind === 'google_news_rss') current.aggregated += 1;
-        else current.official += 1;
-        counts.set(article.date, current);
-    });
-    const labels = [...counts.keys()].sort();
-    return {
-        labels,
-        official: labels.map((label) => counts.get(label).official),
-        aggregated: labels.map((label) => counts.get(label).aggregated)
-    };
-}
-
 function applyChartDefaults() {
     if (!window.Chart) return;
     window.Chart.defaults.color = '#4b3a58';
@@ -152,15 +135,16 @@ function renderRealSummary(articles) {
 function renderEmptyAnalytics(message) {
     const host = document.getElementById('analyticsInsights');
     if (host) host.innerHTML = `<p class="method-muted">${message}</p>`;
-    ['exposureTrendChart', 'categoryChart', 'sourceChart', 'keywordChart'].forEach((id) => destroyChart(id));
+    ['categoryChart', 'sourceChart', 'keywordChart'].forEach((id) => destroyChart(id));
 }
 
 function renderAnalyticsCharts() {
     const analytics = document.getElementById('analytics');
     if (!analytics || window.getComputedStyle(analytics).display === 'none') return;
     const articles = getRealArticles();
-    const rangeLabel = document.getElementById('trendRangeLabel');
-    if (rangeLabel) rangeLabel.textContent = `資料區間：${getRealRange()}`;
+    renderCompanyCoverage(articles);
+    const rangeLabel = document.getElementById('analyticsDataNote');
+    if (rangeLabel) rangeLabel.textContent = `資料區間：${getRealRange()}。Google News 聚合為原文索引，非媒體官方 RSS；文章可命中多個分類或關鍵字，各項數量不可直接加總。`;
     if (!articles.length) {
         renderEmptyAnalytics('正在等待真實新聞監測資料；資料服務無法驗證時不會以其他資料補足。');
         return;
@@ -168,16 +152,6 @@ function renderAnalyticsCharts() {
     renderRealSummary(articles);
     ensureChartJs().then(() => {
         applyChartDefaults();
-        const dates = dateCounts(articles);
-        makeChart('exposureTrendChart', {
-            type: 'line',
-            data: { labels: dates.labels, datasets: [
-                { label: '官方 RSS', data: dates.official, borderColor: '#725d87', backgroundColor: 'rgba(114,93,135,.12)', fill: true, tension: .25 },
-                { label: 'Google News 聚合', data: dates.aggregated, borderColor: '#e76f51', backgroundColor: 'rgba(231,111,81,.08)', fill: true, tension: .25 }
-            ] },
-            options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }, plugins: { tooltip: { callbacks: { label: (context) => `${context.dataset.label}：${context.parsed.y} 篇` } } } }
-        });
-
         const categories = folderCounts(articles);
         makeChart('categoryChart', {
             type: 'bar', data: { labels: categories.map(([id]) => folderLabel(id)), datasets: [{ label: '文章數', data: categories.map(([, count]) => count), backgroundColor: chartColors(categories.length) }] },

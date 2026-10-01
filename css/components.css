@@ -766,6 +766,16 @@
   margin-bottom: var(--spacing-xl);
 }
 
+.coverage-table-wrap { overflow-x: auto; margin-top: 20px; }
+.coverage-table { width: 100%; min-width: 620px; }
+.coverage-table td, .coverage-table th { vertical-align: top; }
+.coverage-table summary { cursor: pointer; padding: 6px 0; color: var(--text-primary); }
+.coverage-table summary:focus-visible { outline: 2px solid var(--text-primary); outline-offset: 3px; }
+.coverage-sources { margin-top: 8px; max-height: 380px; overflow-y: auto; }
+.coverage-sources ul { padding-left: 20px; }
+.coverage-sources li { padding: 8px 0; }
+.coverage-sources a { overflow-wrap: anywhere; }
+
 .chart-card-body {
   position: relative;
   width: 100%;
