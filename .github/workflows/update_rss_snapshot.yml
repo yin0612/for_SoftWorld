@@ -1,0 +1,28 @@
+name: 每小時官方 RSS 備援快照
+on:
+  schedule:
+    - cron: '23 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: monitoring-aggregation
+  cancel-in-progress: false
+jobs:
+  rss-backup:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 驗證來源、規則與日期
+        run: node --test tests/*.test.mjs worker/src/*.test.mjs
+      - name: 更新官方 RSS metadata 快照
+        run: node scripts/update_rss_snapshot.mjs
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'auto: 更新官方 RSS 備援快照 [skip ci]'
+          file_pattern: 'data/rss-snapshot.json'
+          branch: main

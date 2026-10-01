@@ -1,6 +1,6 @@
 /* 真實新聞監測 API 設定。官方 RSS 與 Google News RSS 聚合來源分開標示，
    不把聚合結果誤稱為媒體官方 RSS，也不以展示資料補足。 */
-window.MONITORING_API_BASE = 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev';
+window.MONITORING_API_BASE = window.MONITORING_API_BASE || 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev';
 
 function monitoringApiBase() {
     return (window.MONITORING_API_BASE || '').replace(/\/$/, '');
@@ -10,7 +10,7 @@ async function fetchMonitoringJson(url, options = {}, maxAttempts = 3) {
     let lastError = null;
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         try {
-            const response = await fetch(url, { cache: 'no-store', ...options });
+            const response = await fetch(url, { cache: 'no-store', ...options, signal: AbortSignal.timeout(25000) });
             if (!response.ok) throw new Error(`Monitoring request returned ${response.status}`);
             return await response.json();
         } catch (error) {
@@ -84,6 +84,7 @@ function normalizeMonitoringArticle(article) {
             ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。'
             : '此文章由已驗證公開 RSS 來源收錄。'),
         date: formatMonitoringDate(article.published_at || article.fetched_at),
+        publishedAt: article.published_at,
         collectedDate: formatMonitoringDate(article.fetched_at),
         reviewState: article.review_status || 'approved',
         source: article.source,
@@ -109,7 +110,7 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
 
     // Worker 已提供較大的安全上限；近兩個月資料通常可在一次請求完成，
     // 避免多個 offset 請求重複掃描資料庫而消耗免費 D1 讀取額度。
-    const baseParams = new URLSearchParams({ limit: '2000' });
+    const baseParams = new URLSearchParams({ limit: '2000', v: '20261001-quality' });
     if (typeof getRollingMonitoringDateRange === 'function') {
         const range = getRollingMonitoringDateRange();
         baseParams.set('from', range.from);
@@ -126,6 +127,10 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     let complete = true;
     let degraded = false;
     let degradationReason = '';
+    let partial = false;
+    let aggregatedSnapshot = null;
+    let rssSnapshot = null;
+    const seen = new Set();
 
     // The Worker returns a total and cursor-like offset. Fetch every page so the
     // client never silently treats the first 100 articles as the full result set.
@@ -136,11 +141,21 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
             headers: { Accept: 'application/json' }
         });
         const pageArticles = Array.isArray(payload.articles) ? payload.articles : [];
+        partial ||= payload.partial === true;
+        aggregatedSnapshot = payload.aggregated_snapshot || aggregatedSnapshot;
+        rssSnapshot = payload.rss_snapshot || rssSnapshot;
         if (payload.degraded === true) {
             degraded = true;
             degradationReason = payload.degradation_reason || degradationReason;
         }
         pageArticles.forEach((article) => {
+            const timestamp = Date.parse(article.published_at);
+            if (!article.title || !/^https?:\/\//i.test(article.url || '') || !Number.isFinite(timestamp) || timestamp > Date.now()) {
+                complete = false;
+                return;
+            }
+            if (seen.has(article.url)) return;
+            seen.add(article.url);
             if (article.live_fallback === true) {
                 liveFallbackCount += 1;
                 if (article.source_kind !== 'google_news_rss') officialLiveFallbackCount += 1;
@@ -161,6 +176,7 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
         if (page === 999) complete = false;
     }
 
+    if (total !== null && total !== articles.length) complete = false;
     return {
         loaded: true,
         range,
@@ -172,6 +188,9 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
         officialRssCount,
         degraded,
         degradationReason,
+        partial,
+        aggregatedSnapshot,
+        rssSnapshot,
         articles
     };
 };

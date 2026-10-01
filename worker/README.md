@@ -53,3 +53,5 @@ npx wrangler deploy
 - `POST /api/internal/collect`：須附帶 `Authorization: Bearer <MONITORING_ADMIN_TOKEN>`；用於立即執行收集，不對公開前端開放。
 
 官方 RSS 收集排程每小時第 17 分鐘執行一次，並額外於台北時間 12:00、17:00 執行；寫入為冪等，並保留每次收集紀錄。
+
+另由 GitHub Actions 每小時第 23 分產生官方 RSS 備援快照。Worker 讀取 `data/rss-snapshot.json`，使用原文 URL 與 D1 合併；備援同樣套用啟用來源白名單、完整規則、台北近兩個月及未來時間檢查。已拒絕的 URL 不會被備援恢復；拒絕狀態查詢失敗時，暫停該批補位並標記 `partial=true`。API 的 `rss_snapshot`、`aggregated_snapshot` 提供快照時間與來源查核資訊，前端據此顯示實際新鮮度。

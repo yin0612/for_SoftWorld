@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initHashRouter();
     initBackToTop();
     initSkipLink();
+    initMonitoringAutoRefresh();
 });
 
 // 1. Hash SPA 獨立切頁路由器 (點選目錄只顯示該項獨立頁面)
@@ -145,6 +146,18 @@ function initNavbar() {
 }
 
 // 2. 渲染公司卡片
+function companyLatestArticleHtml(company) {
+    const article = monitoringNews.filter(news => companyMatchesArticle(company, news))
+        .sort((a, b) => String(b.publishedAt || b.date).localeCompare(String(a.publishedAt || a.date)))[0];
+    const title = monitoringDataMode === 'loading' ? '正在載入近期新聞'
+        : monitoringDataMode === 'unavailable' ? '新聞服務暫時無法讀取' : '近兩個月未收錄明確命中的新聞';
+    if (!article) return `<div class="company-event-summary"><strong>近期收錄新聞</strong><p>${title}</p></div>`;
+    return `<div class="company-event-summary"><div class="company-event-heading"><strong>近期收錄新聞</strong>
+        <span class="data-type-badge data-type-real">自動同步</span></div>
+        <a href="${escapeHtml(safeHttpUrl(article.url))}" target="_blank" rel="noopener noreferrer">${escapeHtml(article.title)}</a>
+        <p class="company-event-source">${escapeHtml(article.date)} · ${escapeHtml(article.source)} · ${article.sourceKind === 'google_news_rss' ? 'Google News 聚合' : '官方 RSS'}</p></div>`;
+}
+
 function renderCompanyCards() {
     const container = document.getElementById('companyGrid');
     if (!container) return;
@@ -174,7 +187,6 @@ function renderCompanyCards() {
         
         const productsList = company.products || company.keyProducts || [];
         const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
-        const newsText = company.latestNews || company.recentNews || '';
         const eventSourceUrl = safeHttpUrl(company.eventSourceUrl || company.newsUrl || company.mopsUrl);
         const eventSourceLabel = company.eventSourceLabel || (company.newsUrl ? '官方新聞專區' : 'MOPS 公開資訊觀測站');
         const metaItems = [company.enName || company.englishName];
@@ -182,20 +194,12 @@ function renderCompanyCards() {
         metaItems.push(industry);
         const metaHtml = metaItems.filter(Boolean).map(item => `<span>${item}</span>`).join(' <span aria-hidden="true">•</span> ');
         const productLabel = company.productLabel || (industry === '金融支付' ? '主要支付服務：' : '核心代表作品：');
-        const eventSummaryHtml = newsText ? `
-            <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
-                <div class="company-event-heading">
-                    <span style="font-weight: 700; color: var(--text-primary);">近期重要事件</span>
-                    <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
-                </div>
-                <span style="color: var(--text-primary); line-height: 1.5; display: block;">${newsText}</span>
-                <span class="company-event-source">來源入口：<a href="${eventSourceUrl}" target="_blank" rel="noopener">${eventSourceLabel} ↗</a>｜最後查核：待補</span>
-            </div>` : '';
-        
+        const eventSummaryHtml = companyLatestArticleHtml(company);
+
         // 判斷新聞來源按鈕
         let newsBtnHtml = '';
         if (company.newsUrl) {
-            newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="前往 ${company.name} 官方新聞專區">📰 官方新聞 ↗</a>`;
+            newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" title="前往 ${company.name} 官方新聞專區">📰 官方資訊 ↗</a>`;
         } else {
             newsBtnHtml = `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm" style="color: var(--text-primary); border-color: #725d87; background: #f2edf6;" title="公開資訊觀測站 MOPS 快捷鍵">🏛️ MOPS觀測站 ↗</a>`;
         }
@@ -254,11 +258,10 @@ function showCompanyModal(companyId) {
     const eventSourceLabel = company.eventSourceLabel || (company.newsUrl ? '官方新聞專區' : 'MOPS 公開資訊觀測站');
     const industry = company.industry || '遊戲與數位娛樂';
     const productLabel = company.productLabel || (industry === '金融支付' ? '主要支付服務' : '主要代表作品');
-    const newsText = company.latestNews || company.recentNews || '';
 
     let newsBtnHtml = '';
     if (company.newsUrl) {
-        newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">📰 官方新聞發布專區 ↗</a>`;
+        newsBtnHtml = `<a href="${company.newsUrl}" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">📰 官方資訊 ↗</a>`;
     }
 
     modalBody.innerHTML = `
@@ -275,15 +278,7 @@ function showCompanyModal(companyId) {
             <h4 style="font-size: 1rem; margin-bottom: 6px;">${productLabel}</h4>
             <div class="company-tags">${tagsHtml}</div>
         </div>
-        ${newsText ? `
-        <div class="company-event-summary" style="border-left-color: ${company.brandColor || company.color};">
-            <div class="company-event-heading">
-                <h4 style="font-size: 0.9rem; color: var(--text-primary); margin: 0;">近期重要事件</h4>
-                <span class="data-type-badge data-type-curated">✎ 人工整理・待查核</span>
-            </div>
-            <p style="font-size: 0.9rem; color: var(--text-primary);">${newsText}</p>
-            <p class="company-event-source">來源入口：<a href="${eventSourceUrl}" target="_blank" rel="noopener">${eventSourceLabel} ↗</a>；請逐筆查核｜最後查核：待補</p>
-        </div>` : ''}
+        ${companyLatestArticleHtml(company)}
         <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
             <a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">🏛️ MOPS 公開資訊觀測站 ↗</a>
             ${newsBtnHtml}
@@ -291,6 +286,7 @@ function showCompanyModal(companyId) {
         </div>
     `;
 
+    modal.dataset.companyId = companyId;
     modal.classList.add('active');
 
     const closeBtn = document.getElementById('modalClose');
@@ -352,8 +348,7 @@ function updateRealStatsOverview(articles = [], status = null) {
     const aggregated = Array.isArray(articles)
         ? articles.filter((article) => article.sourceKind === 'google_news_rss').length
         : 0;
-    const statusSources = Number(status?.source_summary?.healthy || 0);
-    const sourceCount = statusSources || new Set((articles || []).map((article) => article.source).filter(Boolean)).size;
+    const sourceCount = new Set((articles || []).map(coverageSourceName).filter(Boolean)).size;
     const setValue = (id, value) => {
         const element = document.getElementById(id);
         if (!element) return;
@@ -365,6 +360,7 @@ function updateRealStatsOverview(articles = [], status = null) {
     setValue('statOfficialRss', official);
     setValue('statAggregatedNews', aggregated);
     setValue('statVerifiedSources', sourceCount);
+    setValue('totalChannels', sourceCount);
     const range = status?.article_range || monitoringLoadState?.range || getRollingMonitoringDateRange();
     const methodCompanies = document.getElementById('methodCompanies');
     const methodRange = document.getElementById('methodRange');
@@ -850,6 +846,8 @@ let monitoringManifest = null;
 let monitoringRuntimeStatus = null;
 let monitoringLoadState = null;
 let monitoringDataMode = 'loading';
+let monitoringRefreshState = { syncedAt: null, error: false };
+let monitoringRefreshCoordinator = null;
 // 趨勢頁的預設焦點只涵蓋遊戲與金融支付；穩定幣保留獨立範圍，避免大量加密新聞淹沒支付事件。
 let trendScope = 'focus';
 let trendRangeDays = 60;
@@ -925,23 +923,25 @@ function renderGlobalDataStatusBar() {
     const statusText = document.getElementById('siteDataStatusText');
     if (!statusText) return;
     const range = monitoringLoadState?.range || getRollingMonitoringDateRange();
-    const lastRun = formatMonitoringTimestamp(monitoringRuntimeStatus?.latest_run?.finished_at);
-    const sources = Number(monitoringRuntimeStatus?.source_summary?.healthy || 0);
-    const enabledSources = Array.isArray(monitoringRuntimeStatus?.enabled_sources)
-        ? monitoringRuntimeStatus.enabled_sources
-        : [];
+    const lastRun = formatMonitoringTimestamp(monitoringRuntimeStatus?.source_summary?.latest_success);
+    const quality = monitoringFreshness(monitoringRuntimeStatus, monitoringLoadState, monitoringRefreshState);
+    const sources = quality.healthy;
+    const badge = document.getElementById('siteDataStatusBadge');
+    if (badge) badge.textContent = monitoringDataMode === 'loading' ? '正在載入真實新聞'
+        : monitoringDataMode === 'unavailable' ? '資料服務暫時無法讀取'
+        : quality.issues.length ? `資料待確認：${quality.issues.join('；')}` : '✓ 資料持續自動同步';
+    const sync = document.getElementById('siteAutoRefreshText');
+    if (sync) sync.textContent = `每 5 分鐘同步各分頁${monitoringRefreshState.syncedAt ? `｜頁面同步 ${formatMonitoringTimestamp(monitoringRefreshState.syncedAt)}` : ''}`;
+    const enabledSources = quality.sources;
     const healthyTaiwanNames = enabledSources
-        .filter((source) => source?.region === 'TW' && source?.health_status === 'healthy')
+        .filter((source) => source?.region === 'TW' && monitoringSourceIsFresh(source))
         .map((source) => source.name)
         .filter(Boolean);
     const liveSourceNames = Array.isArray(monitoringRuntimeStatus?.live_fallback_sources)
         ? monitoringRuntimeStatus.live_fallback_sources
         : [];
     const enabledSourceNames = new Set(enabledSources.map((source) => source?.name).filter(Boolean));
-    const taiwanSources = new Set([
-        ...healthyTaiwanNames,
-        ...liveSourceNames.filter((name) => !enabledSourceNames.has(name))
-    ]).size;
+    const taiwanSources = new Set(healthyTaiwanNames).size;
     const liveSourceCount = Number(monitoringRuntimeStatus?.live_fallback_source_count || liveSourceNames.length || 0);
     const liveFallback = Number(monitoringLoadState?.officialLiveFallbackCount || 0);
     const aggregatedSourceCount = Number(monitoringRuntimeStatus?.aggregated_source_count || 0);
@@ -955,7 +955,9 @@ function renderGlobalDataStatusBar() {
         const liveSourceText = liveSourceCount ? `；台灣即時補位來源設定 ${liveSourceCount} 個` : '';
         const liveText = liveFallback ? `；新增台灣來源即時補位 ${liveFallback} 篇` : '';
         const aggregatedText = aggregatedSourceCount ? `；Google News RSS 聚合來源 ${aggregatedSourceCount} 個、目前 ${aggregatedCount} 篇` : '';
-        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜官方 RSS ${sources} 個（台灣 ${taiwanSources} 個）｜${updated}${liveSourceText}${aggregatedText}${liveText}`;
+        const snapshot = formatMonitoringTimestamp(monitoringLoadState?.aggregatedSnapshot?.generated_at);
+        const rssBackup = formatMonitoringTimestamp(monitoringLoadState?.rssSnapshot?.generated_at);
+        statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜近期可讀 RSS ${sources} 個（台灣 ${taiwanSources} 個，含備援查核）｜Worker ${updated}${liveSourceText}${aggregatedText}${liveText}；RSS 備援 ${rssBackup || '時間待確認'}；聚合快照 ${snapshot || '時間待確認'}（台北時間）${quality.issues.length ? `；${quality.issues.join('；')}` : ''}`;
     } else if (monitoringDataMode === 'loading') {
         statusText.textContent = '真實新聞：正在確認官方 RSS、Google News RSS 聚合來源與近兩個月資料。';
     } else {
@@ -1124,17 +1126,7 @@ function renderMonitoringTransparency() {
 }
 
 function getRollingMonitoringDateRange() {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const from = new Date(today);
-    from.setMonth(from.getMonth() - 2);
-    const asDateInput = (date) => {
-        const yyyy = date.getFullYear();
-        const mm = String(date.getMonth() + 1).padStart(2, '0');
-        const dd = String(date.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    };
-    return { from: asDateInput(from), to: asDateInput(today) };
+    return monitoringDateRange();
 }
 
 function constrainMonitoringDateInputs(dateFromInput, dateToInput) {
@@ -1148,9 +1140,10 @@ function constrainMonitoringDateInputs(dateFromInput, dateToInput) {
         if (!input) return;
         input.min = range.from;
         input.max = range.to;
-        if (!input.value || input.value < range.from || input.value > range.to) {
+        if (!input.value || input.value === input.dataset.rollingDefault || input.value < range.from || input.value > range.to) {
             input.value = fallback;
         }
+        input.dataset.rollingDefault = fallback;
     });
 
     // 日期範圍不得顛倒；若使用者調整起始日超過結束日，保留起始日並同步結束日。
@@ -1192,6 +1185,20 @@ function initNewsSection() {
         return;
     }
 
+    refreshMonitoringData();
+
+    const loadMoreBtn = document.getElementById('loadMoreBtn');
+    if (loadMoreBtn) {
+        loadMoreBtn.addEventListener('click', () => {
+            currentNewsPage++;
+            renderNews(true);
+        });
+    }
+}
+
+let monitoringDataRequest = null;
+function refreshMonitoringData() {
+    if (monitoringDataRequest) return monitoringDataRequest;
     const manifestPromise = typeof loadMonitoringManifest === 'function'
         ? loadMonitoringManifest().catch((error) => { console.warn('Monitoring manifest unavailable.', error); return null; })
         : Promise.resolve(null);
@@ -1204,12 +1211,13 @@ function initNewsSection() {
         if (manifest) hydrateMonitoringManifest(manifest);
     });
 
-    Promise.all([loadVerifiedMonitoringArticles(), manifestPromise, statusPromise]).then(([result, manifest, status]) => {
+    monitoringDataRequest = Promise.all([loadVerifiedMonitoringArticles(), manifestPromise, statusPromise]).then(([result, manifest, status]) => {
         if (!result.loaded) throw new Error('Monitoring API is not configured.');
         monitoringRuntimeStatus = status;
         setVerifiedMonitoringSourceTotal(status);
         if (manifest && monitoringManifest !== manifest) hydrateMonitoringManifest(manifest);
         monitoringNews = result.articles;
+        monitoringRefreshState = { syncedAt: new Date().toISOString(), error: false };
         monitoringLoadState = {
             total: result.total ?? monitoringNews.length,
             loaded: monitoringNews.length,
@@ -1220,10 +1228,13 @@ function initNewsSection() {
             aggregatedCount: result.aggregatedCount || 0,
             officialRssCount: result.officialRssCount || 0,
             degraded: result.degraded === true,
-            degradationReason: result.degradationReason || ''
+            degradationReason: result.degradationReason || '',
+            partial: result.partial === true,
+            aggregatedSnapshot: result.aggregatedSnapshot || null,
+            rssSnapshot: result.rssSnapshot || null
         };
         updateRealStatsOverview(monitoringNews, status);
-        setVerifiedNewsTotal(monitoringLoadState.total);
+        setVerifiedNewsTotal(monitoringNews.length);
         setNewsDataMode('verified');
         refreshVerifiedSourceOptions(result.articles, [
             ...(status?.enabled_sources || []),
@@ -1232,10 +1243,13 @@ function initNewsSection() {
         renderMonitoringTransparency();
         renderHuikeTabs();
         renderHuikeChips();
-        applyNewsFilters();
+        applyNewsFilters(true);
         renderFintechMonitoring();
         renderGamingMonitoring();
         renderRealTrends();
+        renderCompanyCards();
+        const modal = document.getElementById('companyModal');
+        if (modal?.classList.contains('active') && modal.dataset.companyId) showCompanyModal(modal.dataset.companyId);
         if (window.location.hash.includes('analytics') && typeof renderAnalyticsCharts === 'function') {
             renderAnalyticsCharts();
         }
@@ -1244,6 +1258,11 @@ function initNewsSection() {
         }
     }).catch((error) => {
         console.warn('Verified monitoring API unavailable; no unverified content is shown.', error);
+        monitoringRefreshState.error = true;
+        if (monitoringLoadState) {
+            renderGlobalDataStatusBar();
+            return;
+        }
         monitoringNews = [];
         monitoringLoadState = null;
         setVerifiedNewsTotal(0);
@@ -1251,19 +1270,32 @@ function initNewsSection() {
         updateRealStatsOverview([], null);
         setNewsDataMode('unavailable');
         renderMonitoringTransparency();
+        renderCompanyCards();
         applyNewsFilters();
         renderFintechMonitoring();
         renderGamingMonitoring();
         renderRealTrends();
-    });
+    }).finally(() => { monitoringDataRequest = null; });
+    return monitoringDataRequest;
+}
 
-    const loadMoreBtn = document.getElementById('loadMoreBtn');
-    if (loadMoreBtn) {
-        loadMoreBtn.addEventListener('click', () => {
-            currentNewsPage++;
-            renderNews(true);
-        });
-    }
+function initMonitoringAutoRefresh() {
+    if (monitoringRefreshCoordinator || !monitoringApiBase()) return;
+    monitoringRefreshCoordinator = createMonitoringRefreshCoordinator({
+        load: refreshMonitoringData,
+        isVisible: () => document.visibilityState !== 'hidden',
+        onError: () => { monitoringRefreshState.error = true; renderGlobalDataStatusBar(); }
+    });
+    document.addEventListener('visibilitychange', () => monitoringRefreshCoordinator.refresh());
+    window.addEventListener('online', () => monitoringRefreshCoordinator.refresh(true));
+    window.addEventListener('hashchange', () => monitoringRefreshCoordinator.refresh());
+    const button = document.getElementById('refreshMonitoringButton');
+    button?.addEventListener('click', async () => {
+        button.disabled = true;
+        button.textContent = '同步中…';
+        try { await monitoringRefreshCoordinator.refresh(true); }
+        finally { button.disabled = false; button.textContent = '同步最新資料'; }
+    });
 }
 
 function refreshVerifiedSourceOptions(articles, sourceDetails) {
@@ -1277,7 +1309,7 @@ function refreshVerifiedSourceOptions(articles, sourceDetails) {
     sourceSelect.appendChild(allOption);
 
     const details = Array.isArray(sourceDetails) && sourceDetails.length
-        ? sourceDetails
+        ? [...sourceDetails, ...articles.map((article) => ({ name: article.source }))]
         : [...new Set(articles.map((article) => article.source).filter(Boolean))].map((name) => ({ name }));
     const seen = new Set();
     details.sort((a, b) => String(a.name).localeCompare(String(b.name), 'zh-Hant')).forEach((source) => {
@@ -1287,7 +1319,7 @@ function refreshVerifiedSourceOptions(articles, sourceDetails) {
         option.value = source.name;
         const isAggregated = source.source_kind === 'aggregated' || source.access_mode === 'google_news_rss'
             || articles.some((article) => article.source === source.name && article.sourceKind === 'google_news_rss');
-        const health = source.health_status === 'healthy' ? '健康' : source.health_status ? '待確認' : '';
+        const health = monitoringSourceIsFresh(source) ? '近期健康' : source.health_status ? '待確認' : '';
         option.textContent = `📰 ${source.name}${isAggregated ? '（Google News 聚合）' : ''}${health ? `（${health}）` : ''}`;
         sourceSelect.appendChild(option);
     });
@@ -1631,8 +1663,8 @@ function renderFintechSummary(summary, articles) {
     const taiwanPaymentCount = articles.filter((article) => articleHasMonitoringFolder(article, 'folder_2')).length;
     const stablecoinCount = articles.filter(isStablecoinArticle).length;
     const owlPayPriorityCount = articles.filter(isOwlPayPriorityArticle).length;
-    const sources = new Set(articles.map((article) => article.source).filter(Boolean));
-    const taiwanSources = new Set(articles.filter((article) => article.sourceRegion === 'TW').map((article) => article.source).filter(Boolean));
+    const sources = new Set(articles.map(coverageSourceName).filter(Boolean));
+    const taiwanSources = new Set(articles.filter((article) => article.sourceRegion === 'TW').map(coverageSourceName).filter(Boolean));
 
     const contextDetails = document.createElement('details');
     contextDetails.className = 'fintech-summary-details';
@@ -2012,7 +2044,7 @@ function renderGamingSummary(summary, articles) {
     const competitorCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.competitor)).length;
     const mobileCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.mobile)).length;
     const platformCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.platform)).length;
-    const sources = new Set(articles.map((article) => article.source).filter(Boolean));
+    const sources = new Set(articles.map(coverageSourceName).filter(Boolean));
     const aggregatedCount = articles.filter((article) => article.sourceKind === 'google_news_rss').length;
 
     const contextDetails = document.createElement('details');
@@ -2477,7 +2509,7 @@ function setupNewsFilters() {
     }
 }
 
-function applyNewsFilters() {
+function applyNewsFilters(preservePage = false) {
     const activeCompBtns = document.querySelectorAll('.company-toggle-btn.active');
     const selectedCompanies = Array.from(activeCompBtns).map(btn => btn.getAttribute('data-id'));
 
@@ -2518,11 +2550,11 @@ function applyNewsFilters() {
         if (!a.date) return 1;
         if (!b.date) return -1;
         return sortOrder === 'asc' 
-            ? a.date.localeCompare(b.date) 
-            : b.date.localeCompare(a.date);
+            ? String(a.publishedAt || a.date).localeCompare(String(b.publishedAt || b.date))
+            : String(b.publishedAt || b.date).localeCompare(String(a.publishedAt || a.date));
     });
 
-    currentNewsPage = 1;
+    currentNewsPage = preservePage === true ? Math.min(currentNewsPage, Math.max(1, Math.ceil(filteredNews.length / NEWS_PER_PAGE))) : 1;
     renderNews(false);
 }
 
@@ -2599,7 +2631,7 @@ function renderNews(append = false) {
         countEl.textContent = `共 ${filteredNews.length} 則符合條件｜${mode}`;
     }
 
-    const startIndex = (currentNewsPage - 1) * NEWS_PER_PAGE;
+    const startIndex = append ? (currentNewsPage - 1) * NEWS_PER_PAGE : 0;
     const endIndex = startIndex + NEWS_PER_PAGE;
     const newsToShow = filteredNews.slice(startIndex, endIndex);
 

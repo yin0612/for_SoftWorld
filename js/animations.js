@@ -55,6 +55,11 @@ function initCounters() {
 function animateValue(obj, start, end, duration) {
     let startTimestamp = null;
     const step = (timestamp) => {
+        const currentTarget = Number(obj.getAttribute('data-target'));
+        if (Number.isFinite(currentTarget) && currentTarget !== end) {
+            obj.textContent = currentTarget.toLocaleString();
+            return;
+        }
         if (!startTimestamp) startTimestamp = timestamp;
         const progress = Math.min((timestamp - startTimestamp) / duration, 1);
         // 使用 easeOutQuart 緩動函數讓動畫更自然

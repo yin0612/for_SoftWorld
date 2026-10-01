@@ -1,6 +1,9 @@
 import coreSourceConfig from '../../config/core_media_sources.json';
 import googleSourceConfig from '../../config/fintech_media_sources.json';
 import { verifyItemSource } from './source-verification.mjs';
+import { normalizeFeedDate, sourceIsFresh } from './time-quality.mjs';
+import { evaluateRule, ruleAutoPublishes, ruleAllowsSource } from './rule-engine.mjs';
+import { parseRss } from './rss-parser.mjs';
 
 function sourceDefinition(source) {
   return coreSourceConfig.sources.find((entry) => entry.id === source.id)
@@ -249,6 +252,7 @@ function makeArticlePayload(articles, { offset, limit, fromDate, toDate, dataMod
     if (!source?.enabled || !source?.auto_publish || !verifyItemSource({
       link: url, publisherName: article.source, publisherUrl: article.source_homepage
     }, source, google)) return;
+    if (!isPublishedInRange(article.published_at, `${fromDate}T00:00:00+08:00`, `${toDate}T23:59:59.999+08:00`)) return;
     if (url && !unique.has(url)) unique.set(url, article.url ? article : publicArticleFromCandidate(article));
   });
   const ordered = [...unique.values()].sort((a, b) => String(b.published_at || b.fetched_at || '').localeCompare(String(a.published_at || a.fetched_at || '')));
@@ -262,6 +266,7 @@ function makeArticlePayload(articles, { offset, limit, fromDate, toDate, dataMod
     has_more: nextOffset < ordered.length,
     next_offset: nextOffset,
     data_mode: dataMode,
+    generated_at: new Date().toISOString(),
     degraded,
     degradation_reason: degradationReason || undefined,
     range: { from: fromDate, to: toDate },
@@ -286,60 +291,6 @@ async function articleResponseWithCache(request, url, headers, payload) {
     console.warn('Unable to cache public monitoring response.', String(error).slice(0, 120));
   }
   return response;
-}
-
-function normalize(text = '') {
-  return text.toLowerCase().normalize('NFKC').replace(/\s+/g, ' ').trim();
-}
-
-function decodeEntities(text = '') {
-  const entities = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', '#39': "'" };
-  let decoded = String(text);
-  let previous;
-  do {
-    previous = decoded;
-    decoded = decoded.replace(/&(#39|amp|lt|gt|quot|apos|nbsp);/gi, (_match, entity) => entities[entity.toLowerCase()] || _match);
-  } while (decoded !== previous);
-  return decoded;
-}
-
-function textFromXml(value = '') {
-  return decodeEntities(value
-    .replace(/<\/?(?:p|div|br|li|h[1-6])\b[^>]*>/gi, '\n')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\r/g, '')
-    .replace(/\n[ \t]*\n+/g, '\n\n')
-    .replace(/[ \t]+/g, ' ')
-    .trim());
-}
-
-function extractTag(block, tag) {
-  const match = block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, 'i'));
-  return match ? textFromXml(match[1].replace(/^<!\[CDATA\[|\]\]>$/g, '')) : '';
-}
-
-function parseRss(xml) {
-  const entries = xml.match(/<item\b[\s\S]*?<\/item>|<entry\b[\s\S]*?<\/entry>/gi) || [];
-  return entries.map((entry) => {
-    // RSS publishers commonly wrap links in CDATA, while Atom uses href.
-    // extractTag handles both plain and CDATA-wrapped RSS text links.
-    const rawLink = (entry.match(/<link[^>]*href=["']([^"']+)/i) || [])[1] || extractTag(entry, 'link');
-    const textParts = [
-      extractTag(entry, 'description'),
-      extractTag(entry, 'summary'),
-      extractTag(entry, 'content:encoded')
-    ].filter(Boolean);
-    return {
-      title: extractTag(entry, 'title'),
-      link: decodeEntities(rawLink).trim(),
-      publisherName: extractTag(entry, 'source'),
-      publisherUrl: decodeEntities((entry.match(/<source\b[^>]*url=["']([^"']+)/i) || [])[1] || ''),
-      publishedAt: extractTag(entry, 'pubDate') || extractTag(entry, 'published') || extractTag(entry, 'updated'),
-      // A number of publishers put their useful lead in description and the
-      // attributable RSS body in content:encoded. Keep both for matching.
-      excerpt: [...new Set(textParts)].join('\n\n')
-    };
-  }).filter((item) => item.title && item.link).slice(0, MAX_RSS_ITEMS_PER_SOURCE);
 }
 
 function addCalendarDays(dateString, days) {
@@ -416,67 +367,11 @@ function isWithinCollectionWindow(publishedAt) {
   return publishedDay >= earliest && publishedDay <= today;
 }
 
-function parseJson(value, fallback) {
-  try { return JSON.parse(value); } catch (_) { return fallback; }
-}
-
-function ruleTargets(article, scope) {
-  const title = article.title || '';
-  const paragraphs = (article.excerpt || '').split(/\n{2,}/).map((text) => text.trim()).filter(Boolean);
-  const lead = paragraphs[0] || article.excerpt || '';
-  if (scope === 'title') return [{ label: 'title', text: title }];
-  if (scope === 'lead') return [{ label: 'rss_excerpt', text: lead }];
-  if (scope === 'title_or_lead') return [{ label: 'title', text: title }, { label: 'rss_excerpt', text: lead }];
-  if (scope === 'paragraph') return [{ label: 'title', text: title }, ...paragraphs.map((text, index) => ({ label: `rss_paragraph_${index + 1}`, text }))];
-  return [{ label: 'title_and_rss_excerpt', text: `${title}\n${article.excerpt || ''}` }];
-}
-
-function evaluateRule(article, rule) {
-  const requiredAnyGroups = [parseJson(rule.any_of_json, []), parseJson(rule.all_of_json, [])].filter((group) => group.length);
-  const excluded = parseJson(rule.exclude_any_json, []);
-  for (const target of ruleTargets(article, rule.scope)) {
-    const normalizedTarget = normalize(target.text);
-    const hits = (terms) => terms.filter((term) => normalizedTarget.includes(normalize(term)));
-    const groupHits = requiredAnyGroups.map(hits);
-    const excludedHits = hits(excluded);
-    const matched = groupHits.every((group) => group.length > 0) && excludedHits.length === 0;
-    if (matched) {
-      return {
-        matched: true,
-        evidence: {
-          matched_scope: target.label,
-          required_any_group_hits: groupHits,
-          any_hits: groupHits[0] || [],
-          all_hits: groupHits[1] || [],
-          excluded_hits: excludedHits
-        }
-      };
-    }
-  }
-  return { matched: false };
-}
-
-function ruleAutoPublishes(rule, evidence) {
-  if (Number(rule.auto_publish) !== 1) return false;
-  const allowedTerms = parseJson(rule.auto_publish_allowed_terms_json, []);
-  if (!Array.isArray(allowedTerms) || allowedTerms.length === 0) return true;
-  const allowed = new Set(allowedTerms.map(normalize));
-  const groupHits = Array.isArray(evidence?.required_any_group_hits)
-    ? evidence.required_any_group_hits.flat()
-    : [];
-  return groupHits.some((term) => allowed.has(normalize(term)));
-}
-
-function ruleAllowsSource(rule, source) {
-  const allowedRegions = parseJson(rule.region_scope_json || '[]', []);
-  return allowedRegions.length === 0 || allowedRegions.includes(source.region);
-}
-
 function isPublishedInRange(publishedAt, from, to) {
   const timestamp = new Date(publishedAt).getTime();
   const fromTimestamp = new Date(from).getTime();
   const toTimestamp = new Date(to).getTime();
-  return Number.isFinite(timestamp) && timestamp >= fromTimestamp && timestamp <= toTimestamp;
+  return Number.isFinite(timestamp) && timestamp >= fromTimestamp && timestamp <= toTimestamp && timestamp <= Date.now();
 }
 
 async function fetchLiveArticles(from, to, { sources, rules, folderId, sourceKind = 'official_rss', diagnostics = null }) {
@@ -510,8 +405,8 @@ async function fetchLiveArticles(from, to, { sources, rules, folderId, sourceKin
           diagnostics?.push({ source_id: source.id, result: 'source_domain_mismatch' });
           return null;
         }
-        const parsedDate = new Date(item.publishedAt);
-        if (Number.isNaN(parsedDate.getTime()) || !isPublishedInRange(parsedDate.toISOString(), from, to)) return null;
+        const normalizedDate = normalizeFeedDate(item.publishedAt, source);
+        if (!normalizedDate || !isPublishedInRange(normalizedDate, from, to)) return null;
         // Google News RSS 的 description 主要是導流連結與媒體名稱，不當作摘要，
         // 只以標題套用規則；原始 Google News wrapper URL 會保留供使用者跳轉。
         const title = sourceIsAggregated ? cleanGoogleNewsTitle(item.title, source) : item.title;
@@ -537,7 +432,7 @@ async function fetchLiveArticles(from, to, { sources, rules, folderId, sourceKin
           excerpt: excerpt || (sourceIsAggregated
             ? 'Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。'
             : '此文章由已驗證公開 RSS 來源即時收錄。'),
-          published_at: parsedDate.toISOString(),
+          published_at: normalizedDate,
           fetched_at: fetchedAt,
           review_status: 'approved',
           folder_ids: [...new Set(matches.map(({ rule }) => rule.folder_id).filter(Boolean))].join(',') || folderId,
@@ -641,6 +536,7 @@ async function fetchStaticAggregatedArticles(from, to, folderId, diagnostics = n
       return [];
     }
     const payload = await response.json();
+    diagnostics?.push({ source_id: 'fintech-aggregated-static', result: 'snapshot', generated_at: payload.generated_at, error_count: Array.isArray(payload.errors) ? payload.errors.length : 0, source_count: payload.source_count });
     const rows = Array.isArray(payload?.articles) ? payload.articles : [];
     return rows
       .filter((article) => article?.source_kind === 'google_news_rss')
@@ -665,19 +561,38 @@ async function fetchStaticAggregatedArticles(from, to, folderId, diagnostics = n
   }
 }
 
-async function findExistingArticleUrls(env, urls) {
+async function fetchStaticRssArticles(from, to, folderId, diagnostics) {
+  try {
+    const response = await fetch('https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/rss-snapshot.json', {
+      signal: AbortSignal.timeout(15000), headers: { accept: 'application/json' }, cache: 'no-store'
+    });
+    if (!response.ok) throw Error(`RSS snapshot HTTP ${response.status}`);
+    const payload = await response.json();
+    diagnostics.push({ result: 'rss_snapshot', generated_at: payload.generated_at, results: payload.results || [], error_count: (payload.errors || []).length });
+    return (payload.articles || []).filter(article => article.source_kind === 'official_rss'
+      && isPublishedInRange(article.published_at, from, to)
+      && (!folderId || String(article.folder_ids).split(',').includes(folderId)))
+      .map(article => ({ ...article, canonical_url: article.url, snapshot_fallback: true, live_fallback: true }));
+  } catch (error) {
+    diagnostics.push({ result: 'rss_snapshot_error', error: String(error).slice(0, 160) });
+    return [];
+  }
+}
+
+async function findExistingArticleUrls(env, urls, reviewStatus = 'approved', diagnostics = []) {
   const existing = new Set();
   const uniqueUrls = [...new Set(urls.filter(Boolean))];
   for (let offset = 0; offset < uniqueUrls.length; offset += 80) {
     const batch = uniqueUrls.slice(offset, offset + 80);
     try {
       const placeholders = batch.map(() => '?').join(',');
-      // 只把已公開的 D1 文章視為重複。舊規則留下的 pending／rejected
-      // 項目不應遮住目前已通過精準台灣支付規則的即時結果。
+      // Rejected articles must never be restored by a backup pipeline.
       const result = await env.DB.prepare(`SELECT canonical_url FROM articles
-        WHERE review_status = 'approved' AND canonical_url IN (${placeholders})`).bind(...batch).all();
+        WHERE review_status = ? AND canonical_url IN (${placeholders})`).bind(reviewStatus, ...batch).all();
       result.results.forEach((row) => existing.add(row.canonical_url));
     } catch (_) {
+      diagnostics.push({ result: 'review_lookup_error', review_status: reviewStatus });
+      if (reviewStatus === 'rejected') batch.forEach(url => existing.add(url));
       // D1 讀取暫時失敗時仍可顯示即時來源，前端會以 URL 去重後呈現。
     }
   }
@@ -860,6 +775,7 @@ async function collectSource(source, rules, env) {
     await env.DB.prepare('INSERT INTO collection_runs (id, source_id, started_at, result) VALUES (?, ?, ?, ?)').bind(runId, source.id, now, 'running').run();
     started = true;
     const response = await fetch(source.feed_url, {
+      signal: AbortSignal.timeout(15000),
       headers: {
         'user-agent': 'SoftWorldMonitoring/1.0 (+https://yin0612.github.io/for_SoftWorld/)',
         accept: 'application/rss+xml, application/xml, text/xml, */*;q=0.8'
@@ -871,9 +787,8 @@ async function collectSource(source, rules, env) {
     let added = 0;
 
     for (const item of items) {
-      const parsedDate = new Date(item.publishedAt);
-      if (Number.isNaN(parsedDate.getTime())) continue;
-      const publishedAt = parsedDate.toISOString();
+      const publishedAt = normalizeFeedDate(item.publishedAt, source);
+      if (!publishedAt) continue;
       // The database itself observes the same rolling two-month window as the public API.
       if (!isWithinCollectionWindow(publishedAt)) continue;
       const canonicalUrl = new URL(item.link, source.feed_url).toString();
@@ -972,19 +887,21 @@ async function monitoringStatus(env) {
     readDomesticConfigStatus(env),
     readStablecoinConfigStatus(env)
   ]);
+  const publicSources = enabledSources.results.map(source => ({ ...source, health_status: source.health_status === 'healthy' && !sourceIsFresh(source) ? 'stale' : source.health_status }));
+  const aggregatedSources = googleSourceConfig.sources.filter(source => source.enabled && source.auto_publish && source.access_mode === 'google_news_rss');
   return {
     rules_version: env.RULES_VERSION || null,
-    source_summary: sources,
+    source_summary: { ...sources, healthy: publicSources.filter(source => sourceIsFresh(source)).length },
     article_summary: articles,
     media_catalog_summary: catalog,
-    enabled_sources: enabledSources.results,
+    enabled_sources: publicSources,
     live_fallback_sources: LIVE_DOMESTIC_SOURCES.map((source) => source.name),
     live_fallback_source_count: LIVE_DOMESTIC_SOURCES.length,
-    aggregated_sources: LIVE_AGGREGATED_FINTECH_SOURCES.map((source) => ({
+    aggregated_sources: aggregatedSources.map((source) => ({
       id: source.id,
       name: source.name,
       region: source.region,
-      domain: source.domain,
+      domain: source.domain || source.domains?.[0] || '',
       homepage: source.homepage,
       access_mode: 'google_news_rss',
       source_kind: 'aggregated',
@@ -992,7 +909,7 @@ async function monitoringStatus(env) {
     })),
     // 15 個既有具名媒體加上 config/fintech_media_sources.json 的 30 個
     // 免費 Google News 網域補位；公司官方動態與泛媒體露出搜尋另計。
-    aggregated_source_count: 46,
+    aggregated_source_count: aggregatedSources.length,
     domestic_config: domesticConfig,
     stablecoin_config: stablecoinConfig,
     active_rule_count: ruleCount?.active || 0,
@@ -1045,6 +962,8 @@ export default {
       const where = [
         "a.review_status = 'approved'",
         "m.status = 'approved'",
+        "s.enabled = 1 AND s.auto_publish = 1 AND s.access_mode = 'rss'",
+        "r.active = 1",
         'COALESCE(a.published_at, a.fetched_at) BETWEEN ? AND ?'
       ];
       const values = [from, to];
@@ -1062,12 +981,12 @@ export default {
           GROUP_CONCAT(DISTINCT r.folder_id) AS folder_ids, GROUP_CONCAT(DISTINCT r.id) AS rule_ids,
           GROUP_CONCAT(m.evidence_json, '|||') AS evidence_jsons
           ${joins} ${whereSql}
-          GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC LIMIT 5000`;
+          GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC`;
       const aggregateDiagnostics = [];
       // Google News RSS 聚合改由 GitHub Actions 產出的公開快照提供。
       // 全分類頁只讀取 D1 與快照，避免前端分頁時重複觸發大量 RSS 請求而被
       // 上游節流／503 影響；單一分類頁仍保留官方 RSS 即時唯讀補位。
-      const livePromise = !folder
+      const primaryLivePromise = !folder
         ? fetchStaticAggregatedArticles(from, to, '', aggregateDiagnostics)
         : folder === 'folder_2'
           ? Promise.all([
@@ -1085,6 +1004,8 @@ export default {
                 fetchStaticAggregatedArticles(from, to, folder, aggregateDiagnostics)
               ]).then((groups) => groups.flat())
               : Promise.resolve([]);
+      const livePromise = Promise.all([primaryLivePromise, fetchStaticRssArticles(from, to, folder || '', aggregateDiagnostics)])
+        .then(groups => groups.flat());
       let result;
       let liveCandidates;
       try {
@@ -1106,15 +1027,21 @@ export default {
           degraded: true,
           degradationReason: isD1ReadQuotaError(error) ? 'd1_read_quota' : 'temporary_data_store_error'
         });
+        payload.aggregated_snapshot = aggregateDiagnostics.find(entry => entry.result === 'snapshot') || null;
+        payload.partial = !payload.aggregated_snapshot;
         if (url.searchParams.get('debug') === '1') payload.aggregated_diagnostics = aggregateDiagnostics;
         return cacheEnabled
           ? articleResponseWithCache(request, url, headers, payload)
           : json(payload, 200, headers);
       }
-      const existingLiveUrls = await findExistingArticleUrls(env, liveCandidates.map((article) => article.canonical_url));
+      const candidateUrls = liveCandidates.map(article => article.canonical_url);
+      const [existingLiveUrls, rejectedUrls] = await Promise.all([
+        findExistingArticleUrls(env, candidateUrls, 'approved', aggregateDiagnostics), findExistingArticleUrls(env, candidateUrls, 'rejected', aggregateDiagnostics)
+      ]);
       const liveArticles = [...new Map(
         liveCandidates
-          .filter((article) => !existingLiveUrls.has(article.canonical_url))
+          .filter(article => !rejectedUrls.has(article.canonical_url)
+            && (article.snapshot_fallback === true || !existingLiveUrls.has(article.canonical_url)))
           .map((article) => [article.canonical_url, article])
       ).values()];
       const persistedArticles = Array.isArray(result.results) ? result.results : [];
@@ -1123,7 +1050,7 @@ export default {
         if (article?.url) merged.set(article.url, article);
       });
       liveArticles.forEach((article) => {
-        if (article?.canonical_url && !merged.has(article.canonical_url)) {
+        if (article?.canonical_url && (article.snapshot_fallback === true || !merged.has(article.canonical_url))) {
           merged.set(article.canonical_url, publicArticleFromCandidate(article));
         }
       });
@@ -1134,6 +1061,10 @@ export default {
         toDate,
         dataMode: 'verified_rss_plus_google_news_aggregation'
       });
+      responsePayload.aggregated_snapshot = aggregateDiagnostics.find(entry => entry.result === 'snapshot') || null;
+      responsePayload.rss_snapshot = aggregateDiagnostics.find(entry => entry.result === 'rss_snapshot') || null;
+      responsePayload.partial = !responsePayload.aggregated_snapshot || !responsePayload.rss_snapshot
+        || aggregateDiagnostics.some(entry => entry.result === 'review_lookup_error');
       if (url.searchParams.get('debug') === '1') responsePayload.aggregated_diagnostics = aggregateDiagnostics;
       return cacheEnabled
         ? articleResponseWithCache(request, url, headers, responsePayload)

@@ -6,14 +6,19 @@
 const compareState = { selectedCompanyIds: [] };
 const COMPARE_MAX = 8;
 const COMPANY_ALIASES = {
-    'soft-world': ['智冠', '智冠科技', '藍新科技', '藍新金流', 'NewebPay', 'MyCard', '中華網龍', '遊戲新幹線'],
-    softstar: ['大宇資', '大宇資訊', 'Softstar', '仙劍', '軒轅劍'],
-    gamania: ['橘子', '遊戲橘子', 'Gamania', '橘子支付'],
+    'soft-world': ['智冠', '智冠科技', '一帆數位', '發票大師', '簡單支付', 'ezPay', 'ezAIO', '智凡迪', '智樂堂', '台灣淘米', '藍新科技', '藍新金流', 'NewebPay', 'MyCard', '中華網龍', '遊戲新幹線'],
+    softstar: ['大宇資', '大宇資訊', 'Softstar', '光聚晶電聯合'],
+    gamania: ['橘子集團', '遊戲橘子', 'Gamania', '橘子支付'],
     wanin: ['網銀國際', 'Wanin', '星城'],
     wayi: ['華義', '華義國際', 'Wayi'],
     userjoy: ['宇峻', '宇峻奧汀', 'USERJOY', '三國群英傳'],
     xlegend: ['傳奇網路', 'X-Legend', '精靈樂章', '幻想神域'],
-    astro: ['泰偉', 'Astro Corp']
+    astro: ['泰偉', 'Astro Corp'],
+    ecpay: ['綠界科技', 'ECPay'],
+    sunpay: ['紅陽科技', '紅陽金流', 'SunPay'],
+    'line-pay-money': ['LINE Pay Money'],
+    jkopay: ['街口支付', '街口電子支付', 'JKOPAY'],
+    'plus-pay': ['全支付', 'PX Pay Plus']
 };
 
 function getCompareArticles() {
@@ -23,10 +28,9 @@ function getCompareArticles() {
 }
 
 function companyMatchesArticle(company, article) {
-    const text = [article.title, article.excerpt, ...(article.matchedTerms || [])].filter(Boolean).join(' ').toLowerCase();
-    const names = [company.name, company.enName, company.id, ...(COMPANY_ALIASES[company.id] || [])]
+    const names = [company.id === 'gamania' ? '' : company.name, company.enName, ...(COMPANY_ALIASES[company.id] || [])]
         .filter(Boolean).map((value) => String(value).toLowerCase());
-    return names.some((name) => text.includes(name));
+    return coverageMatches(article, names);
 }
 
 function getCompanyRealStats(company) {
@@ -37,7 +41,7 @@ function getCompanyRealStats(company) {
             categories.set(folder, (categories.get(folder) || 0) + 1);
         });
     });
-    const sources = new Set(articles.map((article) => article.source).filter(Boolean));
+    const sources = new Set(articles.map(coverageSourceName).filter(Boolean));
     const latest = articles.map((article) => article.date).filter(Boolean).sort().pop() || '—';
     return { total: articles.length, sourceCount: sources.size, latest, categories };
 }

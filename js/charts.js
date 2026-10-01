@@ -76,7 +76,7 @@ function folderCounts(articles) {
 function sourceCounts(articles) {
     const counts = new Map();
     articles.forEach((article) => {
-        const source = article.source || '來源未提供';
+        const source = coverageSourceName(article) || '來源未提供';
         counts.set(source, (counts.get(source) || 0) + 1);
     });
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 12);
@@ -115,7 +115,7 @@ function renderRealSummary(articles) {
     if (!host) return;
     const official = articles.filter((article) => article.sourceKind !== 'google_news_rss').length;
     const aggregated = articles.length - official;
-    const sourceTotal = new Set(articles.map((article) => article.source).filter(Boolean)).size;
+    const sourceTotal = new Set(articles.map(coverageSourceName).filter(Boolean)).size;
     const latest = articles.map((article) => article.date).filter(Boolean).sort().pop() || '待更新';
     const cards = [
         ['📰', '真實新聞', articles.length.toLocaleString(), '目前監測窗口'],

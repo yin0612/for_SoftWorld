@@ -4,7 +4,7 @@
 本專案以智冠年度關鍵字規則為核心，監測智冠集團、藍新科技、競業與遊戲／支付產業的官方 RSS 與 Google News RSS 聚合真實新聞；產業總覽同時整理遊戲與數位娛樂企業，以及綠界、紅陽、LINE Pay Money、街口支付、全支付等大型金融支付業者，並保留比較與視覺化工具作為延伸參考。
 
 ## ⚠️ 資料說明與規範
-- **公司主檔與重大動態**：人工整理自 TWSE/TPEx 公開資訊觀測站 (MOPS) 與各公司官方新聞專區，介面標示「人工整理・待查核」與來源入口。
+- **公司主檔**：公司簡介與產品清單由人工整理，介面標示「人工整理・待查核」與來源入口；公司近期新聞由全站真實新聞資料自動更新。
 - **真實新聞分析**：`#/analytics`、`#/compare` 與 `#/trends` 只使用 Cloudflare Worker/D1 已收錄的文章，統計新聞量、監測分類、實際來源與關鍵字命中；不使用模型聲量或估算數字。
 - **資料溯源 (Data Provenance)**：每則新聞保留來源、命中規則、發布日期與原文連結，圖表的日期區間與來源類型會同步顯示。
 
@@ -24,6 +24,7 @@ http://127.0.0.1:8765/
 - `js/charts.js` — 真實監測圖表模組（進入分析頁時才載入 Chart.js）
 - `js/compare.js` — 企業真實新聞數量、來源與分類比較工具
 - `js/app.js` — SPA Hash 切頁路由器 (`#/companies`, `#/news`, `#/gaming`, `#/fintech`, `#/analytics`, `#/compare`, `#/trends`, `#/methodology`) 與 UI 邏輯
+- `js/refresh.js` — 全站每 5 分鐘共用同步、台北日期邊界與新鮮度判定
 - `config/` — `companies.yml` 公司主檔與 `sources.yml` 觀測媒體清單
 
 ## 🌐 部署
@@ -39,10 +40,21 @@ http://127.0.0.1:8765/
 - `config/core_media_sources.json`：目前實測可用、近期仍更新且獲准自動收錄的官方／專業 RSS 白名單，包含 18 個台灣來源（含聯卡中心多頻道、卡優與自由）。其他媒體保留為 `manual_or_authorized`，必須先完成 RSS/API、條款或授權檢查。
 - `config/fintech_media_sources.json`：由 `金融科技&穩定幣監測/關鍵字清單.xlsx` 與 `監測關鍵字及媒體.docx` 整理的金融科技媒體白名單。鉅亨、東森財經、工商時報、MoneyDJ、今周刊等無穩定官方 RSS 時，使用官方網域 Google News RSS 補位；不鏡像全文、不寫入 D1，且保留來源類型與原文跳轉連結。
 - `scripts/update_fintech_aggregated.py` 與 `.github/workflows/update_fintech_aggregated.yml`：每 6 小時從白名單媒體的 Google News RSS 產生 `data/fintech-aggregated.json` 公開快照，並額外於台北時間 12:00、17:00 更新；Worker 讀取快照以避開 Google 對 Cloudflare 網路的節流，失敗來源會記錄在 `errors` 而不產生虛構文章。
+- `scripts/update_rss_snapshot.mjs` 與 `.github/workflows/update_rss_snapshot.yml`：每小時第 23 分由 GitHub Actions 收集啟用的官方 RSS，使用與 Worker 相同的解析器、來源驗證、日期與規則引擎，產生 `data/rss-snapshot.json` 備援。原文 URL 去重，已拒絕文章不會重新公開；收集全部失敗時保留前一份快照並讓工作失敗。
 - `worker/schema.sql`：媒體、規則、媒體清單、文章、命中證據、審核與收集執行紀錄。
 - `worker/README.md`：D1 migration、部署、收集與資料品質政策。
 
 為降低泛用詞誤報，只有高精準的品牌、台灣支付核心、主管機關／支付基礎建設、產品/IP 與國際金融科技規則會自動公開；原始支付生態寬鬆規則與易歧義別名則完整保留為待覆核資料。
+
+## 自動更新與品質檢查
+
+八個分頁共用同一份資料，每 5 分鐘同步；回到頁面、恢復網路或按「同步最新資料」時也會檢查更新。同步失敗保留上次成功資料並顯示警示，不會顯示成功狀態。日期範圍以台北時間的近兩個月計算，API 與前端都拒絕未來日期。
+
+RSS 主收集每小時第 17 分及台北 12:00、17:00 執行，另有每小時第 23 分的 RSS 備援。Google News 每 6 小時及台北 12:00、17:00 更新。GitHub 排程可能排隊；RSS 超過 2 小時、Google 快照超過 8 小時或部分來源失败時，網站會顯示待確認。來源覆蓋查核報告直接讀取 GitHub 原始檔，避免機器人提交不觸發 Pages 建置而停留在舊報告。
+
+`.github/workflows/auto_update_data.yml` 在相關程式變更及每天台北 08:23 執行單元測試與線上完整資料檢查；檢查重複 URL、未來日期、分頁完整性、必填欄位、來源與快照新鮮度。異常使工作失敗，報告保留在 Actions 的 `site-data-health` artifact。這取代原本只印出成功、未更新資料的腳本。可用 GitHub Actions 既有通知接收失敗通知。
+
+關鍵字命中、日期與來源驗證是資料品質檢查，無法代替逐則報導的事實查核。公司主檔仍需定期人工核對。詳細改善項目見 [全站資料更新查核報告](docs/site-data-audit-2026-10-01.md)。
 
 ## 金融科技與穩定幣監測
 

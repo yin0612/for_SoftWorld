@@ -11,9 +11,14 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: monitoring-aggregation
+  cancel-in-progress: false
+
 jobs:
   update-fintech-aggregated:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     steps:
       - name: 檢出專案程式碼
         uses: actions/checkout@v4
@@ -24,7 +29,9 @@ jobs:
           python-version: '3.11'
 
       - name: 讀取白名單媒體並更新 Google News RSS metadata
-        run: python scripts/update_fintech_aggregated.py
+        run: |
+          python -m unittest discover -s scripts -p 'test_*.py'
+          python scripts/update_fintech_aggregated.py
 
       - name: 自動檢查 RSS 與 Google News 來源
         run: python scripts/verify_sources.py

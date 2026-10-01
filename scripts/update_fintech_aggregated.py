@@ -6,6 +6,7 @@ Google News 原文跳轉連結；不抓取或鏡像新聞全文，也不把結�
 from __future__ import annotations
 
 import hashlib
+import calendar
 import json
 import re
 import urllib.parse
@@ -168,6 +169,8 @@ def parse_feed(
         published_at = parse_datetime(item.findtext("pubDate"))
         if not title or not link or not published_at:
             continue
+        if fetched_at and datetime.fromisoformat(published_at.replace('Z', '+00:00')) > datetime.fromisoformat(fetched_at.replace('Z', '+00:00')):
+            continue
         target = title.casefold()
         payment = any(contains_term(target, term) for term in PAYMENT_TERMS)
         stablecoin = any(contains_term(target, term) for term in STABLECOIN_TERMS)
@@ -225,12 +228,16 @@ def main() -> int:
     huike_rules = load_huike_rules()
     now = taipei_now()
     end = now.date()
-    start = (end - timedelta(days=62))
+    month_index = end.year * 12 + end.month - 3
+    target_year, target_month = divmod(month_index, 12)
+    target_month += 1
+    start = end.replace(year=target_year, month=target_month, day=min(end.day, calendar.monthrange(target_year, target_month)[1]))
     fetched_at = now.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
     articles: dict[str, dict] = {}
     errors: list[dict] = []
+    succeeded = 0
     for source in config.get("sources", []):
-        if not source.get("enabled") or source.get("access_mode") != "google_news_rss":
+        if not source.get("enabled") or not source.get("auto_publish") or source.get("access_mode") != "google_news_rss":
             continue
         domain = (source.get("domains") or [""])[0]
         selected_topics = set(source.get("query_topics") or [])
@@ -245,7 +252,9 @@ def main() -> int:
                 with urllib.request.urlopen(request, timeout=25) as response:
                     rows, error = parse_feed(response.read(), source, feed_url, fetched_at, huike_rules)
                 if error:
-                    errors.append({"source_id": source["id"], "error": error})
+                    errors.append({"source_id": source["id"], "topic": _topic_name, "error": error})
+                else:
+                    succeeded += 1
                 for row in rows:
                     existing = articles.get(row["url"])
                     if existing is None:
@@ -265,7 +274,15 @@ def main() -> int:
                         *(row.get("matched_terms") or []),
                     ]))[:20]
             except Exception as exc:  # noqa: BLE001 - record per-source failure, continue others
-                errors.append({"source_id": source["id"], "error": str(exc)[:240]})
+                errors.append({"source_id": source["id"], "topic": _topic_name, "error": str(exc)[:240]})
+    if succeeded == 0:
+        raise RuntimeError("All aggregation queries failed; preserving the previous published snapshot.")
+    if errors and OUTPUT.exists():
+        previous = json.loads(OUTPUT.read_text(encoding="utf-8"))
+        failed_sources = {error["source_id"] for error in errors}
+        for row in previous.get("articles", []):
+            if row.get("source_id") in failed_sources and start.isoformat() <= row.get("published_at", "")[:10] <= end.isoformat():
+                articles.setdefault(row["url"], row)
     ordered = sorted(articles.values(), key=lambda row: row["published_at"], reverse=True)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     payload = {
@@ -274,12 +291,14 @@ def main() -> int:
         "range": {"from": start.isoformat(), "to": end.isoformat()},
         "method": "google-news-rss-site-query",
         "provenance": "public metadata only; Google News wrapper URLs retained; not official publisher RSS",
-        "source_count": len(config.get("sources", [])),
+        "source_count": sum(bool(source.get("enabled") and source.get("auto_publish") and source.get("access_mode") == "google_news_rss") for source in config.get("sources", [])),
         "article_count": len(ordered),
         "errors": errors,
         "articles": ordered,
     }
-    OUTPUT.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary = OUTPUT.with_suffix(".tmp")
+    temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    temporary.replace(OUTPUT)
     print(json.dumps({"article_count": len(ordered), "errors": len(errors), "output": str(OUTPUT)}, ensure_ascii=False))
     return 0
 

@@ -13,22 +13,20 @@ const COMPANIES = [
         mopsUrl: MOPS_HOME_URL,
         color: '#e76f51',
         products: ['MyCard點數平台', '藍新金流', '金庸群俠傳Online', '吞食天地'],
-        description: '台灣歷史最悠久的一站式數位遊戲與周邊整合服務大廠。旗下擁有中華網龍、遊戲新幹線及藍新科技。',
-        latestNews: '2026年8月王俊博交棒長女王思淳接任董事長，啟動二代接班。2024年與榮剛換股鞏固經營權。'
+        description: '提供數位遊戲、點數與支付相關服務，旗下事業包括中華網龍、遊戲新幹線與藍新科技。',
     },
     {
         id: 'softstar',
         name: '大宇資訊',
-        enName: 'Star Fusion Group (Softstar)',
-        stock: 'TPEx 6111 (光聚)',
+        enName: 'Softstar（光聚集團遊戲事業）',
+        stock: '母集團 TPEx 6111（光聚）',
         founded: 1988,
         website: 'https://www.softstar.com.tw',
         newsUrl: 'https://km.softstar.com.tw/list.aspx?cid=2',
         mopsUrl: MOPS_HOME_URL,
         color: '#4a7c59',
         products: ['女鬼橋系列', '咒', '大富翁系列'],
-        description: '曾以「仙劍」與「軒轅劍」名震華人遊戲圈。2026年母公司更名「光聚晶電聯合」轉型半導體/重電控股。',
-        latestNews: '2024年處分仙劍/軒轅劍IP挹注5億資金。2026年初正式更名光聚晶電聯合。'
+        description: '大宇遊戲品牌提供遊戲研發與發行服務；母集團光聚晶電聯合的官方沿革記載於 2025 年 12 月更名。',
     },
     {
         id: 'gamania',
@@ -42,7 +40,6 @@ const COMPANIES = [
         color: '#f4a261',
         products: ['天堂M', '新楓之谷', '波拉西亞戰記', '橘子支付', 'Vyin AI'],
         description: '台灣代表性數位娛樂集團，整合遊戲、支付、電商、資安與AI企業解決方案。',
-        latestNews: '2026年定調「AI商轉元年」，推邊緣算力與AI應用。2024年發行《波拉西亞戰記》。'
     },
     {
         id: 'wanin',
@@ -55,8 +52,7 @@ const COMPANIES = [
         mopsUrl: MOPS_HOME_URL,
         color: '#48cae4',
         products: ['星城', '遊e卡', '閃電狼', '威秀影城'],
-        description: '台灣休閒娛樂遊戲霸主與泛娛樂巨頭，建構跨虛實的泛娛樂生態圈。',
-        latestNews: '2024年斥資12.49億收購威秀影城成最大股東。2026年《星城Online》品牌煥新更名《星城》。'
+        description: '提供休閒遊戲與數位娛樂服務，旗下遊戲品牌包括《星城》。',
     },
     {
         id: 'wayi',
@@ -69,8 +65,7 @@ const COMPANIES = [
         mopsUrl: MOPS_HOME_URL,
         color: '#9d4edf',
         products: ['遊戲大亂鬥社群', 'BanaBana', '石器時代（經典）'],
-        description: '台灣老牌遊戲營運商，現隸屬網銀國際體系，轉型社群經營與海外B2B博弈技術。',
-        latestNews: '2025年合資華智進軍印度手遊。2026年子公司取得離岸B2B遊戲執照。'
+        description: '提供遊戲營運、遊戲軟體與社群相關服務，股票代號 3086。',
     },
     {
         id: 'userjoy',
@@ -83,8 +78,7 @@ const COMPANIES = [
         mopsUrl: MOPS_HOME_URL,
         color: '#3a86ff',
         products: ['三國群英傳系列', 'FFXIV繁中版', '幻想三國誌', '拉斯維加斯娛樂城'],
-        description: '台灣少數兼具強大自研能力與長青IP的上櫃遊戲公司，貫徹「一次研發，官方授權」策略。',
-        latestNews: '2026年Q1營收創歷史新高5.19億元。推出《三國群英傳：策定九州》及UE5新作。'
+        description: '成立於 1995 年，從事線上與手機遊戲研發、營運與銷售，股票代號 3546。',
     },
     {
         id: 'xlegend',
@@ -93,12 +87,11 @@ const COMPANIES = [
         stock: 'TWSE 4994',
         founded: 2002,
         website: 'https://www.x-legend.tw',
-        newsUrl: 'https://www.x-legend.tw/02news/news_1.php#/nl/undefined/undefined',
+        newsUrl: 'https://www.x-legend.tw/02news/news_1.php',
         mopsUrl: MOPS_HOME_URL,
         color: '#ff70a6',
         products: ['精靈樂章：ORIGIN', '幻想神域', '晴空物語', '咻咻史萊姆'],
         description: '以自研日系動漫風格MMORPG聞名的台灣遊戲研發及全球發行商。',
-        latestNews: '轉型「高毛利長青PC端遊+輕量休閒手遊」雙軌策略。全球推廣《咻咻史萊姆》。'
     },
     {
         id: 'astro',
@@ -111,8 +104,7 @@ const COMPANIES = [
         mopsUrl: MOPS_HOME_URL,
         color: '#2a9d8f',
         products: ['商用博弈遊戲機台', '網路博弈軟體系統', '叫號叫我智慧系統'],
-        description: '台灣首家掛牌上櫃的博弈概念股，專注商用博弈軟硬體及系統整合。',
-        latestNews: '2024年減資70%改善財務體質。轉型網路博弈技術輸出與智慧系統。'
+        description: '提供遊戲機台、遊戲軟體與系統整合相關服務，股票代號 3064。',
     },
     // 金融支付主要業者（產業總覽延伸；新聞仍以即時監測頁的真實命中結果為準）
     {
@@ -127,7 +119,6 @@ const COMPANIES = [
         color: '#16a085',
         products: ['全方位金流', '電子發票', '物流整合', '跨境支付'],
         description: '台灣大型第三方支付與電商金流服務商，提供信用卡、超商代收、行動支付、電子發票與物流等整合服務。',
-        latestNews: null
     },
     {
         id: 'sunpay',
@@ -141,7 +132,6 @@ const COMPANIES = [
         color: '#e67e22',
         products: ['紅陽 Pay', '信用卡收款', '行動支付', '電子發票'],
         description: '台灣老牌第三方支付與金流串接業者，提供信用卡、行動支付、電子發票及商店收款整合。',
-        latestNews: null
     },
     {
         id: 'line-pay-money',
@@ -155,7 +145,6 @@ const COMPANIES = [
         color: '#06c755',
         products: ['儲值與付款', '好友轉帳', '生活繳費', 'LINE 生態系'],
         description: 'LINE 生態系中的台灣電子支付服務，涵蓋儲值、消費付款、轉帳與生活繳費等使用情境。',
-        latestNews: null
     },
     {
         id: 'jkopay',
@@ -169,7 +158,6 @@ const COMPANIES = [
         color: '#f15a24',
         products: ['掃碼支付', '好友轉帳', '生活繳費', '商家收款'],
         description: '台灣大型行動電子支付品牌，提供消費掃碼、好友轉帳、生活繳費與商家收款服務。',
-        latestNews: null
     },
     {
         id: 'plus-pay',
@@ -183,7 +171,6 @@ const COMPANIES = [
         color: '#1d70b7',
         products: ['全支付錢包', '掃碼支付', '跨境支付', '會員生態整合'],
         description: '由全聯生態系延伸的電子支付服務，串接零售會員、掃碼付款、轉帳與跨境支付場景。',
-        latestNews: null
     }
 ];
 
