@@ -26,6 +26,9 @@ jobs:
       - name: 讀取白名單媒體並更新 Google News RSS metadata
         run: python scripts/update_fintech_aggregated.py
 
+      - name: 自動檢查 RSS 與 Google News 來源
+        run: python scripts/verify_sources.py
+
       - name: 提交並推送聚合資料
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
@@ -33,4 +36,4 @@ jobs:
           commit_user_name: "GitHub Actions Bot"
           commit_user_email: "actions@github.com"
           branch: main
-          file_pattern: "data/fintech-aggregated.json"
+          file_pattern: "data/fintech-aggregated.json data/source-verification.json"

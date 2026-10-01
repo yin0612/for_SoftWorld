@@ -16,6 +16,42 @@ const COVERAGE_COMPANIES = [
     ['全支付', ['全支付']]
 ];
 
+const COVERAGE_MEDIA_NAMES = [
+    ['money.udn.com', '經濟日報'], ['udn.com', '聯合新聞網'],
+    ['cna.com.tw', '中央社'], ['nccc.com.tw', '聯合信用卡處理中心'],
+    ['ltn.com.tw', '自由時報'], ['cardu.com.tw', '卡優新聞網'],
+    ['cnyes.com', '鉅亨網'], ['ctee.com.tw', '工商時報'],
+    ['ithome.com.tw', 'iThome'], ['technews.tw', '科技新報']
+];
+
+function coverageSourceName(article) {
+    const url = coverageUrl(article.sourceHomepage) || coverageUrl(article.url);
+    const host = url ? new URL(url).hostname.toLowerCase().replace(/^www\./, '') : '';
+    const canonical = COVERAGE_MEDIA_NAMES.find(([domain]) => host === domain || host.endsWith(`.${domain}`));
+    return canonical ? canonical[1] : String(article.source || '').normalize('NFKC').trim().replace(/\s+/g, ' ');
+}
+
+let coverageVerificationPromise;
+function renderSourceVerification() {
+    const host = document.getElementById('sourceVerification');
+    if (!host) return;
+    if (!coverageVerificationPromise) coverageVerificationPromise = fetch('data/source-verification.json', { cache: 'no-store' })
+        .then((response) => { if (!response.ok) throw new Error('report unavailable'); return response.json(); })
+        .catch(() => { coverageVerificationPromise = null; return null; });
+    coverageVerificationPromise.then((report) => {
+        if (!report || !Array.isArray(report.results)) {
+            host.textContent = '來源檢查報告暫時無法讀取。';
+            return;
+        }
+        const checked = new Date(report.checked_at);
+        const date = Number.isNaN(checked.getTime()) ? '時間未提供' : checked.toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' });
+        host.innerHTML = `<p class="method-muted">來源檢查：${coverageEscape(date)}（台北時間）</p><div class="coverage-table-wrap"><table class="method-table coverage-table"><thead><tr><th scope="col">管線</th><th scope="col">通過</th><th scope="col">待確認</th><th scope="col">無結果</th><th scope="col">無法讀取</th></tr></thead><tbody>${['rss', 'google_news_rss'].map((kind) => {
+            const rows = report.results.filter((row) => row.kind === kind);
+            return `<tr><th scope="row">${kind === 'rss' ? 'RSS' : 'Google News'}</th>${['passed', 'warning', 'empty', 'unavailable'].map((status) => `<td>${rows.filter((row) => row.status === status).length}</td>`).join('')}</tr>`;
+        }).join('')}</tbody></table></div><details><summary>查看待確認來源</summary><ul>${report.results.filter((row) => row.status === 'warning' || row.status === 'unavailable').map((row) => `<li>${coverageEscape(row.name)}（${row.kind === 'rss' ? 'RSS' : 'Google News'}）：${coverageEscape(row.error || Object.entries(row.reasons || {}).map(([reason, count]) => `${({date_timezone_missing: '日期缺少時區', invalid_date: '日期格式異常', article_domain_mismatch: '文章連至來源網域之外', publisher_domain_mismatch: '出版者不在核准網域', invalid_google_link: '聚合連結異常', missing_title_or_date: '缺少標題或日期'})[reason] || reason} ${count} 筆`).join('、'))}</li>`).join('') || '<li>目前沒有待確認來源。</li>'}</ul></details><p class="method-muted">檢查涵蓋 RSS／Google XML、日期與來源網域；Google 每個來源抽查一組主題，無結果不代表故障。來源網域核對不等於新聞內容查證，也不保證原文目前可開啟。</p>`;
+    });
+}
+
 function coverageEscape(value) {
     return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
 }
@@ -44,7 +80,7 @@ function getCoverageStats(articles) {
         const seen = new Set();
         const matched = articles.filter((article) => {
             if (!coverageMatches(article, aliases)) return false;
-            const source = String(article.source || '').normalize('NFKC').trim().replace(/\s+/g, ' ');
+            const source = coverageSourceName(article);
             const key = coverageUrl(article.url) || JSON.stringify([source, article.date, article.title]);
             if (seen.has(key)) return false;
             seen.add(key);
@@ -52,13 +88,13 @@ function getCoverageStats(articles) {
         });
         const sources = new Map();
         matched.forEach((article) => {
-            const source = String(article.source || '').normalize('NFKC').trim().replace(/\s+/g, ' ');
+            const source = coverageSourceName(article);
             if (!source) return;
             const key = source.toLowerCase();
             if (!sources.has(key)) sources.set(key, { name: source, articles: [] });
             sources.get(key).articles.push(article);
         });
-        return { name, total: matched.length, unknown: matched.filter((article) => !String(article.source || '').trim()).length,
+        return { name, total: matched.length, unknown: matched.filter((article) => !coverageSourceName(article)).length,
             sources: [...sources.values()].sort((a, b) => b.articles.length - a.articles.length || a.name.localeCompare(b.name, 'zh-Hant')) };
     });
 }

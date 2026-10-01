@@ -486,7 +486,8 @@
                 <div class="chart-card-header"><h3 class="chart-card-title">📡 企業媒體覆蓋</h3></div>
                 <p class="method-muted">依標題、RSS 摘要與命中詞中的企業名稱／品牌別名統計；智冠與藍新分開計算。展開媒體可查看對應新聞。</p>
                 <div id="companyCoverage" aria-live="polite"></div>
-                <p class="method-muted">僅代表目前已收錄新聞的來源覆蓋；0 家表示未收錄，不代表沒有報導。媒體以來源名稱辨識，缺少來源不計家數；相同 URL 去重，聚合與原文不同 URL 仍可能重複。同篇可計入多家企業，家數不可相加。</p>
+                <details><summary>RSS 與 Google News 來源檢查</summary><div id="sourceVerification" aria-live="polite">正在讀取來源檢查報告…</div></details>
+                <p class="method-muted">僅代表目前已收錄新聞的來源覆蓋；0 家表示未收錄，不代表沒有報導。已設定的媒體依網域合併 RSS 頻道與 Google 名稱，其餘依來源名稱辨識；相同 URL 去重，聚合與原文不同 URL 仍可能重複。同篇可計入多家企業，家數不可相加。</p>
             </div>
 
             <div class="chart-grid">
@@ -734,8 +735,8 @@
     <!-- JavaScript -->
     <script src="js/data.js?v=20260930_02"></script>
     <script src="js/animations.js?v=20260914_03"></script>
-    <script src="js/coverage.js?v=20261001_01"></script>
-    <script src="js/charts.js?v=20261001_01"></script>
+    <script src="js/coverage.js?v=20261001_02"></script>
+    <script src="js/charts.js?v=20261001_02"></script>
     <script src="js/compare.js?v=20260917_01"></script>
     <script src="js/monitoring.js?v=20260930_02"></script>
     <script src="js/app.js?v=20260930_05"></script>

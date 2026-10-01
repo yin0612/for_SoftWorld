@@ -143,6 +143,7 @@ function renderAnalyticsCharts() {
     if (!analytics || window.getComputedStyle(analytics).display === 'none') return;
     const articles = getRealArticles();
     renderCompanyCoverage(articles);
+    renderSourceVerification();
     const rangeLabel = document.getElementById('analyticsDataNote');
     if (rangeLabel) rangeLabel.textContent = `資料區間：${getRealRange()}。Google News 聚合為原文索引，非媒體官方 RSS；文章可命中多個分類或關鍵字，各項數量不可直接加總。`;
     if (!articles.length) {

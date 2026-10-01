@@ -1,3 +1,13 @@
+import coreSourceConfig from '../../config/core_media_sources.json';
+import googleSourceConfig from '../../config/fintech_media_sources.json';
+import { verifyItemSource } from './source-verification.mjs';
+
+function sourceDefinition(source) {
+  return coreSourceConfig.sources.find((entry) => entry.id === source.id)
+    || googleSourceConfig.sources.find((entry) => entry.id === source.id)
+    || source;
+}
+
 const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(data), {
   status,
   headers: { 'content-type': 'application/json; charset=utf-8', ...headers }
@@ -206,6 +216,7 @@ function isD1ReadQuotaError(error) {
 function publicArticleFromCandidate(article, liveFallback = true) {
   return {
     id: article.id,
+    source_id: article.source_id,
     title: article.title,
     excerpt: article.excerpt,
     url: article.canonical_url || article.url,
@@ -232,6 +243,12 @@ function makeArticlePayload(articles, { offset, limit, fromDate, toDate, dataMod
   const unique = new Map();
   articles.forEach((article) => {
     const url = article?.url || article?.canonical_url;
+    const google = article?.source_kind === 'google_news_rss';
+    const config = google ? googleSourceConfig : coreSourceConfig;
+    const source = config.sources.find((entry) => entry.id === article?.source_id);
+    if (!source?.enabled || !source?.auto_publish || !verifyItemSource({
+      link: url, publisherName: article.source, publisherUrl: article.source_homepage
+    }, source, google)) return;
     if (url && !unique.has(url)) unique.set(url, article.url ? article : publicArticleFromCandidate(article));
   });
   const ordered = [...unique.values()].sort((a, b) => String(b.published_at || b.fetched_at || '').localeCompare(String(a.published_at || a.fetched_at || '')));
@@ -315,6 +332,8 @@ function parseRss(xml) {
     return {
       title: extractTag(entry, 'title'),
       link: decodeEntities(rawLink).trim(),
+      publisherName: extractTag(entry, 'source'),
+      publisherUrl: decodeEntities((entry.match(/<source\b[^>]*url=["']([^"']+)/i) || [])[1] || ''),
       publishedAt: extractTag(entry, 'pubDate') || extractTag(entry, 'published') || extractTag(entry, 'updated'),
       // A number of publishers put their useful lead in description and the
       // attributable RSS body in content:encoded. Keep both for matching.
@@ -487,6 +506,10 @@ async function fetchLiveArticles(from, to, { sources, rules, folderId, sourceKin
       }
       const items = parseRss(await response.text());
       return items.map((item) => {
+        if (!verifyItemSource(item, sourceDefinition(source), sourceIsAggregated)) {
+          diagnostics?.push({ source_id: source.id, result: 'source_domain_mismatch' });
+          return null;
+        }
         const parsedDate = new Date(item.publishedAt);
         if (Number.isNaN(parsedDate.getTime()) || !isPublishedInRange(parsedDate.toISOString(), from, to)) return null;
         // Google News RSS 的 description 主要是導流連結與媒體名稱，不當作摘要，
@@ -621,6 +644,12 @@ async function fetchStaticAggregatedArticles(from, to, folderId, diagnostics = n
     const rows = Array.isArray(payload?.articles) ? payload.articles : [];
     return rows
       .filter((article) => article?.source_kind === 'google_news_rss')
+      .filter((article) => {
+        const source = googleSourceConfig.sources.find((entry) => entry.id === article.source_id);
+        return source?.enabled && source?.auto_publish && verifyItemSource({
+          link: article.url, publisherName: article.source, publisherUrl: article.source_homepage
+        }, source, true);
+      })
       .filter((article) => !folderId || String(article.folder_ids || '').split(',').includes(folderId))
       .filter((article) => isPublishedInRange(article.published_at, from, to))
       .map((article) => ({
@@ -848,6 +877,7 @@ async function collectSource(source, rules, env) {
       // The database itself observes the same rolling two-month window as the public API.
       if (!isWithinCollectionWindow(publishedAt)) continue;
       const canonicalUrl = new URL(item.link, source.feed_url).toString();
+      if (!verifyItemSource({ ...item, link: canonicalUrl }, sourceDefinition(source))) continue;
       const article = { title: item.title, excerpt: item.excerpt, canonicalUrl };
       const matches = sourceRules.map((rule) => ({ rule, result: evaluateRule(article, rule) })).filter(({ result }) => result.matched);
       if (!matches.length) continue;
@@ -1026,7 +1056,7 @@ export default {
       const whereSql = `WHERE ${where.join(' AND ')}`;
       // 先讀取完整的近兩個月 D1 結果，再與唯讀即時補位合併後分頁，
       // 避免新來源插在排序前端時造成 offset 分頁漏項。
-      const articlesSql = `SELECT a.id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status,
+      const articlesSql = `SELECT a.id, a.source_id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status,
           s.name AS source, s.region AS source_region, s.feed_url AS source_feed, s.access_mode AS source_access_mode,
           'official_rss' AS source_kind, 'verified_rss' AS verification_status, 'publisher_url' AS url_kind,
           GROUP_CONCAT(DISTINCT r.folder_id) AS folder_ids, GROUP_CONCAT(DISTINCT r.id) AS rule_ids,

@@ -153,15 +153,18 @@ def parse_feed(
         publisher_node = item.find("source")
         publisher_name = text(item.findtext("source"))
         publisher_url = publisher_node.attrib.get("url", "") if publisher_node is not None else ""
-        publisher_domain = urllib.parse.urlparse(publisher_url).netloc.lower().removeprefix("www.")
-        allowed_domains = [str(domain).lower().removeprefix("www.") for domain in source.get("publisher_domains", [])]
-        if allowed_domains and not any(
+        publisher_domain = (urllib.parse.urlparse(publisher_url).hostname or "").lower().removeprefix("www.")
+        allowed_domains = [str(domain).lower().removeprefix("www.") for domain in (source.get("publisher_domains") or source.get("domains") or [])]
+        if not publisher_name or urllib.parse.urlparse(publisher_url).scheme not in ("http", "https") or not allowed_domains or not any(
             publisher_domain == domain or publisher_domain.endswith("." + domain)
             for domain in allowed_domains
         ):
             continue
         title = strip_suffix(item.findtext("title"), source, publisher_name)
         link = text(item.findtext("link"))
+        link_parts = urllib.parse.urlparse(link)
+        if link_parts.scheme != "https" or link_parts.hostname != "news.google.com":
+            continue
         published_at = parse_datetime(item.findtext("pubDate"))
         if not title or not link or not published_at:
             continue
@@ -206,6 +209,8 @@ def parse_feed(
             "source_kind": "google_news_rss",
             "source_access_mode": "google_news_rss",
             "verification_status": "aggregated",
+            "source_verification": "publisher_domain_matched",
+            "publisher_domain": publisher_domain,
             "url_kind": "google_news_redirect",
             "review_status": "approved",
             "folder_ids": ",".join(sorted(set(folders))),
