@@ -1,7 +1,16 @@
-/** 企業覆蓋只按企業名稱／明確品牌別名判定，不以產品 IP 推定企業。 */
+/** 公司與產品分項覆蓋，依各項明確名称／品牌別名判定。 */
 const COVERAGE_COMPANIES = [
     ['智冠', ['智冠', 'Soft-World', 'Soft World']],
     ['藍新', ['藍新', 'NewebPay']],
+    ['一帆數位／發票大師', ['一帆數位', '發票大師']],
+    ['MyCard', ['MyCard', 'My Card']],
+    ['簡單支付', ['簡單支付', '簡單付', '簡單行動支付', 'ezPay']],
+    ['簡單收', ['ezAIO', 'ezAIO簡單收', '簡單收']],
+    ['中華網龍', ['中華網龍']],
+    ['遊戲新幹線', ['遊戲新幹線']],
+    ['智凡迪', ['智凡迪']],
+    ['智樂堂', ['智樂堂']],
+    ['台灣淘米', ['台灣淘米']],
     ['大宇資訊／光聚', ['大宇資訊', '大宇資', 'Softstar', '光聚晶電', '光聚']],
     ['遊戲橘子', ['遊戲橘子', 'Gamania']],
     ['網銀國際', ['網銀國際', 'Wanin']],
@@ -108,8 +117,8 @@ function renderCompanyCoverage(articles) {
     }
     const rows = getCoverageStats(articles);
     host.innerHTML = `<div class="coverage-table-wrap"><table class="method-table coverage-table">
-        <caption class="sr-only">企業媒體覆蓋與報導清單</caption>
-        <thead><tr><th scope="col">企業</th><th scope="col">報導媒體數</th><th scope="col">已收錄報導</th><th scope="col">媒體與新聞</th></tr></thead>
+        <caption class="sr-only">企業、旗下公司與產品媒體覆蓋及報導清單</caption>
+        <thead><tr><th scope="col">企業／公司／產品</th><th scope="col">報導媒體數</th><th scope="col">已收錄報導</th><th scope="col">媒體與新聞</th></tr></thead>
         <tbody>${rows.map((row) => `<tr><th scope="row">${coverageEscape(row.name)}</th><td><strong>${row.sources.length}</strong> 家</td><td>${row.total} 篇${row.unknown ? `<br><small>其中 ${row.unknown} 篇未提供來源</small>` : ''}</td><td>${row.sources.length ? `<details><summary>查看 ${row.sources.length} 家媒體</summary><div class="coverage-sources">${row.sources.map((source) => `<details><summary>${coverageEscape(source.name)} · ${source.articles.length} 篇</summary><ul>${source.articles.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).map((article) => {
             const url = coverageUrl(article.url);
             return `<li><span class="chart-card-subtitle">${coverageEscape(article.date || '日期未提供')} · ${article.sourceKind === 'google_news_rss' ? 'Google News 聚合' : 'RSS'}</span><br>${url ? `<a href="${coverageEscape(url)}" target="_blank" rel="noopener noreferrer">${coverageEscape(article.title)}</a>` : coverageEscape(article.title)}</li>`;

@@ -5,7 +5,7 @@
   "description": "依原始 Word、金融科技關鍵字清單與媒體清單資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。穩定幣採獨立高精準規則；奧丁丁／OwlPay 需搭配穩定幣、鏈上支付、加密資產或金融科技語境，不把泛稱加密貨幣直接視為穩定幣。高營收手遊與重點手遊則僅以直接遊戲名稱或明確別名比對，不公開排行、合作狀態或內部標記。",
   "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","softworld-fintech-services","taiwan-payment-peer-oen","newebpay-brand","taiwan-payment-core","taiwan-payment-authority","international-fintech","stablecoin-core","stablecoin-settlement","stablecoin-brand","stablecoin-circle","stablecoin-bitopro","stablecoin-vasp","competitor-brand","competitor-tw-game","competitor-global-game","industry-game-platform","industry-game-market","industry-platform-business","industry-new-business","industry-einvoice","industry-martech","mobile-top-grossing-games","mobile-game-watchlist","mobile-game-context-watchlist"],
   "automatic_publication_allowed_terms": {
-    "softworld-brand": ["智冠科技","智冠集團","智冠","台灣淘米","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團"],
+    "softworld-brand": ["智冠科技","智冠集團","智冠","MyCard","台灣淘米","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團"],
     "softworld-fintech-services": ["一帆數位","發票大師","簡單付","簡單支付","簡單行動支付"],
     "taiwan-payment-peer-oen": ["應援科技","應援金流","Oen Tech","Oen應援科技","OEN應援科技","oen.tw"],
     "newebpay-brand": ["藍新科技","藍新金流","NewebPay","簡單付","ezPay","簡單行動支付","ezAIO簡單收","ezAIO","簡單收","歐付寶","O'Pay","OPay","橘子支","橘子支付","街口支付","街口電子支付","綠界科技","ECPay","全支付","全盈支付","全盈+PAY","台灣Pay","悠遊付","悠遊卡","一卡通","iPASS MONEY","LINE Pay","LINE Pay Money","LINE Bank","彈性付","Pi拍錢包","PChomepay","Hami Pay","friDay錢包","蝦皮支付","電子票證","MaiCoin Pay","TWQR"],
