@@ -187,8 +187,6 @@ function renderCompanyCards() {
         
         const productsList = company.products || company.keyProducts || [];
         const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
-        const eventSourceUrl = safeHttpUrl(company.eventSourceUrl || company.newsUrl || company.mopsUrl);
-        const eventSourceLabel = company.eventSourceLabel || (company.newsUrl ? '官方新聞專區' : 'MOPS 公開資訊觀測站');
         const metaItems = [company.enName || company.englishName];
         if (company.founded || company.foundingYear) metaItems.push(`成立 ${company.founded || company.foundingYear} 年`);
         metaItems.push(industry);
@@ -254,8 +252,6 @@ function showCompanyModal(companyId) {
 
     const productsList = company.products || company.keyProducts || [];
     const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
-    const eventSourceUrl = safeHttpUrl(company.eventSourceUrl || company.newsUrl || company.mopsUrl);
-    const eventSourceLabel = company.eventSourceLabel || (company.newsUrl ? '官方新聞專區' : 'MOPS 公開資訊觀測站');
     const industry = company.industry || '遊戲與數位娛樂';
     const productLabel = company.productLabel || (industry === '金融支付' ? '主要支付服務' : '主要代表作品');
 
@@ -940,7 +936,6 @@ function renderGlobalDataStatusBar() {
     const liveSourceNames = Array.isArray(monitoringRuntimeStatus?.live_fallback_sources)
         ? monitoringRuntimeStatus.live_fallback_sources
         : [];
-    const enabledSourceNames = new Set(enabledSources.map((source) => source?.name).filter(Boolean));
     const taiwanSources = new Set(healthyTaiwanNames).size;
     const liveSourceCount = Number(monitoringRuntimeStatus?.live_fallback_source_count || liveSourceNames.length || 0);
     const liveFallback = Number(monitoringLoadState?.officialLiveFallbackCount || 0);
@@ -953,7 +948,7 @@ function renderGlobalDataStatusBar() {
         }
         const updated = lastRun ? `最後成功更新 ${lastRun}（台北時間）` : '最後成功更新時間待服務回報';
         const liveSourceText = liveSourceCount ? `；台灣即時補位來源設定 ${liveSourceCount} 個` : '';
-        const liveText = liveFallback ? `；新增台灣來源即時補位 ${liveFallback} 篇` : '';
+        const liveText = liveFallback ? `；官方 RSS 備援／即時補位提供 ${liveFallback} 篇` : '';
         const aggregatedText = aggregatedSourceCount ? `；Google News RSS 聚合來源 ${aggregatedSourceCount} 個、目前 ${aggregatedCount} 篇` : '';
         const snapshot = formatMonitoringTimestamp(monitoringLoadState?.aggregatedSnapshot?.generated_at);
         const rssBackup = formatMonitoringTimestamp(monitoringLoadState?.rssSnapshot?.generated_at);
@@ -1102,8 +1097,9 @@ function renderMonitoringTransparency() {
             : ''
     ].filter(Boolean);
     const configSyncText = pendingConfigMessages.length ? ' ' + pendingConfigMessages.join(' ') : '';
+    const sourceQuality = monitoringFreshness(monitoringRuntimeStatus, monitoringLoadState, monitoringRefreshState);
     const statusText = monitoringRuntimeStatus
-        ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（健康 ${sources.healthy || 0} 個；台灣來源 ${Array.isArray(monitoringRuntimeStatus.enabled_sources) ? monitoringRuntimeStatus.enabled_sources.filter((source) => source?.region === 'TW' && source?.health_status === 'healthy').length : 0} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個官方 RSS 即時唯讀補位來源與 ${monitoringRuntimeStatus.aggregated_source_count || 0} 個 Google News RSS 聚合來源；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇資料庫文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
+        ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（近兩小時可讀 ${sourceQuality.healthy} 個，含備援查核；台灣來源 ${sourceQuality.sources.filter((source) => source?.region === 'TW' && monitoringSourceIsFresh(source)).length} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個官方 RSS 即時唯讀補位來源與 ${monitoringRuntimeStatus.aggregated_source_count || 0} 個 Google News RSS 聚合來源；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇資料庫文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
         : '正在讀取來源健康與收錄狀態。';
     summary.textContent = `真實性原則：官方 RSS 與 Google News RSS 聚合來源分開標示；兩者都必須命中年度監測規則且附可開啟的原文跳轉連結，不顯示展示資料。${statusText}${loadText}${liveFallbackText}${aggregatedText}${degradedText}${configSyncText}`;
     disclosureContent.appendChild(summary);
@@ -1237,7 +1233,7 @@ function refreshMonitoringData() {
         setVerifiedNewsTotal(monitoringNews.length);
         setNewsDataMode('verified');
         refreshVerifiedSourceOptions(result.articles, [
-            ...(status?.enabled_sources || []),
+            ...monitoringFreshness(status, monitoringLoadState, monitoringRefreshState).sources,
             ...(status?.aggregated_sources || [])
         ]);
         renderMonitoringTransparency();

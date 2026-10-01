@@ -67,7 +67,7 @@ def inspect_dataset(payload, status, now):
         "errors": sorted(set(errors)), "warnings": warnings}
 
 def main():
-    payload = load(API + "/api/articles?limit=2000&v=20261001-quality")
+    payload = load(API + "/api/articles?limit=2000&debug=1")
     rows = list(payload.get("articles", []))
     seen_offsets = {0}
     page = payload
@@ -76,7 +76,7 @@ def main():
         if not isinstance(offset, int) or offset in seen_offsets or not page.get("articles"):
             raise RuntimeError("Incomplete pagination: invalid cursor")
         seen_offsets.add(offset)
-        page = load(API + f"/api/articles?limit=2000&v=20261001-quality&offset={offset}")
+        page = load(API + f"/api/articles?limit=2000&debug=1&offset={offset}")
         rows.extend(page.get("articles", []))
     payload["articles"] = rows
     payload["has_more"] = False
