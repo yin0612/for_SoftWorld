@@ -73,7 +73,7 @@
   display_name: 傳奇網路
   ticker: "4994"
   market: TWSE                       # 上市，非上櫃
-  legal_names: [{ name: 傳奇網路遊戲股份有限公司, from: 2007-01-01 }]
+  legal_names: [{ name: 傳奇網路遊戲股份有限公司, from: 2002-01-09 }]
   aliases: [傳奇, 傳奇網路, X-Legend]
   titles: [幻想神域, 精靈樂章, 晴空物語, 星界神話, 咻咻史萊姆]
   sources:
@@ -83,7 +83,7 @@
   display_name: 泰偉電子
   ticker: "3064"
   market: TPEx
-  legal_names: [{ name: 泰偉電子股份有限公司, from: 1994-01-01 }]
+  legal_names: [{ name: 泰偉電子股份有限公司, from: 2000-08-02 }]
   aliases: [泰偉, 泰偉電子]
-  titles: [叫號叫我]
+  titles: [叫叫我]
   sources: []

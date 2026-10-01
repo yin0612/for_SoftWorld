@@ -254,6 +254,7 @@ function showCompanyModal(companyId) {
     const tagsHtml = productsList.map(p => `<span class="tag">${p}</span>`).join('');
     const industry = company.industry || '遊戲與數位娛樂';
     const productLabel = company.productLabel || (industry === '金融支付' ? '主要支付服務' : '主要代表作品');
+    const hasMopsProfile = /(?:TPEx|TWSE|興櫃)\s*\d{4}/.test(company.stock || company.stockTicker || '');
 
     let newsBtnHtml = '';
     if (company.newsUrl) {
@@ -276,7 +277,7 @@ function showCompanyModal(companyId) {
         </div>
         ${companyLatestArticleHtml(company)}
         <div style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
-            <a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">🏛️ MOPS 公開資訊觀測站 ↗</a>
+            ${hasMopsProfile ? `<a href="${company.mopsUrl || 'https://mops.twse.com.tw/mops/#/web/home'}" target="_blank" rel="noopener" class="btn btn-ghost btn-sm">🏛️ MOPS 公開資訊觀測站 ↗</a>` : ''}
             ${newsBtnHtml}
             <a href="${company.website || company.officialWebsite}" target="_blank" rel="noopener" class="btn btn-primary btn-sm">前往官方網站 ↗</a>
         </div>

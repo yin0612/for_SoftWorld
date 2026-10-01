@@ -44,6 +44,9 @@ GitHub 排程可能排隊，無法保證準點。網頁每 5 分鐘同步是讀�
 - 計數動畫可能覆蓋新資料數字，現會在資料目標變動時停止舊動畫。
 - 泰偉 Astro 不再命中 Astro 遊戲硬體；橘子不再只憑水果詞命中；大宇不再以已出售的仙劍／軒轅劍直接歸因公司。
 - 公司近期事件改為實際文章連結；光聚更名時間修正為 2025 年 12 月，依[官方大事紀](https://group.softstar.com.tw/tw/history.php)。
+- 全支付官方連結原本錯指全盈+PAY，已改為[全支付官方網域](https://www.pxpayplus.com.tw/)；[綠界基本資料](https://corp.ecpay.com.tw/company_info/)核對股票代號 6763、成立 1996 年，[紅陽投資人專區](https://www.sunpay.com.tw/investor)核對興櫃代號 7745；泰偉產品改為[叫叫我智慧排隊系統](https://www.astrocorp.com.tw/products-callmeback.php)。
+- 設定檔的傳奇／泰偉成立日原有錯誤，依[傳奇官方基本資料](https://www.x-legend.tw/03financials/financials_1.php)與[泰偉商工登記](https://findbiz.nat.gov.tw/fts/company/70613972)修正；LINE Pay Money 仍為目前服務，核對[官方付款功能](https://pay.line.me/portal/tw-lpm/payment/)。
+- 未列出上市、上櫃或興櫃代號的企業／服務彈窗移除 MOPS 捷徑，避免引導使用者查詢沒有對應股票代號的公司。
 - 機器人提交通常不觸發 Pages 重建，來源查核報告因此直接讀原始資料，依 [GitHub 官方說明](https://docs.github.com/en/actions/concepts/security/github_token)。
 
 ## 驗證
@@ -57,6 +60,12 @@ GitHub 排程可能排隊，無法保證準點。網頁每 5 分鐘同步是讀�
 - 關鍵字頁搜尋「智冠」後手動同步，篩選仍保留；金融科技搜尋 OwlPay、遊戲搜尋 PlayStation、趨勢改為 7 日均有正確回應；比較新增泰偉後，同步仍保留選擇，未誤列 Astro 硬體新聞。
 - Worker 正式部署版本 `d7b86fec-6bfc-4af8-88df-0982a833d26b`；[RSS 備援 Actions 實跑成功](https://github.com/yin0612/for_SoftWorld/actions/runs/36845260273)，2026-10-01 台北 17:50 快照 254 篇、28/29 個來源成功。ABMedia 在 GitHub 網路回傳 HTTP 403，但主 Worker 近期成功，所以整體可讀來源仍有 29 個；此備援限制保留在快照錯誤與來源查核報告中。
 - [正式網站 Pages 部署成功](https://github.com/yin0612/for_SoftWorld/actions/runs/36845121538)，[品質工作在 GitHub 執行成功](https://github.com/yin0612/for_SoftWorld/actions/runs/36845122601)。Google News 排程先前最近一次成功於台北 12:39，實際啟動較 12:00 晚 37 分鐘；排程準點不能作為保證。
+- 瀏覽器實測自動同步：台北 17:55 至 18:00 間未按同步按鈕，頁面同步時間自動前進至 18:00，總覽更新至 1,818 篇並讀到 17:50 的 RSS 備援快照。
+- [更新後的 Google News 工作實跑成功](https://github.com/yin0612/for_SoftWorld/actions/runs/36846189326)：台北 17:58 新快照 575 篇、51 個來源、零收集錯誤；台北 18:02 的線上資料為 1,809 篇，完整查核仍為 `passed`、零錯誤與零覆蓋警告。篇數是當下已收錄結果，Google 查詢結果會變動，並非全網完整新聞總數。
+
+公司詳情的近期新聞已由共用資料自動產生並附原文連結：
+
+![公司近期新聞自動同步的實測畫面](audit-images/company-news-2026-10-01.jpg)
 
 ## 後續改善規劃
 
