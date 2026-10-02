@@ -14,6 +14,8 @@ const COMPANY_ALIASES = {
     userjoy: ['宇峻', '宇峻奧汀', 'USERJOY', '三國群英傳'],
     xlegend: ['傳奇網路', 'X-Legend', '精靈樂章', '幻想神域'],
     astro: ['泰偉', 'Astro Corp'],
+    igs: ['鈊象', '鈊象電子', 'International Games System', 'IGS', '明星3缺1', '明星三缺一', '金猴爺'],
+    newebpay: ['藍新科技', '藍新金流', 'Neweb Technologies', 'NewebPay', 'ezPay', '簡單付', '簡單支付', '簡單行動支付', 'ezAIO', '簡單收'],
     ecpay: ['綠界科技', 'ECPay'],
     sunpay: ['紅陽科技', '紅陽金流', 'SunPay'],
     'line-pay-money': ['LINE Pay Money'],

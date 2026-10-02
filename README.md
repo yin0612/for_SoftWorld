@@ -20,7 +20,7 @@ http://127.0.0.1:8765/
 ## 📁 專案檔案結構
 - `index.html` — 主網頁 HTML 結構與八大獨立區塊
 - `css/` — 核心樣式表 (index.css, components.css, animations.css)
-- `js/data.js` — 8 大公司主檔、監測分類與關鍵字設定（新聞資料由 API 提供）
+- `js/data.js` — 15 家遊戲與金融支付業者主檔、監測分類與關鍵字設定（新聞資料由 API 提供）
 - `js/charts.js` — 真實監測圖表模組（進入分析頁時才載入 Chart.js）
 - `js/compare.js` — 企業真實新聞數量、來源與分類比較工具
 - `js/app.js` — SPA Hash 切頁路由器 (`#/companies`, `#/news`, `#/gaming`, `#/fintech`, `#/analytics`, `#/compare`, `#/trends`, `#/methodology`) 與 UI 邏輯

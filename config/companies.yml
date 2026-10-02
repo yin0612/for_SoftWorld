@@ -1,4 +1,4 @@
-# 八家公司主檔。任何程式都不得硬編碼公司資訊，一律讀這個檔。
+# 公司監測主檔；產業總覽顯示資料另見 js/data.js。
 - id: soft-world
   display_name: 智冠科技
   ticker: "5478"
@@ -57,6 +57,30 @@
   aliases: [華義, 華義國際, Wayi]
   titles: [遊戲大亂鬥, BanaBana, 石器時代]
   sources: []
+
+- id: igs
+  display_name: 鈊象電子
+  ticker: "3293"
+  market: TPEx
+  legal_names: [{ name: 鈊象電子股份有限公司 }]
+  aliases: [鈊象, 鈊象電子, International Games System, IGS]
+  titles: [明星3缺1, 明星三缺一, 金猴爺, 唯舞獨尊Online]
+  sources: []
+  website: "https://www.igs.com.tw/"
+  news_url: "https://www.igs.com.tw/news/"
+  ir_url: "https://www.igs.com.tw/investors/info/"
+
+- id: newebpay
+  display_name: 藍新金流（藍新科技）
+  ticker: null
+  market: UNLISTED
+  legal_names: [{ name: 藍新科技股份有限公司 }]
+  aliases: [藍新科技, 藍新金流, Neweb Technologies, NewebPay, ezPay, 簡單付, 簡單支付, 簡單行動支付, ezAIO, 簡單收]
+  titles: []
+  sources: []
+  website: "https://www.neweb.com.tw/"
+  news_url: "https://www.neweb.com.tw/news"
+  notes: 藍新科技已公開發行，尚未上市櫃；產業總覽合併呈現公司與藍新金流服務品牌。
 
 - id: userjoy
   display_name: 宇峻奧汀
