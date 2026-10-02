@@ -63,6 +63,31 @@ test('source collector requires authorization and only accepts an enabled databa
     assert.equal(queries, 1);
 });
 
+test('scheduled handler resolves only after collection finishes', async () => {
+    const context = worker();
+    let finished = false;
+    context.collectAll = async () => { await new Promise(resolve => setTimeout(resolve, 10)); finished = true; };
+    await context.worker.scheduled({}, {});
+    assert.equal(finished, true);
+});
+
+test('public RSS relay accepts only configured feeds, validates XML, and uses a fixed cache key', async () => {
+    const fetched = [], cacheKeys = [];
+    const cache = { match: async request => { cacheKeys.push(request.url); }, put: async () => {} };
+    const context = worker({ caches: { default: cache }, fetch: async url => {
+        fetched.push(url); return new Response('<rss><channel></channel></rss>');
+    } });
+    const request = query => new Request(`https://example.test/api/rss-backup?${query}`);
+    assert.equal((await context.worker.fetch(request('source=ithome&url=http://private.test'), {})).status, 404);
+    assert.equal(fetched.length, 0);
+    const result = await context.worker.fetch(request('source=abmedia&random=1&url=http://private.test'), {});
+    assert.equal(result.status, 200); assert.equal(result.headers.get('x-rss-source'), 'abmedia');
+    assert.deepEqual(fetched, ['https://abmedia.io/feed']);
+    assert.deepEqual(cacheKeys, ['https://example.test/api/rss-backup?source=abmedia']);
+    const blocked = worker({ caches: { default: cache }, fetch: async () => new Response('<html>Denied</html>') });
+    assert.equal((await blocked.worker.fetch(request('source=abmedia'), {})).status, 502);
+});
+
 test('a 200 HTML block page fails collection rather than marking an RSS source healthy', async () => {
     const context = worker({ fetch: async () => new Response('<html>Access denied</html>') });
     const writes = [];

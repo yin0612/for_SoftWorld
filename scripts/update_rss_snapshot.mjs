@@ -53,6 +53,22 @@ export function approvedFeedArticles(xml, source, rules, now = new Date()) {
   });
 }
 
+export async function fetchBackupFeed(source, fetchFeed = fetch) {
+  async function fetchXml(url) {
+    const response = await fetchFeed(url, { signal: AbortSignal.timeout(20000), headers: { 'user-agent': 'SoftWorldMonitoring/1.0' } });
+    if (!response.ok) throw Error(`RSS HTTP ${response.status}`);
+    const xml = await response.text();
+    if (!/<(?:rss|feed|rdf:RDF)\b/i.test(xml)) throw Error('not_rss_or_atom');
+    return xml;
+  }
+  try { return { xml: await fetchXml(source.feed_url), transport: 'publisher-direct' }; }
+  catch (error) {
+    if (!source.backup_worker_relay) throw error;
+    const xml = await fetchXml(`https://softworld-monitoring-api.media-monitoring-worker.workers.dev/api/rss-backup?source=${encodeURIComponent(source.id)}`);
+    return { xml, transport: 'worker-relay', direct_error: String(error).slice(0, 200) };
+  }
+}
+
 export async function main() {
   const sources = (await read('config/core_media_sources.json')).sources.filter(source => source.enabled && source.auto_publish && source.access_mode === 'rss');
   const rules = configuredRules(await read('config/monitoring_rules.json'));
@@ -67,13 +83,10 @@ export async function main() {
     while (cursor < sources.length) {
       const source = sources[cursor++];
       try {
-        const response = await fetch(source.feed_url, { signal: AbortSignal.timeout(20000), headers: { 'user-agent': 'SoftWorldMonitoring/1.0' } });
-        if (!response.ok) throw Error(`RSS HTTP ${response.status}`);
-        const xml = await response.text();
-        if (!/<(?:rss|feed|rdf:RDF)\b/i.test(xml)) throw Error('not_rss_or_atom');
+        const { xml, ...transport } = await fetchBackupFeed(source);
         const rows = approvedFeedArticles(xml, source, rules, now);
         rows.forEach(article => articles.set(article.url, article));
-        results.push({ source_id: source.id, name: source.name, result: 'success', checked_at: new Date().toISOString(), articles: rows.length });
+        results.push({ source_id: source.id, name: source.name, result: 'success', checked_at: new Date().toISOString(), articles: rows.length, ...transport });
       } catch (error) {
         results.push({ source_id: source.id, name: source.name, result: 'failed', checked_at: new Date().toISOString(), error: String(error).slice(0, 200) });
       }

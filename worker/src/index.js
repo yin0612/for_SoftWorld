@@ -970,6 +970,32 @@ export default {
     }
     if (url.pathname === '/api/status') return json(await monitoringStatus(env), 200, headers);
 
+    // Relay only explicitly configured public publisher feeds. The GitHub
+    // backup still validates dates, publisher URLs and publication rules.
+    if (url.pathname === '/api/rss-backup' && request.method === 'GET') {
+      const source = coreSourceConfig.sources.find(source => source.id === url.searchParams.get('source') &&
+        source.enabled && source.auto_publish && source.access_mode === 'rss' && source.backup_worker_relay);
+      if (!source) return json({ error: 'Not found' }, 404, headers);
+      const cacheRequest = new Request(`${url.origin}/api/rss-backup?source=${encodeURIComponent(source.id)}`);
+      const cached = await caches.default.match(cacheRequest);
+      if (cached) return cached;
+      try {
+        const upstream = await fetch(source.feed_url, { signal: AbortSignal.timeout(15000), headers: {
+          'user-agent': 'SoftWorldMonitoring/1.0 (+https://yin0612.github.io/for_SoftWorld/)',
+          accept: 'application/rss+xml, application/xml, text/xml, */*;q=0.8'
+        } });
+        if (!upstream.ok) throw new Error(`RSS HTTP ${upstream.status}`);
+        const xml = await upstream.text();
+        if (!/<(?:rss|feed|rdf:RDF)\b/i.test(xml)) throw new Error('not_rss_or_atom');
+        const response = new Response(xml, { headers: { ...headers, 'content-type': 'application/xml; charset=utf-8',
+          'cache-control': 'public, max-age=300', 'x-rss-source': source.id } });
+        await caches.default.put(cacheRequest, response.clone());
+        return response;
+      } catch (error) {
+        return json({ error: String(error).slice(0, 200), source_id: source.id }, 502, headers);
+      }
+    }
+
     if (url.pathname === '/api/internal/collect' && request.method === 'POST') {
       if (!isInternalRequest(request, env)) return json({ error: 'Not found' }, 404, headers);
       return json({ runs: await collectAll(env) }, 200, headers);
@@ -1115,5 +1141,5 @@ export default {
     }
     return json({ error: 'Not found' }, 404, headers);
   },
-  async scheduled(_controller, env, ctx) { ctx.waitUntil(collectAll(env)); }
+  async scheduled(_controller, env) { await collectAll(env); }
 };
