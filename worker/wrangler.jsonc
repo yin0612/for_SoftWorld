@@ -2,6 +2,9 @@
   "name": "softworld-monitoring-api",
   "main": "src/index.js",
   "compatibility_date": "2026-09-14",
+  "services": [
+    { "binding": "COLLECTOR", "service": "softworld-monitoring-api" }
+  ],
   "triggers": {
     "crons": [
       "17 * * * *",

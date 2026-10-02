@@ -38,7 +38,7 @@ const LIVE_DOMESTIC_SOURCES = [
   { id: 'ltn-business', name: '自由電子報 財經', region: 'TW', type: 'editorial', feed_url: 'https://news.ltn.com.tw/rss/business.xml' },
   { id: 'techorange', name: '科技報橘 TechOrange', region: 'TW', type: 'editorial', feed_url: 'https://techorange.com/feed/' },
   { id: 'blocktempo', name: '動區動趨 BlockTempo', region: 'TW', type: 'editorial', feed_url: 'https://www.blocktempo.com/feed/' },
-  { id: 'abmedia', name: 'ABMedia 區塊鏈媒體', region: 'TW', type: 'editorial', feed_url: 'https://www.abmedia.io/feed/' }
+  { id: 'abmedia', name: 'ABMedia 區塊鏈媒體', region: 'TW', type: 'editorial', feed_url: 'https://abmedia.io/feed' }
 ];
 
 const LIVE_DOMESTIC_RULES = [
@@ -782,7 +782,9 @@ async function collectSource(source, rules, env) {
       }
     });
     if (!response.ok) throw new Error(`RSS HTTP ${response.status}`);
-    const items = parseRss(await response.text());
+    const xml = await response.text();
+    if (!/<(?:rss|feed|rdf:RDF)\b/i.test(xml)) throw new Error('not_rss_or_atom');
+    const items = parseRss(xml);
     const sourceRules = rules.filter((rule) => ruleAllowsSource(rule, source));
     let added = 0;
 
@@ -834,37 +836,68 @@ async function collectSource(source, rules, env) {
       // precision-policy update safely demote former system approvals while
       // preserving an explicitly rejected article.
       if (existing || hasPublishableMatch) {
-        const approval = await env.DB.prepare(`SELECT COUNT(*) AS approved_matches
-          FROM article_matches WHERE article_id = ? AND status = 'approved'`).bind(articleId).first();
         await env.DB.prepare(`UPDATE articles SET review_status = CASE
           WHEN review_status = 'rejected' THEN 'rejected'
-          WHEN ? = 1 THEN 'approved'
+          WHEN EXISTS (SELECT 1 FROM article_matches WHERE article_id = articles.id AND status = 'approved') THEN 'approved'
           ELSE 'pending'
-        END WHERE id = ?`).bind(Number(approval?.approved_matches || 0) > 0 ? 1 : 0, articleId).run();
+        END WHERE id = ?`).bind(articleId).run();
       }
     }
 
+    const finishedAt = new Date().toISOString();
     await env.DB.batch([
-      env.DB.prepare('UPDATE media_sources SET last_success_at = ?, last_attempt_at = ?, health_status = ?, last_error = NULL WHERE id = ?').bind(now, now, 'healthy', source.id),
-      env.DB.prepare('UPDATE collection_runs SET finished_at = ?, result = ?, items_seen = ?, items_new = ? WHERE id = ?').bind(now, 'success', items.length, added, runId)
+      env.DB.prepare('UPDATE media_sources SET last_success_at = ?, last_attempt_at = ?, health_status = ?, last_error = NULL WHERE id = ?').bind(finishedAt, now, 'healthy', source.id),
+      env.DB.prepare('UPDATE collection_runs SET finished_at = ?, result = ?, items_seen = ?, items_new = ? WHERE id = ?').bind(finishedAt, 'success', items.length, added, runId)
     ]);
     return { source_id: source.id, result: 'success', items_seen: items.length, items_new: added };
   } catch (error) {
     const errorText = String(error).slice(0, 500);
     const statements = [env.DB.prepare('UPDATE media_sources SET last_attempt_at = ?, health_status = ?, last_error = ? WHERE id = ?').bind(now, 'error', errorText, source.id)];
-    if (started) statements.push(env.DB.prepare('UPDATE collection_runs SET finished_at = ?, result = ?, error = ? WHERE id = ?').bind(now, 'failed', errorText, runId));
+    if (started) statements.push(env.DB.prepare('UPDATE collection_runs SET finished_at = ?, result = ?, error = ? WHERE id = ?').bind(new Date().toISOString(), 'failed', errorText, runId));
     await env.DB.batch(statements);
     return { source_id: source.id, result: 'failed', error: errorText };
   }
 }
 
 async function collectAll(env) {
+  if (!env.COLLECTOR || !env.MONITORING_ADMIN_TOKEN) throw new Error('Collector service binding or admin token is missing');
   await syncDomesticConfig(env);
-  const [sources, rules] = await Promise.all([
-    env.DB.prepare("SELECT * FROM media_sources WHERE enabled = 1 AND auto_publish = 1 AND access_mode = 'rss' AND feed_url IS NOT NULL").all(),
-    activeRules(env)
-  ]);
-  return Promise.all(sources.results.map((source) => collectSource(source, rules, env)));
+  await env.DB.prepare(`UPDATE collection_runs SET finished_at = ?, result = 'failed', error = 'Previous collection did not finish within 30 minutes'
+    WHERE result = 'running' AND started_at < ?`).bind(new Date().toISOString(), new Date(Date.now() - 30 * 60 * 1000).toISOString()).run();
+  const sources = await env.DB.prepare("SELECT id FROM media_sources WHERE enabled = 1 AND auto_publish = 1 AND access_mode = 'rss' AND feed_url IS NOT NULL ORDER BY id").all();
+  // Each source receives its own invocation/query budget. Await all children so
+  // the scheduled invocation cannot terminate them early; cap D1 concurrency.
+  const runs = [];
+  let cursor = 0;
+  async function collectNext() {
+    while (cursor < sources.results.length) {
+      const source = sources.results[cursor++];
+      try {
+        const response = await env.COLLECTOR.fetch(new Request('https://collector.internal/api/internal/collect-source', {
+          method: 'POST', headers: { authorization: `Bearer ${env.MONITORING_ADMIN_TOKEN}`, 'content-type': 'application/json' },
+          body: JSON.stringify({ source_id: source.id })
+        }));
+        if (!response.ok) throw new Error(`Collector HTTP ${response.status}`);
+        const run = await response.json();
+        if (run.source_id !== source.id || !['success', 'failed'].includes(run.result)) throw new Error('Invalid collector response');
+        runs.push(run);
+      } catch (error) {
+        const errorText = String(error).slice(0, 500);
+        const finishedAt = new Date().toISOString();
+        try {
+          await env.DB.batch([
+            env.DB.prepare("UPDATE media_sources SET last_attempt_at = ?, health_status = 'error', last_error = ? WHERE id = ?").bind(finishedAt, errorText, source.id),
+            env.DB.prepare("UPDATE collection_runs SET finished_at = ?, result = 'failed', error = ? WHERE source_id = ? AND result = 'running'").bind(finishedAt, errorText, source.id)
+          ]);
+        } catch (recordError) {
+          console.error('Unable to record collector failure', source.id, String(recordError));
+        }
+        runs.push({ source_id: source.id, result: 'failed', error: errorText });
+      }
+    }
+  }
+  await Promise.all(Array.from({ length: Math.min(4, sources.results.length) }, collectNext));
+  return runs;
 }
 
 async function monitoringStatus(env) {
@@ -940,6 +973,16 @@ export default {
     if (url.pathname === '/api/internal/collect' && request.method === 'POST') {
       if (!isInternalRequest(request, env)) return json({ error: 'Not found' }, 404, headers);
       return json({ runs: await collectAll(env) }, 200, headers);
+    }
+
+    if (url.pathname === '/api/internal/collect-source' && request.method === 'POST') {
+      if (!isInternalRequest(request, env)) return json({ error: 'Not found' }, 404, headers);
+      let body;
+      try { body = await request.json(); } catch { return json({ error: 'Invalid JSON' }, 400, headers); }
+      if (typeof body?.source_id !== 'string') return json({ error: 'source_id is required' }, 400, headers);
+      const source = await env.DB.prepare("SELECT * FROM media_sources WHERE id = ? AND enabled = 1 AND auto_publish = 1 AND access_mode = 'rss' AND feed_url IS NOT NULL").bind(body.source_id).first();
+      if (!source) return json({ error: 'Not found' }, 404, headers);
+      return json(await collectSource(source, await activeRules(env), env), 200, headers);
     }
 
     if (url.pathname === '/api/articles') {
