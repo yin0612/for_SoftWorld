@@ -893,7 +893,12 @@
 
 /* 9. 頁尾與回頂部 Footer & Back to top */
 .footer {
-  background: var(--bg-tertiary);
+  --text-primary: #352743;
+  --text-secondary: #4b3b5b;
+  --text-muted: #675474;
+  --border-color: #cdb6df;
+  --primary: #6f4f88;
+  background: #e5d5ef;
   color: var(--text-primary);
   padding: var(--spacing-3xl) 0 var(--spacing-xl);
   border-top: 1px solid var(--border-color);
@@ -910,20 +915,20 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  font-size: var(--font-size-lg);
+  font-size: 1rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--spacing-md);
 }
 
 .footer-desc {
-  font-size: var(--font-size-sm);
+  font-size: 0.8125rem;
   line-height: 1.65;
   color: var(--text-secondary);
 }
 
 .footer-links-title {
-  font-size: var(--font-size-md);
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: var(--spacing-md);
@@ -934,7 +939,7 @@
 }
 
 .footer-links a {
-  font-size: var(--font-size-sm);
+  font-size: 0.8125rem;
   color: var(--text-secondary);
   text-decoration: none;
   transition: color var(--transition-fast);
@@ -948,7 +953,7 @@
   text-align: center;
   padding-top: var(--spacing-lg);
   border-top: 1px solid var(--border-color);
-  font-size: var(--font-size-xs);
+  font-size: 0.6875rem;
   color: var(--text-muted);
 }
 
