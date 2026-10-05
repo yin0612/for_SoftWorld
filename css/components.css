@@ -893,12 +893,12 @@
 
 /* 9. 頁尾與回頂部 Footer & Back to top */
 .footer {
-  --text-primary: #352743;
-  --text-secondary: #4b3b5b;
-  --text-muted: #675474;
-  --border-color: #cdb6df;
-  --primary: #6f4f88;
-  background: #e5d5ef;
+  --text-primary: #ffffff;
+  --text-secondary: #ffffff;
+  --text-muted: #ffffff;
+  --border-color: #665178;
+  --primary: #ffffff;
+  background: #352443;
   color: var(--text-primary);
   padding: var(--spacing-3xl) 0 var(--spacing-xl);
   border-top: 1px solid var(--border-color);
@@ -947,6 +947,7 @@
 
 .footer-links a:hover {
   color: var(--text-primary);
+  text-decoration: underline;
 }
 
 .footer-bottom {
