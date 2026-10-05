@@ -1,4 +1,4 @@
-name: 更新金融科技 Google News 聚合資料
+name: 更新集團公司與金融科技 Google News 聚合資料
 
 on:
   schedule:
@@ -30,6 +30,7 @@ jobs:
 
       - name: 讀取白名單媒體並更新 Google News RSS metadata
         run: |
+          python scripts/company_coverage.py --check
           python -m unittest discover -s scripts -p 'test_*.py'
           python scripts/update_fintech_aggregated.py
 
@@ -43,4 +44,4 @@ jobs:
           commit_user_name: "GitHub Actions Bot"
           commit_user_email: "actions@github.com"
           branch: main
-          file_pattern: "data/fintech-aggregated.json data/source-verification.json"
+          file_pattern: "data/fintech-aggregated.json data/source-verification.json data/company-coverage-health.json"

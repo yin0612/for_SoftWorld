@@ -7,6 +7,7 @@ on:
   push:
     paths:
       - 'js/**'
+      - 'config/**'
       - 'worker/src/**'
       - 'scripts/**'
       - 'tests/**'
@@ -30,6 +31,7 @@ jobs:
           node-version: '22'
       - name: 檢查同步、日期、來源與資料完整性
         run: |
+          python scripts/company_coverage.py --check
           node --test tests/*.test.mjs worker/src/*.test.mjs
           python -m unittest discover -s scripts -p 'test_*.py'
       - name: 檢查正式網站更新狀態

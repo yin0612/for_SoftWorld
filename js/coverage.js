@@ -1,16 +1,4 @@
-/** 智冠集團公司與產品分項覆蓋，依各項明確名稱／品牌別名判定。 */
-const COVERAGE_COMPANIES = [
-    ['智冠', ['智冠', 'Soft-World', 'Soft World']],
-    ['藍新', ['藍新', 'NewebPay']],
-    ['一帆數位／發票大師', ['一帆數位', '發票大師']],
-    ['MyCard', ['MyCard', 'My Card']],
-    ['簡單支付', ['簡單支付', '簡單付', '簡單行動支付', 'ezPay']],
-    ['簡單收', ['ezAIO', 'ezAIO簡單收', '簡單收']],
-    ['中華網龍', ['中華網龍']],
-    ['遊戲新幹線', ['遊戲新幹線']],
-    ['智凡迪', ['智凡迪']],
-    ['智樂堂', ['智樂堂']]
-];
+/** 智冠集團公司與品牌分項覆蓋；名單來自 coverage-companies.js。 */
 
 const COVERAGE_MEDIA_NAMES = [
     ['money.udn.com', '經濟日報'], ['udn.com', '聯合新聞網'],
@@ -76,7 +64,7 @@ function coverageUrl(value) {
 }
 
 function getCoverageStats(articles) {
-    return COVERAGE_COMPANIES.map(([name, aliases]) => {
+    return COVERAGE_COMPANIES.map(({ id, name, aliases, reference_url }) => {
         const seen = new Set();
         const matched = articles.filter((article) => {
             if (!coverageMatches(article, aliases)) return false;
@@ -94,7 +82,7 @@ function getCoverageStats(articles) {
             if (!sources.has(key)) sources.set(key, { name: source, articles: [] });
             sources.get(key).articles.push(article);
         });
-        return { name, total: matched.length, unknown: matched.filter((article) => !coverageSourceName(article)).length,
+        return { id, name, reference_url, total: matched.length, unknown: matched.filter((article) => !coverageSourceName(article)).length,
             sources: [...sources.values()].sort((a, b) => b.articles.length - a.articles.length || a.name.localeCompare(b.name, 'zh-Hant')) };
     });
 }
@@ -102,16 +90,35 @@ function getCoverageStats(articles) {
 function renderCompanyCoverage(articles) {
     const host = document.getElementById('companyCoverage');
     if (!host) return;
-    if (!articles.length) {
-        host.innerHTML = '<p class="method-muted">尚無可分析的新聞資料，等待資料載入後更新企業媒體覆蓋。</p>';
-        return;
-    }
     const rows = getCoverageStats(articles);
     host.innerHTML = `<div class="coverage-table-wrap"><table class="method-table coverage-table">
-        <caption class="sr-only">企業、旗下公司與產品媒體覆蓋及報導清單</caption>
-        <thead><tr><th scope="col">企業／公司／產品</th><th scope="col">報導媒體數</th><th scope="col">已收錄報導</th><th scope="col">媒體與新聞</th></tr></thead>
+        <caption class="sr-only">企業、公司、品牌與機構媒體覆蓋及報導清單</caption>
+        <thead><tr><th scope="col">企業／公司／品牌／機構</th><th scope="col">報導媒體數</th><th scope="col">已收錄報導</th><th scope="col">媒體與新聞</th><th scope="col">來源與更新檢查</th></tr></thead>
         <tbody>${rows.map((row) => `<tr><th scope="row">${coverageEscape(row.name)}</th><td><strong>${row.sources.length}</strong> 家</td><td>${row.total} 篇${row.unknown ? `<br><small>其中 ${row.unknown} 篇未提供來源</small>` : ''}</td><td>${row.sources.length ? `<details><summary>查看 ${row.sources.length} 家媒體</summary><div class="coverage-sources">${row.sources.map((source) => `<details><summary>${coverageEscape(source.name)} · ${source.articles.length} 篇</summary><ul>${source.articles.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).map((article) => {
             const url = coverageUrl(article.url);
             return `<li><span class="chart-card-subtitle">${coverageEscape(article.date || '日期未提供')} · ${article.sourceKind === 'google_news_rss' ? 'Google News 聚合' : 'RSS'}</span><br>${url ? `<a href="${coverageEscape(url)}" target="_blank" rel="noopener noreferrer">${coverageEscape(article.title)}</a>` : coverageEscape(article.title)}</li>`;
-        }).join('')}</ul></details>`).join('')}</div></details>` : '目前未收錄具名媒體報導'}</td></tr>`).join('')}</tbody></table></div>`;
+        }).join('')}</ul></details>`).join('')}</div></details>` : (articles.length ? '近兩個月未收錄具名媒體報導' : '等待新聞資料載入') }</td><td><a href="${coverageEscape(coverageUrl(row.reference_url))}" target="_blank" rel="noopener noreferrer">公司／品牌資料依據</a><br><span data-company-check="${coverageEscape(row.id)}">正在讀取更新檢查…</span></td></tr>`).join('')}</tbody></table></div>`;
+    renderCompanyChecks();
+}
+
+let companyChecksPromise;
+let companyChecksExpires = 0;
+function renderCompanyChecks() {
+    if (!companyChecksPromise || Date.now() >= companyChecksExpires) {
+        companyChecksExpires = Date.now() + 5 * 60 * 1000;
+        companyChecksPromise = fetch('data/company-coverage-health.json', { cache: 'no-store', signal: AbortSignal.timeout(15000) })
+            .then(response => { if (!response.ok) throw Error('report unavailable'); return response.json(); })
+            .catch(() => { companyChecksPromise = null; return null; });
+    }
+    companyChecksPromise.then(report => {
+        document.querySelectorAll('[data-company-check]').forEach(node => {
+            const row = report?.companies?.find(company => company.id === node.dataset.companyCheck);
+            const checked = Date.parse(row?.checked_at);
+            if (!row || !Number.isFinite(checked)) { node.textContent = '來源檢查暫時無法讀取'; return; }
+            const labels = { passed: '專項查詢正常', empty: '專項查詢正常，未回傳合規報導', unavailable: '查詢失敗，待下次重試' };
+            const stale = checked > Date.now() || Date.now() - checked > 8 * 60 * 60 * 1000;
+            const feed = coverageUrl(row.feed_url);
+            node.innerHTML = `${coverageEscape(labels[row.status] || '來源狀態待確認')}${stale ? ' · 檢查已逾期' : ''}<br><small>${coverageEscape(new Date(checked).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' }))}（台北）</small>${feed ? `<br><a href="${coverageEscape(feed)}" target="_blank" rel="noopener noreferrer">新聞來源查詢</a>` : ''}`;
+        });
+    });
 }

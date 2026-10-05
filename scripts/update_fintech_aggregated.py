@@ -14,12 +14,14 @@ import urllib.request
 import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
+from company_coverage import COMPANIES
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_CONFIG = ROOT / "config" / "fintech_media_sources.json"
 RULE_CONFIG = ROOT / "config" / "monitoring_rules.json"
 OUTPUT = ROOT / "data" / "fintech-aggregated.json"
+COMPANY_HEALTH_OUTPUT = ROOT / "data" / "company-coverage-health.json"
 TAIPEI = timezone(timedelta(hours=8))
 MAX_ITEMS_PER_SOURCE = 80
 
@@ -45,7 +47,7 @@ QUERY_STABLECOIN_TERMS = ("穩定幣", "stablecoin", "USDT", "USDC", "鏈上支�
 QUERY_COMPETITOR_TERMS = ("遊戲", "遊戲橘子", "鈊象", "宇峻奧汀", "網銀國際", "Garena", "騰訊", "網易", "NEXON", "SEGA", "CAPCOM")
 QUERY_INDUSTRY_TERMS = ("遊戲", "遊戲市場", "遊戲產值", "Steam", "PS5", "SWITCH", "電競", "雲端遊戲", "GameFi", "數位廣告", "Martech", "發票載具", "發票存摺", "AI", "Google", "Meta", "LINE", "TikTok")
 QUERY_MOBILE_GAME_TERMS = ("天堂M", "神魔之塔", "寒霜啟示錄", "傳說對決", "勝利女神 妮姬", "崩壞 星穹鐵道", "楓之谷M", "SD鋼彈", "鳴潮", "明日方舟", "Pokemon GO", "Roblox")
-QUERY_SOFTWORLD_TERMS = ("智冠", "一帆數位", "發票大師", "MyCard", "中華網龍", "網龍", "遊戲新幹線")
+QUERY_SOFTWORLD_TERMS = tuple(dict.fromkeys(company['aliases'][0] for company in COMPANIES))
 QUERY_OEN_TERMS = ("應援科技", "應援金流", "Oen", "Oen Tech")
 AGGREGATE_QUERIES = (
     # 智冠／MyCard 未提供可驗證官方 RSS 時，僅以其官方網域的 Google
@@ -99,6 +101,28 @@ def load_huike_rules() -> list[dict]:
         if rule.get("folder_id") in {"folder_1", "folder_3", "folder_4", "folder_6"}
         or rule.get("id") in {"softworld-fintech-services", "taiwan-payment-peer-oen"}
     ]
+
+
+def source_queries(source: dict):
+    """Keep rare brands from being crowded out by a single broad OR query."""
+    selected = set(source.get('query_topics') or [])
+    queries = [(topic, terms, None) for topic, terms in AGGREGATE_QUERIES if not selected or topic in selected]
+    if source.get('company_queries'):
+        queries.extend(('company:' + company['id'], tuple('"' + alias + '"' for alias in company['aliases']), company)
+                       for company in COMPANIES)
+    return queries
+
+
+def company_check(company, feed_url, fetched_at, rows, error=None):
+    # Only count items that explicitly name this company and passed publisher,
+    # timestamp and classification checks. No returned items is a valid query.
+    matched = [row for row in rows if any(contains_term(row['title'], alias) for alias in company['aliases'])]
+    return { 'id': company['id'], 'name': company['name'], 'checked_at': fetched_at,
+             'status': 'unavailable' if error else 'passed' if matched else 'empty',
+             'feed_url': feed_url, 'reference_url': company['reference_url'],
+             'article_count': len({row['url'] for row in matched}),
+             'publisher_domains': sorted({row['publisher_domain'] for row in matched}),
+             **({'error': error} if error else {}) }
 
 
 def classify_huike_title(title: str, rules: list[dict]) -> list[tuple[dict, list[str]]]:
@@ -235,17 +259,15 @@ def main() -> int:
     fetched_at = now.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
     articles: dict[str, dict] = {}
     errors: list[dict] = []
+    company_checks: list[dict] = []
     succeeded = 0
     for source in config.get("sources", []):
         if not source.get("enabled") or not source.get("auto_publish") or source.get("access_mode") != "google_news_rss":
             continue
         domain = (source.get("domains") or [""])[0]
-        selected_topics = set(source.get("query_topics") or [])
         # 分主題查詢，避免只取媒體最新的一小段泛新聞內容；競業／產業
         # 結果仍須通過完整規則，且只保留公開 metadata。
-        for _topic_name, topic_terms in AGGREGATE_QUERIES:
-            if selected_topics and _topic_name not in selected_topics:
-                continue
+        for _topic_name, topic_terms, company in source_queries(source):
             feed_url = google_feed_url(domain, start.isoformat(), end.isoformat(), topic_terms)
             try:
                 request = urllib.request.Request(feed_url, headers={"User-Agent": "SoftWorldMonitoring/1.0"})
@@ -255,6 +277,10 @@ def main() -> int:
                     errors.append({"source_id": source["id"], "topic": _topic_name, "error": error})
                 else:
                     succeeded += 1
+                if company:
+                    rows = [row for row in rows if any(contains_term(row['title'], alias) for alias in company['aliases'])]
+                    rows = [row for row in rows if start.isoformat() <= row['published_at'][:10] <= end.isoformat()]
+                    company_checks.append(company_check(company, feed_url, fetched_at, rows, error))
                 for row in rows:
                     existing = articles.get(row["url"])
                     if existing is None:
@@ -275,6 +301,8 @@ def main() -> int:
                     ]))[:20]
             except Exception as exc:  # noqa: BLE001 - record per-source failure, continue others
                 errors.append({"source_id": source["id"], "topic": _topic_name, "error": str(exc)[:240]})
+                if company:
+                    company_checks.append(company_check(company, feed_url, fetched_at, [], str(exc)[:240]))
     if succeeded == 0:
         raise RuntimeError("All aggregation queries failed; preserving the previous published snapshot.")
     if errors and OUTPUT.exists():
@@ -299,6 +327,13 @@ def main() -> int:
     temporary = OUTPUT.with_suffix(".tmp")
     temporary.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(OUTPUT)
+    if company_checks:
+        health = {'checked_at': fetched_at, 'range': payload['range'],
+                  'scope': 'Company Google News RSS queries; approved publisher metadata, not article factual verification',
+                  'companies': company_checks}
+        health_tmp = COMPANY_HEALTH_OUTPUT.with_suffix('.tmp')
+        health_tmp.write_text(json.dumps(health, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
+        health_tmp.replace(COMPANY_HEALTH_OUTPUT)
     print(json.dumps({"article_count": len(ordered), "errors": len(errors), "output": str(OUTPUT)}, ensure_ascii=False))
     return 0
 

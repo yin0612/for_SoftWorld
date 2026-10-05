@@ -19,6 +19,10 @@
 
 ## 初始部署或更新
 
+企業媒體覆蓋名單統一維護於 `config/company_coverage.json`，包括 2026-10-05 使用者附圖中的公司、品牌、基金會與音樂中心，共 16 項（含原有簡單收）。修改後執行 `python scripts/company_coverage.py` 產生前端名單；CI 檢查前後端一致性。每個項目都有獨立 Google News RSS 精準查詢，僅接受核准出版者網域、有效發布時間及集團規則命中的新聞；普通英文 READ 等泛詞不作別名。報告 `data/company-coverage-health.json` 與聚合快照在同一次排程更新並提交。表格顯示資料依據、查詢連結及檢查時間；查詢正常但沒有合規結果也保留 0 列。全站每日品質檢查會偵測漏項、查詢失敗或超過 8 小時未更新。
+
+公司專項查詢沿用聚合排程，台北時間每日 02:00、08:00、12:00、14:00、17:00、20:00 更新；GitHub Actions 可能延遲執行。官方 RSS 每小時收集，頁面可見時每 5 分鐘同步。既有 D1 集團關鍵字以 `migrations/0006_company_coverage.sql` 更新，與 RSS 備援及 Google 聚合共用最新公司別名；Google 索引查詢不保證收錄所有媒體報導。
+
 1. 在 `wrangler.jsonc` 設定 D1 資料庫 ID 與 GitHub Pages 的 `CORS_ORIGIN`。
 2. 若 D1 是舊版資料庫，先各執行一次 migration；全新資料庫不需要這兩步：
 

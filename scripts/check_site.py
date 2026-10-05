@@ -3,6 +3,7 @@ import json
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from company_coverage import COMPANIES
 
 ROOT = Path(__file__).resolve().parents[1]
 API = "https://softworld-monitoring-api.media-monitoring-worker.workers.dev"
@@ -66,6 +67,27 @@ def inspect_dataset(payload, status, now):
         "articles_checked": len(rows), "has_more": payload.get("has_more", False),
         "errors": sorted(set(errors)), "warnings": warnings}
 
+def inspect_company_checks(payload, now):
+    errors = []
+    rows = payload.get('companies', [])
+    expected = {company['id'] for company in COMPANIES}
+    if {row.get('id') for row in rows} != expected or len(rows) != len(expected):
+        errors.append('Company source checks are incomplete or duplicated')
+    for row in rows:
+        name = row.get('name', row.get('id', 'unknown'))
+        if not row.get('feed_url', '').startswith('https://news.google.com/rss/search?'):
+            errors.append('Company news source is missing: ' + name)
+        if row.get('status') not in ('passed', 'empty'):
+            errors.append('Company source query failed: ' + name)
+        try:
+            checked = datetime.fromisoformat(row['checked_at'].replace('Z', '+00:00'))
+            if not 0 <= (now - checked).total_seconds() <= 28800:
+                errors.append('Company source query is overdue: ' + name)
+        except (KeyError, ValueError, TypeError):
+            errors.append('Company source check time is invalid: ' + name)
+    return errors
+
+
 def main():
     payload = load(API + "/api/articles?limit=2000&debug=1")
     rows = list(payload.get("articles", []))
@@ -80,7 +102,16 @@ def main():
         rows.extend(page.get("articles", []))
     payload["articles"] = rows
     payload["has_more"] = False
-    report = inspect_dataset(payload, load(API + "/api/status"), datetime.now(timezone.utc))
+    now = datetime.now(timezone.utc)
+    report = inspect_dataset(payload, load(API + "/api/status"), now)
+    try:
+        checks = json.loads((ROOT / 'data/company-coverage-health.json').read_text(encoding='utf-8'))
+        report['company_queries_checked'] = len(checks.get('companies', []))
+        report['errors'].extend(inspect_company_checks(checks, now))
+    except (OSError, ValueError):
+        report['errors'].append('Company source check report is unavailable')
+    if report['errors']:
+        report['result'] = 'failed'
     (ROOT / "data" / "site-health.json").write_text(json.dumps(report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, ensure_ascii=False))
     return report["result"] != "passed"

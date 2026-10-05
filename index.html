@@ -484,7 +484,8 @@
 
             <div class="chart-card animate-on-scroll" id="chartCoverageCard">
                 <div class="chart-card-header"><h3 class="chart-card-title">📡 企業媒體覆蓋</h3></div>
-                <p class="method-muted">僅統計智冠及旗下公司與產品：依標題、RSS 摘要與命中詞中的公司／產品名稱判定。智冠、藍新、一帆數位／發票大師、MyCard、簡單支付等分項列出；各項獨立計算，展開媒體可查看對應新聞。</p>
+                <p class="method-muted">依智冠事業版圖，分項列出公司、品牌、基金會及音樂中心；依標題、RSS 摘要與命中詞中的明確名稱判定。展開媒體可查看新聞及原文連結，右欄可查看資料依據與逐項來源檢查。</p>
+                <p class="method-muted">自動更新：官方 RSS 每小時收集；公司新聞查詢於台北時間 02:00、08:00、12:00、14:00、17:00、20:00 排程更新（實際執行可能延遲）。本頁每 5 分鐘同步最新資料；各項檢查時間見右欄。</p>
                 <div id="companyCoverage" aria-live="polite"></div>
                 <details><summary>RSS 與 Google News 來源檢查</summary><div id="sourceVerification" aria-live="polite">正在讀取來源檢查報告…</div></details>
                 <p class="method-muted">僅代表目前已收錄新聞的來源覆蓋；0 家表示未收錄，不代表沒有報導。已設定的媒體依網域合併 RSS 頻道與 Google 名稱，其餘依來源名稱辨識；相同 URL 去重，聚合與原文不同 URL 仍可能重複。同篇可計入多家企業，家數不可相加。</p>
@@ -735,7 +736,8 @@
     <!-- JavaScript -->
     <script src="js/data.js?v=20261002_01"></script>
     <script src="js/animations.js?v=20261001_05"></script>
-    <script src="js/coverage.js?v=20261005_01"></script>
+    <script src="js/coverage-companies.js?v=20261005_01"></script>
+    <script src="js/coverage.js?v=20261005_02"></script>
     <script src="js/charts.js?v=20261001_05"></script>
     <script src="js/compare.js?v=20261002_01"></script>
     <script src="js/refresh.js?v=20261001_05"></script>

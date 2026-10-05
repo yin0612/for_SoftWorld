@@ -1,0 +1,157 @@
+// Generated from config/company_coverage.json by scripts/company_coverage.py.
+const COVERAGE_COMPANIES = [
+  {
+    "id": "softworld",
+    "name": "智冠科技",
+    "aliases": [
+      "智冠",
+      "Soft-World",
+      "Soft World"
+    ],
+    "reference_url": "https://www.soft-world.com/Investors"
+  },
+  {
+    "id": "mycard",
+    "name": "MyCard",
+    "aliases": [
+      "MyCard",
+      "My Card"
+    ],
+    "reference_url": "https://www.soft-world.com/Services"
+  },
+  {
+    "id": "chinesegamer",
+    "name": "中華網龍",
+    "aliases": [
+      "中華網龍",
+      "Chinesegamer"
+    ],
+    "reference_url": "https://www.soft-world.com/Enterprises/40"
+  },
+  {
+    "id": "zealot",
+    "name": "智樂堂",
+    "aliases": [
+      "智樂堂",
+      "Zealot Digital"
+    ],
+    "reference_url": "https://www.soft-world.com/Enterprises/43"
+  },
+  {
+    "id": "gameflier",
+    "name": "遊戲新幹線",
+    "aliases": [
+      "遊戲新幹線",
+      "Game Flier"
+    ],
+    "reference_url": "https://www.soft-world.com/Enterprises/41"
+  },
+  {
+    "id": "gamefirst",
+    "name": "智凡迪",
+    "aliases": [
+      "智凡迪",
+      "Game First International"
+    ],
+    "reference_url": "https://www.soft-world.com/Enterprises/42"
+  },
+  {
+    "id": "neweb",
+    "name": "藍新科技／藍新金流",
+    "aliases": [
+      "藍新",
+      "NewebPay"
+    ],
+    "reference_url": "https://www.neweb.com.tw/milestone"
+  },
+  {
+    "id": "wecan",
+    "name": "威肯金融",
+    "aliases": [
+      "威肯金融",
+      "威力付",
+      "WecanPay"
+    ],
+    "reference_url": "https://www.soft-world.com/About/History?EKind=1"
+  },
+  {
+    "id": "ezpay",
+    "name": "簡單行動支付／ezPay 簡單付",
+    "aliases": [
+      "簡單支付",
+      "簡單付",
+      "簡單行動支付",
+      "ezPay"
+    ],
+    "reference_url": "https://www.soft-world.com/Enterprises/47"
+  },
+  {
+    "id": "cservice",
+    "name": "群心網路",
+    "aliases": [
+      "群心網路",
+      "CService"
+    ],
+    "reference_url": "https://www.neweb.com.tw/milestone"
+  },
+  {
+    "id": "efun",
+    "name": "一帆數位／發票大師",
+    "aliases": [
+      "一帆數位",
+      "發票大師"
+    ],
+    "reference_url": "https://www.soft-world.com/Enterprises/1053"
+  },
+  {
+    "id": "read",
+    "name": "智酷媒體／RE:AD",
+    "aliases": [
+      "智酷媒體",
+      "RE:AD Media",
+      "RE：AD Media"
+    ],
+    "reference_url": "https://www.soft-world.com/SoftworldFile/SWFL20250808164602.pdf"
+  },
+  {
+    "id": "myserver",
+    "name": "智雲科技／絕世好雲",
+    "aliases": [
+      "智雲科技",
+      "絕世好雲",
+      "Myserver"
+    ],
+    "reference_url": "https://www.myserver.asia/about.html"
+  },
+  {
+    "id": "foundation",
+    "name": "智冠科技文化藝術基金會",
+    "aliases": [
+      "智冠科技文化藝術基金會",
+      "智冠文化藝術基金會",
+      "智冠基金會"
+    ],
+    "reference_url": "https://www.soft-world.com/Connect/Org"
+  },
+  {
+    "id": "music",
+    "name": "遊戲音樂創作基地／智冠音樂中心",
+    "aliases": [
+      "遊戲音樂創作基地",
+      "智冠音樂多媒體中心",
+      "智冠數位音樂中心",
+      "智冠音樂中心"
+    ],
+    "reference_url": "https://www.soft-world.com/Services/30"
+  },
+  {
+    "id": "ezaio",
+    "name": "簡單收／ezAIO",
+    "aliases": [
+      "ezAIO",
+      "ezAIO簡單收",
+      "簡單收"
+    ],
+    "reference_url": "https://www.soft-world.com/About/4"
+  }
+];

@@ -1,11 +1,11 @@
 {
-  "version": "2026-09-30-vasp-clean-v1",
+  "version": "2026-10-05-company-coverage-v1",
   "source_document": "智冠年度監測關鍵字與媒體文件；金融科技&穩定幣監測/關鍵字清單.xlsx；金融科技&穩定幣監測/監測關鍵字及媒體.docx；Google Play手遊最高營收排行-0918.docx",
   "matching_capability": "僅比對已授權 RSS 條目的標題、摘要與媒體在 RSS 中提供的內容；不擷取原新聞網站頁面。",
   "description": "依原始 Word、金融科技關鍵字清單與媒體清單資料化。required_any_groups 的每個群組至少須命中一詞；A+B 規則即為兩個群組皆須命中。穩定幣採獨立高精準規則；奧丁丁／OwlPay 需搭配穩定幣、鏈上支付、加密資產或金融科技語境，不把泛稱加密貨幣直接視為穩定幣。高營收手遊與重點手遊則僅以直接遊戲名稱或明確別名比對，不公開排行、合作狀態或內部標記。",
   "automatic_publication_rule_ids": ["softworld-brand","softworld-games","softworld-ip","softworld-fintech-services","taiwan-payment-peer-oen","newebpay-brand","taiwan-payment-core","taiwan-payment-authority","international-fintech","stablecoin-core","stablecoin-settlement","stablecoin-brand","stablecoin-circle","stablecoin-bitopro","stablecoin-vasp","competitor-brand","competitor-tw-game","competitor-global-game","industry-game-platform","industry-game-market","industry-platform-business","industry-new-business","industry-einvoice","industry-martech","mobile-top-grossing-games","mobile-game-watchlist","mobile-game-context-watchlist"],
   "automatic_publication_allowed_terms": {
-    "softworld-brand": ["智冠科技","智冠集團","智冠","MyCard","台灣淘米","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團"],
+    "softworld-brand": ["智冠科技","智冠集團","智冠","MyCard","中華網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團","Soft-World","Soft World","My Card","Chinesegamer","Zealot Digital","Game Flier","Game First International","藍新","NewebPay","威肯金融","威力付","WecanPay","簡單支付","簡單付","簡單行動支付","ezPay","群心網路","CService","發票大師","智酷媒體","RE:AD Media","RE：AD Media","智雲科技","絕世好雲","Myserver","智冠科技文化藝術基金會","智冠文化藝術基金會","智冠基金會","遊戲音樂創作基地","智冠音樂多媒體中心","智冠數位音樂中心","智冠音樂中心","ezAIO","ezAIO簡單收","簡單收"],
     "softworld-fintech-services": ["一帆數位","發票大師","簡單付","簡單支付","簡單行動支付"],
     "taiwan-payment-peer-oen": ["應援科技","應援金流","Oen Tech","Oen應援科技","OEN應援科技","oen.tw"],
     "newebpay-brand": ["藍新科技","藍新金流","NewebPay","簡單付","ezPay","簡單行動支付","ezAIO簡單收","ezAIO","簡單收","歐付寶","O'Pay","OPay","橘子支","橘子支付","街口支付","街口電子支付","綠界科技","ECPay","全支付","全盈支付","全盈+PAY","台灣Pay","悠遊付","悠遊卡","一卡通","iPASS MONEY","LINE Pay","LINE Pay Money","LINE Bank","彈性付","Pi拍錢包","PChomepay","Hami Pay","friDay錢包","蝦皮支付","電子票證","MaiCoin Pay","TWQR"],
@@ -33,7 +33,7 @@
     {"id":"folder_6","name":"穩定幣與鏈上結算","region_scope":["TW","CN","HK","GLOBAL"],"priority":"high","description":"穩定幣、代幣化貨幣與鏈上支付結算動態"}
   ],
   "rules": [
-    {"id":"softworld-brand","folder_id":"folder_1","display_name":"智冠集團 單一關鍵字","scope":"full_text","scope_note":"RSS 標題與摘要","required_any_groups":[["智冠科技","智冠集團","智冠","MyCard","台灣淘米","中華網龍","網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團","台鋼"]],"exclude_any":[]},
+    {"id":"softworld-brand","folder_id":"folder_1","display_name":"智冠集團 單一關鍵字","scope":"full_text","scope_note":"RSS 標題與摘要","required_any_groups":[["智冠科技","智冠集團","智冠","MyCard","中華網龍","網龍","遊戲新幹線","智凡迪","智樂堂","一帆數位","台鋼集團","台鋼","Soft-World","Soft World","My Card","Chinesegamer","Zealot Digital","Game Flier","Game First International","藍新","NewebPay","威肯金融","威力付","WecanPay","簡單支付","簡單付","簡單行動支付","ezPay","群心網路","CService","發票大師","智酷媒體","RE:AD Media","RE：AD Media","智雲科技","絕世好雲","Myserver","智冠科技文化藝術基金會","智冠文化藝術基金會","智冠基金會","遊戲音樂創作基地","智冠音樂多媒體中心","智冠數位音樂中心","智冠音樂中心","ezAIO","ezAIO簡單收","簡單收"]],"exclude_any":[]},
     {"id":"softworld-games","folder_id":"folder_1","display_name":"智冠集團 遊戲與產品","scope":"full_text","scope_note":"RSS 標題與摘要；遊戲 + 產品名稱","required_any_groups":[["遊戲"],["神嵐遊戲","樂聚多科技","遊樂多PLAY","威龍線上","超級遊戲","熊樂子","游龍在線","東方龍數位","吞食天地","戀愛盒子","黃易","黃易群俠傳","中華英雄","尋秦記","武林群俠傳","天子傳奇","金庸群俠傳","星際擴散","落櫻幻夢譚","落櫻散華抄","Fate Grand Order繁中版","FGO","IDOLiSH7偶像星願","勇者鬥惡龍戰略指揮家","TRAHA：天選者","吞食天地2：誕生Reborn","星躍物語Star Leaping Story","咒術迴戰幻影夜行","三國群英傳M","古劍奇譚網路版","新天龍八部","完美世界2","信長之野望","純白和弦","指劍江湖","GFi賦能平台","風色幻想","漢堂","天地劫","炎龍騎士團","MCL電子競技","MCL","精靈M","PristonTale","棕色塵埃2","遺跡傳說","LostDungeon","星之後裔2","上古世紀戰爭","ArcheageWar","飄流幻境Re：星之方舟","飄流幻境Re:星之方舟"]],"exclude_any":[]},
     {"id":"softworld-ip","folder_id":"folder_1","display_name":"智冠集團 IP 與 IP 授權","scope":"full_text","scope_note":"RSS 標題與摘要；IP/IP 授權 + 核心 IP","required_any_groups":[["IP","IP授權"],["吞食天地","黃易","黃易群俠傳","天地劫","武林群俠傳","炎龍騎士團","戀愛盒子","飄流幻境"]],"exclude_any":[]},
     {"id":"softworld-fintech-services","folder_id":"folder_2","display_name":"智冠金融服務","scope":"full_text","scope_note":"RSS 標題與摘要；一帆數位、發票大師與簡單支付服務","required_any_groups":[["一帆數位","發票大師","簡單付","簡單支付","簡單行動支付"]],"exclude_any":[]},
