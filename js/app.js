@@ -862,13 +862,15 @@ const GAMING_MODE_RULE_IDS = {
     softworld: new Set(['softworld-brand', 'softworld-games', 'softworld-ip']),
     competitor: new Set(['competitor-tw-game', 'competitor-global-game']),
     mobile: new Set(['mobile-top-grossing-games', 'mobile-game-watchlist', 'mobile-game-context-watchlist']),
-    platform: new Set(['industry-game-platform'])
+    platform: new Set(['industry-game-platform']),
+    approval: new Set(['industry-cn-game-approval'])
 };
 const GAMING_RULE_IDS = new Set([
     ...GAMING_MODE_RULE_IDS.softworld,
     ...GAMING_MODE_RULE_IDS.competitor,
     ...GAMING_MODE_RULE_IDS.mobile,
-    ...GAMING_MODE_RULE_IDS.platform
+    ...GAMING_MODE_RULE_IDS.platform,
+    ...GAMING_MODE_RULE_IDS.approval
 ]);
 const STABLECOIN_RULE_IDS = new Set(['stablecoin-core', 'stablecoin-settlement', 'stablecoin-brand', 'stablecoin-circle', 'stablecoin-bitopro', 'stablecoin-vasp']);
 const STABLECOIN_PRIORITY_TERMS = ['奧丁丁', 'OwlPay'];
@@ -1994,6 +1996,7 @@ function getGamingCategoryLabels(news) {
     if (articleHasAnyMonitoringRule(news, GAMING_MODE_RULE_IDS.competitor)) labels.push('遊戲競業');
     if (articleHasAnyMonitoringRule(news, GAMING_MODE_RULE_IDS.mobile)) labels.push('高營收手遊');
     if (articleHasAnyMonitoringRule(news, GAMING_MODE_RULE_IDS.platform)) labels.push('平台／主機／電競');
+    if (articleHasAnyMonitoringRule(news, GAMING_MODE_RULE_IDS.approval)) labels.push('中國遊戲版號與審批');
     return labels.length ? labels : ['遊戲產業'];
 }
 
@@ -2024,7 +2027,8 @@ function renderGamingKeywordPills(articles) {
         { label: '智冠集團與旗下遊戲', ruleIds: GAMING_MODE_RULE_IDS.softworld },
         { label: '遊戲競業', ruleIds: GAMING_MODE_RULE_IDS.competitor },
         { label: '高營收手遊', ruleIds: GAMING_MODE_RULE_IDS.mobile },
-        { label: '平台、主機與電競', ruleIds: GAMING_MODE_RULE_IDS.platform }
+        { label: '平台、主機與電競', ruleIds: GAMING_MODE_RULE_IDS.platform },
+        { label: '中國遊戲版號與審批', ruleIds: GAMING_MODE_RULE_IDS.approval }
     ];
     scopes.forEach((scope) => {
         const pill = document.createElement('span');
@@ -2041,6 +2045,7 @@ function renderGamingSummary(summary, articles) {
     const competitorCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.competitor)).length;
     const mobileCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.mobile)).length;
     const platformCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.platform)).length;
+    const approvalCount = articles.filter((article) => articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS.approval)).length;
     const sources = new Set(articles.map(coverageSourceName).filter(Boolean));
     const aggregatedCount = articles.filter((article) => article.sourceKind === 'google_news_rss').length;
 
@@ -2054,7 +2059,7 @@ function renderGamingSummary(summary, articles) {
 
     const state = document.createElement('p');
     state.className = 'fintech-summary-state';
-    state.textContent = `官方 RSS＋Google News RSS 聚合資料；資料範圍 ${range.from} 至 ${range.to}。只納入智冠集團與旗下遊戲、遊戲競業、高營收手遊／重點手遊、平台／主機／電競等精準規則；手遊僅以直接遊戲名稱或明確別名命中。每則新聞皆保留來源類型、原文連結與命中詞。${sources.size ? ` 可追溯來源 ${sources.size} 個。` : ''}${aggregatedCount ? ` 其中 ${aggregatedCount} 篇為 Google News RSS 聚合，非媒體官方 RSS。` : ''}${monitoringLoadState?.degraded ? ' 資料庫讀取暫時受限，目前僅顯示已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。' : ''}`;
+    state.textContent = `官方 RSS＋Google News RSS 聚合資料；資料範圍 ${range.from} 至 ${range.to}。其中 ${approvalCount} 篇為中國遊戲版號與審批新聞。只納入智冠集團與旗下遊戲、遊戲競業、高營收手遊／重點手遊、平台／主機／電競、中國遊戲版號與審批等精準規則；手遊僅以直接遊戲名稱或明確別名命中。每則新聞皆保留來源類型、原文連結與命中詞。${sources.size ? ` 可追溯來源 ${sources.size} 個。` : ''}${aggregatedCount ? ` 其中 ${aggregatedCount} 篇為 Google News RSS 聚合，非媒體官方 RSS。` : ''}${monitoringLoadState?.degraded ? ' 資料庫讀取暫時受限，目前僅顯示已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。' : ''}`;
     contextContent.appendChild(state);
     summary.appendChild(contextDetails);
 

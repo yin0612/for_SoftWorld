@@ -94,7 +94,7 @@ const LIVE_STABLECOIN_SOURCES = LIVE_DOMESTIC_SOURCES.filter((source) => [
 // 競業／產業分類也提供官方 RSS 的即時唯讀補位。來源限定在遊戲、科技、
 // 財經與區塊鏈等已驗證的台灣 RSS，避免把所有泛新聞來源套用到產業規則。
 const LIVE_HUIKE_SOURCE_IDS = [
-  'fourgamers', 'bahamut-gnn', 'gamebase', 'technews', 'ithome', 'gvm',
+  'fourgamers', 'bahamut-gnn', 'gamebase', 'technews', 'ithome', 'ithome-cn', 'gvm',
   'techorange', 'udn-money-industry', 'cna-finance', 'cna-technology',
   'ltn-business', 'blocktempo', 'abmedia'
 ];

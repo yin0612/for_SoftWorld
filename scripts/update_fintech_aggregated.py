@@ -49,6 +49,7 @@ QUERY_INDUSTRY_TERMS = ("遊戲", "遊戲市場", "遊戲產值", "Steam", "PS5"
 QUERY_MOBILE_GAME_TERMS = ("天堂M", "神魔之塔", "寒霜啟示錄", "傳說對決", "勝利女神 妮姬", "崩壞 星穹鐵道", "楓之谷M", "SD鋼彈", "鳴潮", "明日方舟", "Pokemon GO", "Roblox")
 QUERY_SOFTWORLD_TERMS = tuple(dict.fromkeys(company['aliases'][0] for company in COMPANIES))
 QUERY_OEN_TERMS = ("應援科技", "應援金流", "Oen", "Oen Tech")
+QUERY_GAME_APPROVAL_TERMS = ("版號", "版号", "遊戲審批", "游戏审批", "网络游戏审批", "網路遊戲審批")
 AGGREGATE_QUERIES = (
     # 智冠／MyCard 未提供可驗證官方 RSS 時，僅以其官方網域的 Google
     # News RSS 取回公開 metadata；完整分類仍由 folder_1 規則判定。
@@ -63,6 +64,8 @@ AGGREGATE_QUERIES = (
     # 完整分類仍由版本化規則逐筆判定；這組只是讓白名單媒體的 Google
     # News RSS 聚合能主動涵蓋具代表性的高營收手遊名稱。
     ("mobile_games", QUERY_MOBILE_GAME_TERMS),
+    # Monthly approvals need a dedicated query, separate from product guides.
+    ("game_approval", QUERY_GAME_APPROVAL_TERMS),
 )
 
 
@@ -70,12 +73,16 @@ def taipei_now() -> datetime:
     return datetime.now(TAIPEI)
 
 
-def google_feed_url(domain: str, start: str, end: str, topic_terms: tuple[str, ...] = ()) -> str:
+def google_feed_url(domain: str, start: str, end: str, topic_terms: tuple[str, ...] = (), source: dict | None = None) -> str:
     end_exclusive = (datetime.strptime(end, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
     topic = f"({' OR '.join(topic_terms)}) " if topic_terms else ""
     site = f"site:{domain} " if domain else ""
     query = f"{site}{topic}after:{start} before:{end_exclusive}"
-    params = {"q": query, "hl": "zh-TW", "gl": "TW", "ceid": "TW:zh-Hant"}
+    source = source or {}
+    approval = topic_terms == QUERY_GAME_APPROVAL_TERMS
+    params = {"q": query, "hl": source.get("google_news_locale", "zh-CN" if approval else "zh-TW"),
+              "gl": source.get("google_news_country", "CN" if approval else "TW"),
+              "ceid": source.get("google_news_edition", "CN:zh-Hans" if approval else "TW:zh-Hant")}
     return "https://news.google.com/rss/search?" + urllib.parse.urlencode(params)
 
 
@@ -268,7 +275,7 @@ def main() -> int:
         # 分主題查詢，避免只取媒體最新的一小段泛新聞內容；競業／產業
         # 結果仍須通過完整規則，且只保留公開 metadata。
         for _topic_name, topic_terms, company in source_queries(source):
-            feed_url = google_feed_url(domain, start.isoformat(), end.isoformat(), topic_terms)
+            feed_url = google_feed_url(domain, start.isoformat(), end.isoformat(), topic_terms, source)
             try:
                 request = urllib.request.Request(feed_url, headers={"User-Agent": "SoftWorldMonitoring/1.0"})
                 with urllib.request.urlopen(request, timeout=25) as response:

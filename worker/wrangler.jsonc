@@ -20,6 +20,6 @@
   ],
   "vars": {
     "CORS_ORIGIN": "https://yin0612.github.io",
-    "RULES_VERSION": "2026-09-30-vasp-clean-v1"
+    "RULES_VERSION": "2026-10-06-cn-game-approval-v1"
   }
 }

@@ -31,7 +31,7 @@ def check(source):
     if kind == "google_news_rss":
         topics = dict(AGGREGATE_QUERIES)
         topic = (source.get("query_topics") or ["payment"])[0]
-        feed = google_feed_url((source.get("domains") or [""])[0], str(now - timedelta(days=62)), str(now), topics.get(topic, ()))
+        feed = google_feed_url((source.get("domains") or [""])[0], str(now - timedelta(days=62)), str(now), topics.get(topic, ()), source)
     result = {"source_id": source["id"], "name": source.get("document_name") or source["name"], "kind": kind, "feed": feed}
     try:
         request = urllib.request.Request(feed, headers={"User-Agent": "SoftWorldMonitoring/1.0"})
