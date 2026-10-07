@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-06T22:25:44.748372Z",
+  "checked_at": "2026-10-07T04:46:11.883633Z",
   "range": {
     "from": "2026-08-07",
     "to": "2026-10-07"
@@ -9,7 +9,7 @@
     {
       "id": "softworld",
       "name": "智冠科技",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "passed",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E6%99%BA%E5%86%A0%22+OR+%22Soft-World%22+OR+%22Soft+World%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Investors",
@@ -33,7 +33,7 @@
     {
       "id": "mycard",
       "name": "MyCard",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22MyCard%22+OR+%22My+Card%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Services",
@@ -43,7 +43,7 @@
     {
       "id": "chinesegamer",
       "name": "中華網龍",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "passed",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E4%B8%AD%E8%8F%AF%E7%B6%B2%E9%BE%8D%22+OR+%22Chinesegamer%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Enterprises/40",
@@ -55,7 +55,7 @@
     {
       "id": "zealot",
       "name": "智樂堂",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E6%99%BA%E6%A8%82%E5%A0%82%22+OR+%22Zealot+Digital%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Enterprises/43",
@@ -65,7 +65,7 @@
     {
       "id": "gameflier",
       "name": "遊戲新幹線",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E9%81%8A%E6%88%B2%E6%96%B0%E5%B9%B9%E7%B7%9A%22+OR+%22Game+Flier%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Enterprises/41",
@@ -75,7 +75,7 @@
     {
       "id": "gamefirst",
       "name": "智凡迪",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "passed",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E6%99%BA%E5%87%A1%E8%BF%AA%22+OR+%22Game+First+International%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Enterprises/42",
@@ -87,11 +87,11 @@
     {
       "id": "neweb",
       "name": "藍新科技／藍新金流",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "passed",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E8%97%8D%E6%96%B0%22+OR+%22NewebPay%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.neweb.com.tw/milestone",
-      "article_count": 13,
+      "article_count": 14,
       "publisher_domains": [
         "ctee.com.tw",
         "ec.ltn.com.tw",
@@ -102,13 +102,14 @@
         "news.tvbs.com.tw",
         "setn.com",
         "udn.com",
-        "wealth.com.tw"
+        "wealth.com.tw",
+        "ww2.money-link.com.tw"
       ]
     },
     {
       "id": "wecan",
       "name": "威肯金融",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E5%A8%81%E8%82%AF%E9%87%91%E8%9E%8D%22+OR+%22%E5%A8%81%E5%8A%9B%E4%BB%98%22+OR+%22WecanPay%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/About/History?EKind=1",
@@ -118,7 +119,7 @@
     {
       "id": "ezpay",
       "name": "簡單行動支付／ezPay 簡單付",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E7%B0%A1%E5%96%AE%E6%94%AF%E4%BB%98%22+OR+%22%E7%B0%A1%E5%96%AE%E4%BB%98%22+OR+%22%E7%B0%A1%E5%96%AE%E8%A1%8C%E5%8B%95%E6%94%AF%E4%BB%98%22+OR+%22ezPay%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Enterprises/47",
@@ -128,7 +129,7 @@
     {
       "id": "cservice",
       "name": "群心網路",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E7%BE%A4%E5%BF%83%E7%B6%B2%E8%B7%AF%22+OR+%22CService%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.neweb.com.tw/milestone",
@@ -138,7 +139,7 @@
     {
       "id": "efun",
       "name": "一帆數位／發票大師",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "passed",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E4%B8%80%E5%B8%86%E6%95%B8%E4%BD%8D%22+OR+%22%E7%99%BC%E7%A5%A8%E5%A4%A7%E5%B8%AB%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Enterprises/1053",
@@ -150,7 +151,7 @@
     {
       "id": "read",
       "name": "智酷媒體／RE:AD",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E6%99%BA%E9%85%B7%E5%AA%92%E9%AB%94%22+OR+%22RE%3AAD+Media%22+OR+%22RE%EF%BC%9AAD+Media%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/SoftworldFile/SWFL20250808164602.pdf",
@@ -160,7 +161,7 @@
     {
       "id": "myserver",
       "name": "智雲科技／絕世好雲",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E6%99%BA%E9%9B%B2%E7%A7%91%E6%8A%80%22+OR+%22%E7%B5%95%E4%B8%96%E5%A5%BD%E9%9B%B2%22+OR+%22Myserver%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.myserver.asia/about.html",
@@ -170,7 +171,7 @@
     {
       "id": "foundation",
       "name": "智冠科技文化藝術基金會",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80%E6%96%87%E5%8C%96%E8%97%9D%E8%A1%93%E5%9F%BA%E9%87%91%E6%9C%83%22+OR+%22%E6%99%BA%E5%86%A0%E6%96%87%E5%8C%96%E8%97%9D%E8%A1%93%E5%9F%BA%E9%87%91%E6%9C%83%22+OR+%22%E6%99%BA%E5%86%A0%E5%9F%BA%E9%87%91%E6%9C%83%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Connect/Org",
@@ -180,7 +181,7 @@
     {
       "id": "music",
       "name": "遊戲音樂創作基地／智冠音樂中心",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22%E9%81%8A%E6%88%B2%E9%9F%B3%E6%A8%82%E5%89%B5%E4%BD%9C%E5%9F%BA%E5%9C%B0%22+OR+%22%E6%99%BA%E5%86%A0%E9%9F%B3%E6%A8%82%E5%A4%9A%E5%AA%92%E9%AB%94%E4%B8%AD%E5%BF%83%22+OR+%22%E6%99%BA%E5%86%A0%E6%95%B8%E4%BD%8D%E9%9F%B3%E6%A8%82%E4%B8%AD%E5%BF%83%22+OR+%22%E6%99%BA%E5%86%A0%E9%9F%B3%E6%A8%82%E4%B8%AD%E5%BF%83%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/Services/30",
@@ -190,7 +191,7 @@
     {
       "id": "ezaio",
       "name": "簡單收／ezAIO",
-      "checked_at": "2026-10-06T22:25:44.748372Z",
+      "checked_at": "2026-10-07T04:46:11.883633Z",
       "status": "empty",
       "feed_url": "https://news.google.com/rss/search?q=%28%22ezAIO%22+OR+%22ezAIO%E7%B0%A1%E5%96%AE%E6%94%B6%22+OR+%22%E7%B0%A1%E5%96%AE%E6%94%B6%22%29+after%3A2026-08-07+before%3A2026-10-08&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "reference_url": "https://www.soft-world.com/About/4",
