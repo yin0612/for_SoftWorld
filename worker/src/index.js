@@ -1078,8 +1078,8 @@ export default {
           GROUP BY a.id ORDER BY MAX(COALESCE(a.published_at, a.fetched_at)) DESC`;
       const aggregateDiagnostics = [];
       // Google News RSS 聚合改由 GitHub Actions 產出的公開快照提供。
-      // 全分類頁只讀取 D1 與快照，避免前端分頁時重複觸發大量 RSS 請求而被
-      // 上游節流／503 影響；單一分類頁仍保留官方 RSS 即時唯讀補位。
+      // 產業／遊戲分類與全分類使用同一份 D1 和 RSS 備援，避免分類查詢
+      // 額外解析十多個整站 RSS 而超過 CPU 額度；支付保留有限來源補位。
       const primaryLivePromise = !folder
         ? fetchStaticAggregatedArticles(from, to, '', aggregateDiagnostics)
         : folder === 'folder_2'
@@ -1093,10 +1093,7 @@ export default {
               fetchStaticAggregatedArticles(from, to, 'folder_6', aggregateDiagnostics)
             ]).then((groups) => groups.flat())
             : folder === 'folder_1' || folder === 'folder_3' || folder === 'folder_4'
-              ? Promise.all([
-                fetchLiveHuikeArticles(env, from, to, folder, aggregateDiagnostics),
-                fetchStaticAggregatedArticles(from, to, folder, aggregateDiagnostics)
-              ]).then((groups) => groups.flat())
+              ? fetchStaticAggregatedArticles(from, to, folder, aggregateDiagnostics)
               : Promise.resolve([]);
       const livePromise = Promise.all([primaryLivePromise, fetchStaticRssArticles(from, to, folder || '', aggregateDiagnostics)])
         .then(groups => groups.flat());

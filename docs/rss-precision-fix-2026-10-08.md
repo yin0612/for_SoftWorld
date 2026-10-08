@@ -13,6 +13,10 @@ IT之家 RSS 只允許集團、遊戲、競業與版號規則，不套用一般�
 Google News 原有標題分類、台灣支付專用規則與中港澳來源保持原流程。
 快取按政策版本隔離，部署後不會讀到前一版本的 API 快取。
 
+規則 JSON、英文字比對與各文章範圍的清理結果共用快取，減少每條規則重複
+解碼及建立正規表示式。集團／競業／產業分類查詢與全分類使用同一份 D1
+及 RSS 備援，避免額外即時解析十多個整站 RSS 導致 CPU 超限。
+
 清理前以 Wrangler 匯出近兩個月 approved match 作為稽核備份，再執行
 `node scripts/revalidate_rss_data.mjs <D1-json> <correction.sql>` 產生修正 SQL。
 只把無效的系統核准命中移回 pending，保留文章、原始證據及人工決定；

@@ -1,5 +1,9 @@
 import { textFromXml } from './rss-parser.mjs';
 
+const articleTargetCache = new WeakMap();
+const ruleCache = new WeakMap();
+const termCache = new Map();
+
 function normalize(text = '') {
   return text.toLowerCase().normalize('NFKC').replace(/\s+/g, ' ').trim();
 }
@@ -9,31 +13,51 @@ function parseJson(value, fallback) {
 }
 
 function ruleTargets(article, scope) {
-  const title = textFromXml(article.title || '');
-  const excerpt = textFromXml(article.excerpt || '');
-  const paragraphs = excerpt.split(/\n{2,}/).map((text) => text.trim()).filter(Boolean);
+  let prepared = articleTargetCache.get(article);
+  if (!prepared || prepared.rawTitle !== article.title || prepared.rawExcerpt !== article.excerpt) {
+    const title = textFromXml(article.title || '');
+    const excerpt = textFromXml(article.excerpt || '');
+    const paragraphs = excerpt.split(/\n{2,}/).map((text) => text.trim()).filter(Boolean);
+    prepared = { title, excerpt, paragraphs, rawTitle: article.title, rawExcerpt: article.excerpt, scopes: new Map() };
+    articleTargetCache.set(article, prepared);
+  }
+  if (prepared.scopes.has(scope)) return prepared.scopes.get(scope);
+  const { title, excerpt, paragraphs } = prepared;
   const lead = paragraphs[0] || excerpt;
-  if (scope === 'title') return [{ label: 'title', text: title }];
-  if (scope === 'lead') return [{ label: 'rss_excerpt', text: lead }];
-  if (scope === 'title_or_lead') return [{ label: 'title', text: title }, { label: 'rss_excerpt', text: lead }];
-  if (scope === 'paragraph') return [{ label: 'title', text: title }, ...paragraphs.map((text, index) => ({ label: `rss_paragraph_${index + 1}`, text }))];
-  return [{ label: 'title_and_rss_excerpt', text: `${title}\n${excerpt}` }];
+  const targets = scope === 'title' ? [{ label: 'title', text: title }]
+    : scope === 'lead' ? [{ label: 'rss_excerpt', text: lead }]
+    : scope === 'title_or_lead' ? [{ label: 'title', text: title }, { label: 'rss_excerpt', text: lead }]
+    : scope === 'paragraph' ? [{ label: 'title', text: title }, ...paragraphs.map((text, index) => ({ label: `rss_paragraph_${index + 1}`, text }))]
+    : [{ label: 'title_and_rss_excerpt', text: `${title}\n${excerpt}` }];
+  const normalized = targets.map(target => ({ ...target, normalized: normalize(target.text) }));
+  prepared.scopes.set(scope, normalized);
+  return normalized;
 }
 
 function containsTerm(target, term) {
-  const normalizedTerm = normalize(term);
-  if (!normalizedTerm) return false;
-  if (/^[a-z0-9]+$/.test(normalizedTerm)) {
-    return new RegExp(`(?<![a-z0-9])${normalizedTerm}(?![a-z0-9])`).test(target);
+  let prepared = termCache.get(term);
+  if (!prepared) {
+    const normalized = normalize(term);
+    prepared = { normalized, word: /^[a-z0-9]+$/.test(normalized)
+      ? new RegExp(`(?<![a-z0-9])${normalized}(?![a-z0-9])`) : null };
+    termCache.set(term, prepared);
   }
+  const normalizedTerm = prepared.normalized;
+  if (!normalizedTerm) return false;
+  if (prepared.word) return prepared.word.test(target);
   return target.includes(normalizedTerm);
 }
 
 function evaluateRule(article, rule) {
-  const requiredAnyGroups = [parseJson(rule.any_of_json, []), parseJson(rule.all_of_json, [])].filter((group) => group.length);
-  const excluded = parseJson(rule.exclude_any_json, []);
+  let prepared = ruleCache.get(rule);
+  if (!prepared || prepared.anyJson !== rule.any_of_json || prepared.allJson !== rule.all_of_json || prepared.excludeJson !== rule.exclude_any_json) {
+    prepared = { requiredAnyGroups: [parseJson(rule.any_of_json, []), parseJson(rule.all_of_json, [])].filter((group) => group.length),
+      excluded: parseJson(rule.exclude_any_json, []), anyJson: rule.any_of_json, allJson: rule.all_of_json, excludeJson: rule.exclude_any_json };
+    ruleCache.set(rule, prepared);
+  }
+  const { requiredAnyGroups, excluded } = prepared;
   for (const target of ruleTargets(article, rule.scope)) {
-    const normalizedTarget = normalize(target.text);
+    const normalizedTarget = target.normalized;
     const hits = (terms) => terms.filter((term) => containsTerm(normalizedTarget, term));
     const groupHits = requiredAnyGroups.map(hits);
     const excludedHits = hits(excluded);

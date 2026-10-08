@@ -96,3 +96,13 @@ test('cleanup withdraws invalid system approvals while preserving manual review 
   assert.equal(clean.generated_at, '2026-10-07T22:05:46Z');
   assert.equal(clean.articles[0].rule_ids, 'softworld-brand');
 });
+
+test('cached targets and rules refresh when the same object is updated', () => {
+  const article = { title: '品牌曝光 IG' };
+  const mutableRule = { ...rule('industry-martech') };
+  assert.equal(evaluateRule(article, mutableRule).matched, true);
+  article.title = '品牌曝光 inline';
+  assert.equal(evaluateRule(article, mutableRule).matched, false);
+  mutableRule.all_of_json = JSON.stringify(['inline']);
+  assert.equal(evaluateRule(article, mutableRule).matched, true);
+});
