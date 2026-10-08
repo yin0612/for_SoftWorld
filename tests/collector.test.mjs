@@ -5,15 +5,16 @@ import vm from 'node:vm';
 import { webcrypto } from 'node:crypto';
 import { verifyItemSource } from '../worker/src/source-verification.mjs';
 import { normalizeFeedDate, sourceIsFresh } from '../worker/src/time-quality.mjs';
-import { evaluateRule, ruleAutoPublishes, ruleAllowsSource } from '../worker/src/rule-engine.mjs';
+import { evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, revalidateArticle } from '../worker/src/rule-engine.mjs';
 import { parseRss } from '../worker/src/rss-parser.mjs';
 
 const read = path => fs.readFileSync(new URL(path, import.meta.url), 'utf8');
 function worker(overrides = {}) {
     const context = vm.createContext({ URL, URLSearchParams, Date, Intl, Request, Response, AbortController, AbortSignal,
         console, setTimeout, clearTimeout, crypto: webcrypto, verifyItemSource, normalizeFeedDate, sourceIsFresh,
-        evaluateRule, ruleAutoPublishes, ruleAllowsSource, parseRss,
+        evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, revalidateArticle, parseRss,
         coreSourceConfig: JSON.parse(read('../config/core_media_sources.json')),
+        monitoringRuleConfig: JSON.parse(read('../config/monitoring_rules.json')),
         googleSourceConfig: JSON.parse(read('../config/fintech_media_sources.json')), ...overrides });
     vm.runInContext(read('../worker/src/index.js').replace(/^import .*;\r?\n/gm, '').replace('export default {', 'globalThis.worker = {'), context);
     return context;

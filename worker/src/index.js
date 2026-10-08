@@ -1,9 +1,17 @@
 import coreSourceConfig from '../../config/core_media_sources.json';
 import googleSourceConfig from '../../config/fintech_media_sources.json';
+import monitoringRuleConfig from '../../config/monitoring_rules.json';
 import { verifyItemSource } from './source-verification.mjs';
 import { normalizeFeedDate, sourceIsFresh } from './time-quality.mjs';
-import { evaluateRule, ruleAutoPublishes, ruleAllowsSource } from './rule-engine.mjs';
+import { evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, revalidateArticle } from './rule-engine.mjs';
 import { parseRss } from './rss-parser.mjs';
+
+const PUBLICATION_RULES = configuredRules(monitoringRuleConfig);
+function revalidatePublicArticle(article) {
+  const source = coreSourceConfig.sources.find(entry => entry.id === article.source_id)
+    || googleSourceConfig.sources.find(entry => entry.id === article.source_id);
+  return revalidateArticle(article, source, PUBLICATION_RULES);
+}
 
 function sourceDefinition(source) {
   return coreSourceConfig.sources.find((entry) => entry.id === source.id)
@@ -277,6 +285,12 @@ function makeArticlePayload(articles, { offset, limit, fromDate, toDate, dataMod
   };
 }
 
+function publicationCacheRequest(url) {
+  const cacheUrl = new URL(url);
+  cacheUrl.searchParams.set('__publication_policy', monitoringRuleConfig.version);
+  return new Request(cacheUrl.toString(), { method: 'GET' });
+}
+
 async function articleResponseWithCache(request, url, headers, payload) {
   const cacheSeconds = payload.degraded ? DEGRADED_ARTICLE_CACHE_SECONDS : ARTICLE_CACHE_SECONDS;
   const response = json(payload, 200, {
@@ -286,7 +300,7 @@ async function articleResponseWithCache(request, url, headers, payload) {
   });
   if (request.method !== 'GET') return response;
   try {
-    await caches.default.put(new Request(url.toString(), { method: 'GET' }), response.clone());
+    await caches.default.put(publicationCacheRequest(url), response.clone());
   } catch (error) {
     console.warn('Unable to cache public monitoring response.', String(error).slice(0, 120));
   }
@@ -413,6 +427,7 @@ async function fetchLiveArticles(from, to, { sources, rules, folderId, sourceKin
         const excerpt = sourceIsAggregated ? '' : item.excerpt;
         const article = { title, excerpt, canonicalUrl: item.link };
         const matches = rules
+          .filter(rule => ruleAllowsSource(rule, sourceDefinition(source)))
           .map((rule) => ({ rule, result: evaluateRule(article, rule) }))
           .filter(({ rule, result }) => result.matched && ruleAutoPublishes(rule, result.evidence));
         if (!matches.length) return null;
@@ -569,7 +584,7 @@ async function fetchStaticRssArticles(from, to, folderId, diagnostics) {
     if (!response.ok) throw Error(`RSS snapshot HTTP ${response.status}`);
     const payload = await response.json();
     diagnostics.push({ result: 'rss_snapshot', generated_at: payload.generated_at, results: payload.results || [], error_count: (payload.errors || []).length });
-    return (payload.articles || []).filter(article => article.source_kind === 'official_rss'
+    return (payload.articles || []).map(revalidatePublicArticle).filter(Boolean).filter(article => article.source_kind === 'official_rss'
       && isPublishedInRange(article.published_at, from, to)
       && (!folderId || String(article.folder_ids).split(',').includes(folderId)))
       .map(article => ({ ...article, canonical_url: article.url, snapshot_fallback: true, live_fallback: true }));
@@ -785,7 +800,7 @@ async function collectSource(source, rules, env) {
     const xml = await response.text();
     if (!/<(?:rss|feed|rdf:RDF)\b/i.test(xml)) throw new Error('not_rss_or_atom');
     const items = parseRss(xml);
-    const sourceRules = rules.filter((rule) => ruleAllowsSource(rule, source));
+    const sourceRules = rules.filter((rule) => ruleAllowsSource(rule, sourceDefinition(source)));
     let added = 0;
 
     for (const item of items) {
@@ -831,6 +846,16 @@ async function collectSource(source, rules, env) {
           autoPublish ? 'system:verified-rss' : null, autoPublish ? now : null
         );
       }));
+
+      if (existing) {
+        // A changed feed/rule can invalidate old system approvals even when
+        // another rule still matches. Preserve explicit review decisions.
+        const ids = matches.map(({ rule }) => rule.id);
+        await env.DB.prepare(`UPDATE article_matches SET status = 'pending',
+          reviewed_by = 'system:rss-precision-revalidation', reviewed_at = ?
+          WHERE article_id = ? AND status = 'approved' AND reviewed_by LIKE 'system:%'
+            AND rule_id NOT IN (${ids.map(() => '?').join(',')})`).bind(now, articleId, ...ids).run();
+      }
 
       // Recompute the article status after the match upsert. This lets a
       // precision-policy update safely demote former system approvals while
@@ -1019,7 +1044,7 @@ export default {
       const folder = url.searchParams.get('folder');
       const { fromDate, toDate, from, to } = articleQueryRange(url.searchParams);
       const cacheEnabled = request.method === 'GET' && url.searchParams.get('debug') !== '1';
-      const cacheRequest = new Request(url.toString(), { method: 'GET' });
+      const cacheRequest = publicationCacheRequest(url);
       if (cacheEnabled) {
         try {
           const cached = await caches.default.match(cacheRequest);
@@ -1113,7 +1138,9 @@ export default {
             && (article.snapshot_fallback === true || !existingLiveUrls.has(article.canonical_url)))
           .map((article) => [article.canonical_url, article])
       ).values()];
-      const persistedArticles = Array.isArray(result.results) ? result.results : [];
+      const persistedArticles = (Array.isArray(result.results) ? result.results : [])
+        .map(revalidatePublicArticle).filter(Boolean)
+        .filter(article => !folder || article.folder_ids.split(',').includes(folder));
       const merged = new Map();
       persistedArticles.forEach((article) => {
         if (article?.url) merged.set(article.url, article);

@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import { verifyItemSource } from '../worker/src/source-verification.mjs';
 import { normalizeFeedDate, sourceIsFresh } from '../worker/src/time-quality.mjs';
-import { evaluateRule, ruleAutoPublishes, ruleAllowsSource } from '../worker/src/rule-engine.mjs';
+import { evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, revalidateArticle } from '../worker/src/rule-engine.mjs';
 import { parseRss } from '../worker/src/rss-parser.mjs';
 
 const read = path => fs.readFileSync(new URL(path, import.meta.url), 'utf8');
@@ -39,8 +39,9 @@ test('client rejects future dates, deduplicates URLs and forwards snapshot quali
 });
 test('Worker excludes future, out-of-range and unapproved-domain rows and counts only the result', () => {
     const context = vm.createContext({ URL, URLSearchParams, Date, Intl, Request, Response, AbortController, AbortSignal,
-        console, setTimeout, clearTimeout, verifyItemSource, normalizeFeedDate, sourceIsFresh, evaluateRule, ruleAutoPublishes, ruleAllowsSource, parseRss,
+        console, setTimeout, clearTimeout, verifyItemSource, normalizeFeedDate, sourceIsFresh, evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, revalidateArticle, parseRss,
         coreSourceConfig: JSON.parse(read('../config/core_media_sources.json')),
+        monitoringRuleConfig: JSON.parse(read('../config/monitoring_rules.json')),
         googleSourceConfig: JSON.parse(read('../config/fintech_media_sources.json')) });
     vm.runInContext(read('../worker/src/index.js').replace(/^import .*;\r?\n/gm, '').replace('export default {', 'globalThis.worker = {'), context);
     const payload = context.makeArticlePayload([row('1'), row('1'), row('2', { url: 'https://www.ithome.com.tw.evil.test/a' }),
@@ -52,8 +53,9 @@ test('Worker excludes future, out-of-range and unapproved-domain rows and counts
 
 test('RSS backup cannot restore rejected URLs and failed review lookup is reported and blocked', async () => {
     const context = vm.createContext({ URL, URLSearchParams, Date, Intl, Request, Response, AbortController, AbortSignal,
-        console, setTimeout, clearTimeout, verifyItemSource, normalizeFeedDate, sourceIsFresh, evaluateRule, ruleAutoPublishes, ruleAllowsSource, parseRss,
+        console, setTimeout, clearTimeout, verifyItemSource, normalizeFeedDate, sourceIsFresh, evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, revalidateArticle, parseRss,
         coreSourceConfig: JSON.parse(read('../config/core_media_sources.json')),
+        monitoringRuleConfig: JSON.parse(read('../config/monitoring_rules.json')),
         googleSourceConfig: JSON.parse(read('../config/fintech_media_sources.json')) });
     vm.runInContext(read('../worker/src/index.js').replace(/^import .*;\r?\n/gm, '').replace('export default {', 'globalThis.worker = {'), context);
     const rejected = 'https://www.ithome.com.tw/news/rejected';

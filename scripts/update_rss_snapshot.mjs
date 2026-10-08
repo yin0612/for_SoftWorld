@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { parseRss } from '../worker/src/rss-parser.mjs';
-import { evaluateRule, ruleAutoPublishes, ruleAllowsSource } from '../worker/src/rule-engine.mjs';
+import { evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, revalidateArticle } from '../worker/src/rule-engine.mjs';
+export { configuredRules } from '../worker/src/rule-engine.mjs';
 import { normalizeFeedDate } from '../worker/src/time-quality.mjs';
 import { verifyItemSource } from '../worker/src/source-verification.mjs';
 
@@ -18,17 +19,6 @@ function cutoffFor(now) {
   const day = Math.min(parts.day, new Date(Date.UTC(year, month + 1, 0)).getUTCDate());
   return new Date(Date.UTC(year, month, day) - 8 * 60 * 60 * 1000);
 }
-export function configuredRules(config) {
-  return config.rules.map(rule => ({ ...rule,
-    any_of_json: JSON.stringify(rule.required_any_groups[0]),
-    all_of_json: JSON.stringify(rule.required_any_groups[1] || []),
-    exclude_any_json: JSON.stringify([...(config.global_exclude_any || []), ...(rule.exclude_any || [])]),
-    auto_publish: config.automatic_publication_rule_ids.includes(rule.id) ? 1 : 0,
-    auto_publish_allowed_terms_json: JSON.stringify(config.automatic_publication_allowed_terms?.[rule.id] || []),
-    region_scope_json: JSON.stringify(config.folders.find(folder => folder.id === rule.folder_id)?.region_scope || [])
-  }));
-}
-
 export function approvedFeedArticles(xml, source, rules, now = new Date()) {
   const cutoff = cutoffFor(now);
   return parseRss(xml).flatMap(item => {
@@ -96,7 +86,8 @@ export async function main() {
   if (!results.some(result => result.result === 'success')) throw Error('All RSS sources failed; previous snapshot preserved');
   const cutoff = cutoffFor(now);
   for (const article of previous.articles || []) {
-    if (new Date(article.published_at) >= cutoff && !articles.has(article.url)) articles.set(article.url, article);
+    const clean = revalidateArticle(article, sources.find(source => source.id === article.source_id), rules);
+    if (clean && new Date(clean.published_at) >= cutoff && new Date(clean.published_at) <= now && !articles.has(clean.url)) articles.set(clean.url, clean);
   }
   const payload = { generated_at: new Date().toISOString(), method: 'official-rss-hourly-backup', source_count: sources.length,
     errors: results.filter(result => result.result === 'failed'), results,

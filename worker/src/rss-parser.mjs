@@ -5,19 +5,27 @@ function decodeEntities(text = '') {
   let previous;
   do {
     previous = decoded;
-    decoded = decoded.replace(/&(#39|amp|lt|gt|quot|apos|nbsp);/gi, (_match, entity) => entities[entity.toLowerCase()] || _match);
+    decoded = decoded.replace(/&(#x[0-9a-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi, (_match, entity) => {
+      if (!entity.startsWith('#')) return entities[entity.toLowerCase()] || _match;
+      const code = entity[1].toLowerCase() === 'x' ? parseInt(entity.slice(2), 16) : Number(entity.slice(1));
+      return code > 0 && code <= 0x10ffff ? String.fromCodePoint(code) : _match;
+    });
   } while (decoded !== previous);
   return decoded;
 }
 
 function textFromXml(value = '') {
-  return decodeEntities(value
+  // XML-escaped HTML must be decoded BEFORE removing markup; otherwise
+  // text-align, hrefs and image URLs become keyword evidence.
+  return decodeEntities(String(value))
+    .replace(/<!--[\s\S]*?-->/g, ' ')
+    .replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi, ' ')
     .replace(/<\/?(?:p|div|br|li|h[1-6])\b[^>]*>/gi, '\n')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\r/g, '')
     .replace(/\n[ \t]*\n+/g, '\n\n')
     .replace(/[ \t]+/g, ' ')
-    .trim());
+    .trim();
 }
 
 function extractTag(block, tag) {
@@ -50,4 +58,4 @@ function parseRss(xml) {
 }
 
 
-export { parseRss };
+export { parseRss, textFromXml };
