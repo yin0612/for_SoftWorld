@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-10T10:29:09.137971+00:00",
+  "checked_at": "2026-10-10T12:03:57.884312+00:00",
   "scope": "feed availability, article metadata and publisher domains; Google samples one topic per source; no article fact or full-text verification",
   "results": [
     {
@@ -260,8 +260,8 @@
       "http_status": 200,
       "final_feed_url": "https://decrypt.co/feed",
       "status": "passed",
-      "items_checked": 38,
-      "valid": 38,
+      "items_checked": 58,
+      "valid": 58,
       "invalid": 0,
       "reasons": {}
     },
@@ -458,10 +458,10 @@
       "final_feed_url": "https://news.google.com/rss/search?q=%28%E6%99%BA%E5%86%A0+OR+MyCard+OR+%E4%B8%AD%E8%8F%AF%E7%B6%B2%E9%BE%8D+OR+%E6%99%BA%E6%A8%82%E5%A0%82+OR+%E9%81%8A%E6%88%B2%E6%96%B0%E5%B9%B9%E7%B7%9A+OR+%E6%99%BA%E5%87%A1%E8%BF%AA+OR+%E8%97%8D%E6%96%B0+OR+%E5%A8%81%E8%82%AF%E9%87%91%E8%9E%8D+OR+%E7%B0%A1%E5%96%AE%E6%94%AF%E4%BB%98+OR+%E7%BE%A4%E5%BF%83%E7%B6%B2%E8%B7%AF+OR+%E4%B8%80%E5%B8%86%E6%95%B8%E4%BD%8D+OR+%E6%99%BA%E9%85%B7%E5%AA%92%E9%AB%94+OR+%E6%99%BA%E9%9B%B2%E7%A7%91%E6%8A%80+OR+%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80%E6%96%87%E5%8C%96%E8%97%9D%E8%A1%93%E5%9F%BA%E9%87%91%E6%9C%83+OR+%E9%81%8A%E6%88%B2%E9%9F%B3%E6%A8%82%E5%89%B5%E4%BD%9C%E5%9F%BA%E5%9C%B0+OR+ezAIO%29+after%3A2026-08-09+before%3A2026-10-11&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "warning",
       "items_checked": 100,
-      "valid": 67,
-      "invalid": 33,
+      "valid": 68,
+      "invalid": 32,
       "reasons": {
-        "publisher_domain_mismatch": 33
+        "publisher_domain_mismatch": 32
       }
     },
     {
