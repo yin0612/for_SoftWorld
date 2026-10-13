@@ -1,6 +1,12 @@
 /* 真實新聞監測 API 設定。官方 RSS 與 Google News RSS 聚合來源分開標示，
    不把聚合結果誤稱為媒體官方 RSS，也不以展示資料補足。 */
-window.MONITORING_API_BASE = window.MONITORING_API_BASE || 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev';
+const monitoringPreviewLocation = window.location;
+const monitoringUsesLocalProxy = monitoringPreviewLocation
+    && /^https?:$/.test(monitoringPreviewLocation.protocol)
+    && ['localhost', '127.0.0.1'].includes(monitoringPreviewLocation.hostname);
+window.MONITORING_API_BASE = window.MONITORING_API_BASE
+    ?? (monitoringUsesLocalProxy ? monitoringPreviewLocation.origin
+        : 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev');
 
 function monitoringApiBase() {
     return (window.MONITORING_API_BASE || '').replace(/\/$/, '');
@@ -137,9 +143,18 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     for (let page = 0; page < 1000; page++) {
         const params = new URLSearchParams(baseParams);
         params.set('offset', String(offset));
-        const payload = await fetchMonitoringJson(`${base}/api/articles?${params.toString()}`, {
-            headers: { Accept: 'application/json' }
-        });
+        let payload;
+        try {
+            payload = await fetchMonitoringJson(`${base}/api/articles?${params.toString()}`, {
+                headers: { Accept: 'application/json' }
+            });
+        } catch (error) {
+            if (page === 0) throw error;
+            // 已通過檢查的前頁仍可顯示；後續頁失敗時明確標示未完整載入。
+            complete = false;
+            partial = true;
+            break;
+        }
         const pageArticles = Array.isArray(payload.articles) ? payload.articles : [];
         partial ||= payload.partial === true;
         aggregatedSnapshot = payload.aggregated_snapshot || aggregatedSnapshot;

@@ -12,14 +12,30 @@ const row = (id, extra = {}) => ({ id, source_id: 'ithome', source: 'iThome', ti
     url: `https://www.ithome.com.tw/news/${id}`, published_at: '2026-09-20T00:00:00Z',
     folder_ids: 'folder_1', rule_ids: 'softworld-brand', source_kind: 'official_rss', ...extra });
 
-function client(payloads) {
+function client(payloads, globals = {}) {
     let calls = 0;
-    const context = vm.createContext({ Date, Intl, URLSearchParams, AbortSignal, setTimeout,
-        fetch: async () => ({ ok: true, json: async () => payloads[calls++] }) });
+    const context = vm.createContext({ Date, Intl, URLSearchParams, AbortSignal,
+        setTimeout: callback => { callback(); },
+        fetch: async () => {
+            const payload = payloads[calls++];
+            if (payload instanceof Error) throw payload;
+            return { ok: true, json: async () => payload };
+        }, ...globals });
     context.window = context;
     vm.runInContext(read('../js/monitoring.js'), context);
     return { context, calls: () => calls };
 }
+test('local previews use their proxy origin while public pages and explicit overrides retain their API', () => {
+    for (const origin of ['http://localhost:8765', 'http://127.0.0.1:8765', 'https://localhost:8765']) {
+        const location = new URL(origin);
+        assert.equal(client([], { location }).context.monitoringApiBase(), origin);
+        assert.equal(client([], { location, MONITORING_API_BASE: 'https://custom.example/api/' }).context.monitoringApiBase(), 'https://custom.example/api');
+    }
+    for (const origin of ['https://yin0612.github.io', 'https://localhost.example', 'file:///C:/preview/']) {
+        assert.equal(client([], { location: new URL(origin) }).context.monitoringApiBase(), 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev');
+    }
+    assert.equal(client([], { MONITORING_API_BASE: '' }).context.monitoringApiBase(), '');
+});
 test('frontend reads all pages and flags a broken cursor rather than silently truncating totals', async () => {
     const { context, calls } = client([
         { articles: [row('1')], total: 2, has_more: true, next_offset: 1 },
@@ -29,6 +45,28 @@ test('frontend reads all pages and flags a broken cursor rather than silently tr
     assert.equal(data.articles.length, 2); assert.equal(data.complete, true); assert.equal(calls(), 2);
     const broken = client([{ articles: [row('1')], total: 2, has_more: true, next_offset: 0 }]);
     assert.equal((await broken.context.loadVerifiedMonitoringArticles()).complete, false);
+});
+test('first-page failure remains unavailable after retries', async () => {
+    const unavailable = client([Error('offline'), Error('offline'), Error('offline')]);
+    await assert.rejects(unavailable.context.loadVerifiedMonitoringArticles(), /offline/);
+    assert.equal(unavailable.calls(), 3);
+});
+test('a later failed page retains validated articles and reports incomplete partial data', async () => {
+    const snapshot = { generated_at: '2026-09-20T00:00:00Z' };
+    const partial = client([
+        { articles: [row('1'), row('future', { published_at: '2099-10-01T00:00:00Z' })],
+            total: 3, has_more: true, next_offset: 2, aggregated_snapshot: snapshot },
+        Error('page two offline'), Error('page two offline'), Error('page two offline')
+    ]);
+    const data = await partial.context.loadVerifiedMonitoringArticles();
+    assert.equal(data.loaded, true);
+    assert.equal(data.articles.length, 1);
+    assert.equal(data.articles[0].url, row('1').url);
+    assert.equal(data.total, 3);
+    assert.equal(data.complete, false);
+    assert.equal(data.partial, true);
+    assert.equal(data.aggregatedSnapshot.generated_at, snapshot.generated_at);
+    assert.equal(partial.calls(), 4);
 });
 test('client rejects future dates, deduplicates URLs and forwards snapshot quality', async () => {
     const { context } = client([{ articles: [row('1'), row('1'), row('future', { published_at: '2099-10-01T00:00:00Z' })], total: 3,

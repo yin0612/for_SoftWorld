@@ -1212,6 +1212,12 @@ function refreshMonitoringData() {
 
     monitoringDataRequest = Promise.all([loadVerifiedMonitoringArticles(), manifestPromise, statusPromise]).then(([result, manifest, status]) => {
         if (!result.loaded) throw new Error('Monitoring API is not configured.');
+        if (result.complete === false && monitoringLoadState) {
+            // 後續同步缺頁時保留先前資料，避免已載入的新聞被較少的結果覆蓋。
+            monitoringRefreshState.error = true;
+            renderGlobalDataStatusBar();
+            return;
+        }
         monitoringRuntimeStatus = status;
         setVerifiedMonitoringSourceTotal(status);
         if (manifest && monitoringManifest !== manifest) hydrateMonitoringManifest(manifest);
