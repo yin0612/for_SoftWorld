@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-28T04:30:49.430872+00:00",
+  "checked_at": "2026-10-28T10:25:34.198286+00:00",
   "scope": "feed availability, article metadata and publisher domains; Google samples one topic per source; no article fact or full-text verification",
   "results": [
     {
@@ -9,8 +9,11 @@
       "feed": "https://www.ithome.com/rss/",
       "http_status": 200,
       "final_feed_url": "https://www.ithome.com/rss/",
-      "status": "unavailable",
-      "error": "no element found: line 116, column 42"
+      "status": "passed",
+      "items_checked": 60,
+      "valid": 60,
+      "invalid": 0,
+      "reasons": {}
     },
     {
       "source_id": "udn-money-instant",
@@ -430,8 +433,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Ayouxituoluo.com+%28%E7%89%88%E8%99%9F+OR+%E7%89%88%E5%8F%B7+OR+%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9+OR+%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%BD%91%E7%BB%9C%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%B6%B2%E8%B7%AF%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-CN&gl=CN&ceid=CN%3Azh-Hans",
       "status": "passed",
-      "items_checked": 9,
-      "valid": 9,
+      "items_checked": 10,
+      "valid": 10,
       "invalid": 0,
       "reasons": {}
     },
@@ -457,10 +460,10 @@
       "final_feed_url": "https://news.google.com/rss/search?q=%28%E6%99%BA%E5%86%A0+OR+MyCard+OR+%E4%B8%AD%E8%8F%AF%E7%B6%B2%E9%BE%8D+OR+%E6%99%BA%E6%A8%82%E5%A0%82+OR+%E9%81%8A%E6%88%B2%E6%96%B0%E5%B9%B9%E7%B7%9A+OR+%E6%99%BA%E5%87%A1%E8%BF%AA+OR+%E8%97%8D%E6%96%B0+OR+%E5%A8%81%E8%82%AF%E9%87%91%E8%9E%8D+OR+%E7%B0%A1%E5%96%AE%E6%94%AF%E4%BB%98+OR+%E7%BE%A4%E5%BF%83%E7%B6%B2%E8%B7%AF+OR+%E4%B8%80%E5%B8%86%E6%95%B8%E4%BD%8D+OR+%E6%99%BA%E9%85%B7%E5%AA%92%E9%AB%94+OR+%E6%99%BA%E9%9B%B2%E7%A7%91%E6%8A%80+OR+%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80%E6%96%87%E5%8C%96%E8%97%9D%E8%A1%93%E5%9F%BA%E9%87%91%E6%9C%83+OR+%E9%81%8A%E6%88%B2%E9%9F%B3%E6%A8%82%E5%89%B5%E4%BD%9C%E5%9F%BA%E5%9C%B0+OR+ezAIO%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "warning",
       "items_checked": 100,
-      "valid": 52,
-      "invalid": 48,
+      "valid": 50,
+      "invalid": 50,
       "reasons": {
-        "publisher_domain_mismatch": 48
+        "publisher_domain_mismatch": 50
       }
     },
     {
@@ -523,8 +526,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Anews.pchome.com.tw+%28%E6%99%BA%E5%86%A0+OR+MyCard+OR+%E4%B8%AD%E8%8F%AF%E7%B6%B2%E9%BE%8D+OR+%E6%99%BA%E6%A8%82%E5%A0%82+OR+%E9%81%8A%E6%88%B2%E6%96%B0%E5%B9%B9%E7%B7%9A+OR+%E6%99%BA%E5%87%A1%E8%BF%AA+OR+%E8%97%8D%E6%96%B0+OR+%E5%A8%81%E8%82%AF%E9%87%91%E8%9E%8D+OR+%E7%B0%A1%E5%96%AE%E6%94%AF%E4%BB%98+OR+%E7%BE%A4%E5%BF%83%E7%B6%B2%E8%B7%AF+OR+%E4%B8%80%E5%B8%86%E6%95%B8%E4%BD%8D+OR+%E6%99%BA%E9%85%B7%E5%AA%92%E9%AB%94+OR+%E6%99%BA%E9%9B%B2%E7%A7%91%E6%8A%80+OR+%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80%E6%96%87%E5%8C%96%E8%97%9D%E8%A1%93%E5%9F%BA%E9%87%91%E6%9C%83+OR+%E9%81%8A%E6%88%B2%E9%9F%B3%E6%A8%82%E5%89%B5%E4%BD%9C%E5%9F%BA%E5%9C%B0+OR+ezAIO%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "passed",
-      "items_checked": 74,
-      "valid": 74,
+      "items_checked": 100,
+      "valid": 100,
       "invalid": 0,
       "reasons": {}
     },
@@ -575,8 +578,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Astorm.mg+%28%E6%99%BA%E5%86%A0+OR+MyCard+OR+%E4%B8%AD%E8%8F%AF%E7%B6%B2%E9%BE%8D+OR+%E6%99%BA%E6%A8%82%E5%A0%82+OR+%E9%81%8A%E6%88%B2%E6%96%B0%E5%B9%B9%E7%B7%9A+OR+%E6%99%BA%E5%87%A1%E8%BF%AA+OR+%E8%97%8D%E6%96%B0+OR+%E5%A8%81%E8%82%AF%E9%87%91%E8%9E%8D+OR+%E7%B0%A1%E5%96%AE%E6%94%AF%E4%BB%98+OR+%E7%BE%A4%E5%BF%83%E7%B6%B2%E8%B7%AF+OR+%E4%B8%80%E5%B8%86%E6%95%B8%E4%BD%8D+OR+%E6%99%BA%E9%85%B7%E5%AA%92%E9%AB%94+OR+%E6%99%BA%E9%9B%B2%E7%A7%91%E6%8A%80+OR+%E6%99%BA%E5%86%A0%E7%A7%91%E6%8A%80%E6%96%87%E5%8C%96%E8%97%9D%E8%A1%93%E5%9F%BA%E9%87%91%E6%9C%83+OR+%E9%81%8A%E6%88%B2%E9%9F%B3%E6%A8%82%E5%89%B5%E4%BD%9C%E5%9F%BA%E5%9C%B0+OR+ezAIO%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "passed",
-      "items_checked": 29,
-      "valid": 29,
+      "items_checked": 30,
+      "valid": 30,
       "invalid": 0,
       "reasons": {}
     },
@@ -601,8 +604,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Acmoney.tw+%28%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E6%94%AF%E4%BB%98+OR+%E8%A1%8C%E5%8B%95%E6%94%AF%E4%BB%98+OR+%E9%87%91%E6%B5%81+OR+%E4%BF%A1%E7%94%A8%E5%8D%A1+OR+%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E7%A5%A8%E8%AD%89+OR+%E8%B7%A8%E5%A2%83%E6%94%AF%E4%BB%98+OR+BNPL+OR+%E5%85%88%E8%B2%B7%E5%BE%8C%E4%BB%98+OR+%E8%A1%97%E5%8F%A3%E6%94%AF%E4%BB%98+OR+LINE+Pay+OR+LINE+Bank+OR+%E5%BD%88%E6%80%A7%E4%BB%98+OR+%E5%8F%B0%E7%81%A3Pay%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "passed",
-      "items_checked": 100,
-      "valid": 100,
+      "items_checked": 99,
+      "valid": 99,
       "invalid": 0,
       "reasons": {}
     },
@@ -679,8 +682,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Asohu.com+%28%E7%89%88%E8%99%9F+OR+%E7%89%88%E5%8F%B7+OR+%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9+OR+%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%BD%91%E7%BB%9C%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%B6%B2%E8%B7%AF%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-CN&gl=CN&ceid=CN%3Azh-Hans",
       "status": "passed",
-      "items_checked": 100,
-      "valid": 100,
+      "items_checked": 91,
+      "valid": 91,
       "invalid": 0,
       "reasons": {}
     },
@@ -692,8 +695,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3A163.com+%28%E7%89%88%E8%99%9F+OR+%E7%89%88%E5%8F%B7+OR+%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9+OR+%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%BD%91%E7%BB%9C%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%B6%B2%E8%B7%AF%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-CN&gl=CN&ceid=CN%3Azh-Hans",
       "status": "passed",
-      "items_checked": 78,
-      "valid": 78,
+      "items_checked": 70,
+      "valid": 70,
       "invalid": 0,
       "reasons": {}
     },
@@ -705,8 +708,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Aqq.com+%28%E7%89%88%E8%99%9F+OR+%E7%89%88%E5%8F%B7+OR+%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9+OR+%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%BD%91%E7%BB%9C%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%B6%B2%E8%B7%AF%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-CN&gl=CN&ceid=CN%3Azh-Hans",
       "status": "passed",
-      "items_checked": 100,
-      "valid": 100,
+      "items_checked": 58,
+      "valid": 58,
       "invalid": 0,
       "reasons": {}
     },
@@ -718,8 +721,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3A17173.com+%28%E7%89%88%E8%99%9F+OR+%E7%89%88%E5%8F%B7+OR+%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9+OR+%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%BD%91%E7%BB%9C%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%B6%B2%E8%B7%AF%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-CN&gl=CN&ceid=CN%3Azh-Hans",
       "status": "passed",
-      "items_checked": 47,
-      "valid": 47,
+      "items_checked": 87,
+      "valid": 87,
       "invalid": 0,
       "reasons": {}
     },
@@ -744,8 +747,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3A3dmgame.com+%28%E7%89%88%E8%99%9F+OR+%E7%89%88%E5%8F%B7+OR+%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9+OR+%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%BD%91%E7%BB%9C%E6%B8%B8%E6%88%8F%E5%AE%A1%E6%89%B9+OR+%E7%B6%B2%E8%B7%AF%E9%81%8A%E6%88%B2%E5%AF%A9%E6%89%B9%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-CN&gl=CN&ceid=CN%3Azh-Hans",
       "status": "passed",
-      "items_checked": 56,
-      "valid": 56,
+      "items_checked": 54,
+      "valid": 54,
       "invalid": 0,
       "reasons": {}
     },
@@ -783,8 +786,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Awsj.com+%28%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E6%94%AF%E4%BB%98+OR+%E8%A1%8C%E5%8B%95%E6%94%AF%E4%BB%98+OR+%E9%87%91%E6%B5%81+OR+%E4%BF%A1%E7%94%A8%E5%8D%A1+OR+%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E7%A5%A8%E8%AD%89+OR+%E8%B7%A8%E5%A2%83%E6%94%AF%E4%BB%98+OR+BNPL+OR+%E5%85%88%E8%B2%B7%E5%BE%8C%E4%BB%98+OR+%E8%A1%97%E5%8F%A3%E6%94%AF%E4%BB%98+OR+LINE+Pay+OR+LINE+Bank+OR+%E5%BD%88%E6%80%A7%E4%BB%98+OR+%E5%8F%B0%E7%81%A3Pay%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "passed",
-      "items_checked": 40,
-      "valid": 40,
+      "items_checked": 39,
+      "valid": 39,
       "invalid": 0,
       "reasons": {}
     },
@@ -887,8 +890,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Aapp.mycard520.com.tw+%28%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E6%94%AF%E4%BB%98+OR+%E8%A1%8C%E5%8B%95%E6%94%AF%E4%BB%98+OR+%E9%87%91%E6%B5%81+OR+%E4%BF%A1%E7%94%A8%E5%8D%A1+OR+%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E7%A5%A8%E8%AD%89+OR+%E8%B7%A8%E5%A2%83%E6%94%AF%E4%BB%98+OR+BNPL+OR+%E5%85%88%E8%B2%B7%E5%BE%8C%E4%BB%98+OR+%E8%A1%97%E5%8F%A3%E6%94%AF%E4%BB%98+OR+LINE+Pay+OR+LINE+Bank+OR+%E5%BD%88%E6%80%A7%E4%BB%98+OR+%E5%8F%B0%E7%81%A3Pay%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "passed",
-      "items_checked": 59,
-      "valid": 59,
+      "items_checked": 100,
+      "valid": 100,
       "invalid": 0,
       "reasons": {}
     },
@@ -965,8 +968,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Amoneydj.com+%28%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E6%94%AF%E4%BB%98+OR+%E8%A1%8C%E5%8B%95%E6%94%AF%E4%BB%98+OR+%E9%87%91%E6%B5%81+OR+%E4%BF%A1%E7%94%A8%E5%8D%A1+OR+%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E7%A5%A8%E8%AD%89+OR+%E8%B7%A8%E5%A2%83%E6%94%AF%E4%BB%98+OR+BNPL+OR+%E5%85%88%E8%B2%B7%E5%BE%8C%E4%BB%98+OR+%E8%A1%97%E5%8F%A3%E6%94%AF%E4%BB%98+OR+LINE+Pay+OR+LINE+Bank+OR+%E5%BD%88%E6%80%A7%E4%BB%98+OR+%E5%8F%B0%E7%81%A3Pay%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "passed",
-      "items_checked": 55,
-      "valid": 55,
+      "items_checked": 47,
+      "valid": 47,
       "invalid": 0,
       "reasons": {}
     },
@@ -991,8 +994,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Awealth.com.tw+%28%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E6%94%AF%E4%BB%98+OR+%E8%A1%8C%E5%8B%95%E6%94%AF%E4%BB%98+OR+%E9%87%91%E6%B5%81+OR+%E4%BF%A1%E7%94%A8%E5%8D%A1+OR+%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E7%A5%A8%E8%AD%89+OR+%E8%B7%A8%E5%A2%83%E6%94%AF%E4%BB%98+OR+BNPL+OR+%E5%85%88%E8%B2%B7%E5%BE%8C%E4%BB%98+OR+%E8%A1%97%E5%8F%A3%E6%94%AF%E4%BB%98+OR+LINE+Pay+OR+LINE+Bank+OR+%E5%BD%88%E6%80%A7%E4%BB%98+OR+%E5%8F%B0%E7%81%A3Pay%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "passed",
-      "items_checked": 55,
-      "valid": 55,
+      "items_checked": 51,
+      "valid": 51,
       "invalid": 0,
       "reasons": {}
     },
@@ -1004,8 +1007,8 @@
       "http_status": 200,
       "final_feed_url": "https://news.google.com/rss/search?q=site%3Abusinessweekly.com.tw+%28%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E6%94%AF%E4%BB%98+OR+%E8%A1%8C%E5%8B%95%E6%94%AF%E4%BB%98+OR+%E9%87%91%E6%B5%81+OR+%E4%BF%A1%E7%94%A8%E5%8D%A1+OR+%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E7%A5%A8%E8%AD%89+OR+%E8%B7%A8%E5%A2%83%E6%94%AF%E4%BB%98+OR+BNPL+OR+%E5%85%88%E8%B2%B7%E5%BE%8C%E4%BB%98+OR+%E8%A1%97%E5%8F%A3%E6%94%AF%E4%BB%98+OR+LINE+Pay+OR+LINE+Bank+OR+%E5%BD%88%E6%80%A7%E4%BB%98+OR+%E5%8F%B0%E7%81%A3Pay%29+after%3A2026-08-27+before%3A2026-10-29&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "status": "passed",
-      "items_checked": 99,
-      "valid": 99,
+      "items_checked": 81,
+      "valid": 81,
       "invalid": 0,
       "reasons": {}
     },
