@@ -1395,8 +1395,8 @@ function isOwlPayPriorityArticle(news) {
     return STABLECOIN_PRIORITY_TERMS.some((term) => matchesStablecoinTerm(target, term));
 }
 
-// 奧丁丁／OwlPay 維持穩定幣頁首要優先；VASP 的監理、登記與牌照消息
-// 則列為第二優先，讓台灣重要監管動態不會被大量泛加密新聞擠出首批 20 則。
+// 僅在發布日期相同時優先顯示奧丁丁／OwlPay，其次為 VASP。
+// 日期始終由新到舊，避免舊的優先新聞擋住最新消息。
 function stablecoinDisplayPriority(news) {
     if (isOwlPayPriorityArticle(news)) return 2;
     return articleHasMonitoringRule(news, 'stablecoin-vasp') ? 1 : 0;
@@ -1689,7 +1689,7 @@ function renderFintechSummary(summary, articles) {
     contextContent.appendChild(state);
     const priorityNote = document.createElement('p');
     priorityNote.className = 'fintech-priority-note';
-    priorityNote.textContent = `穩定幣頁優先：奧丁丁／OwlPay ${owlPayPriorityCount} 篇；僅在同時具穩定幣、鏈上支付、加密資產或金融科技語境時列入。`;
+    priorityNote.textContent = `穩定幣新聞依日期由新到舊排列；同日優先顯示奧丁丁／OwlPay（${owlPayPriorityCount} 篇）。僅在同時具穩定幣、鏈上支付、加密資產或金融科技語境時列入。`;
     contextContent.appendChild(priorityNote);
 
     const grid = document.createElement('div');
@@ -1906,8 +1906,8 @@ function renderFintechMonitoring() {
     });
     if (fintechMode === 'stablecoin') {
         filtered.sort((a, b) => {
-            const priorityDelta = stablecoinDisplayPriority(b) - stablecoinDisplayPriority(a);
-            return priorityDelta || String(b.date || '').localeCompare(String(a.date || ''));
+            const dateDelta = String(b.date || '').localeCompare(String(a.date || ''));
+            return dateDelta || stablecoinDisplayPriority(b) - stablecoinDisplayPriority(a);
         });
     }
 
