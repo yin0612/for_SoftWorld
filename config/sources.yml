@@ -174,6 +174,10 @@ huike_2025_monitoring:
       - 發票載具
       - 發票存摺
       - 發票怪獸
+    ai_commerce:
+      operator: "AI技術詞 + 商務或生活服務詞；完整條件見 monitoring_rules.json 的 industry-ai-commerce"
+      technology: [AI, 人工智慧, AI Agent, AI代理, 代理式 AI, Agentic AI, 智慧助理]
+      context: [購物, 導購, 電商, 商家, 店家, 官方帳號, 客服, 比價, 訂位, 訂餐, 送禮, 支付, 付款]
     martech_ai:
       - 數位廣告
       - 生成式AI

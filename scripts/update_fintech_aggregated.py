@@ -46,6 +46,9 @@ QUERY_STABLECOIN_TERMS = ("穩定幣", "stablecoin", "USDT", "USDC", "鏈上支�
 # 再通過 monitoring_rules.json 的完整雙群組條件。
 QUERY_COMPETITOR_TERMS = ("遊戲", "遊戲橘子", "鈊象", "宇峻奧汀", "網銀國際", "Garena", "騰訊", "網易", "NEXON", "SEGA", "CAPCOM")
 QUERY_INDUSTRY_TERMS = ("遊戲", "遊戲市場", "遊戲產值", "Steam", "PS5", "SWITCH", "電競", "雲端遊戲", "GameFi", "數位廣告", "Martech", "發票載具", "發票存摺", "AI", "Google", "Meta", "LINE", "TikTok")
+# Dedicated query requires AI AND a commerce/service context.
+QUERY_AI_COMMERCE_TERMS = ("AI", "人工智慧", "人工智能", '"AI Agent"', '"Agentic AI"', "AI代理", '"AI 代理"', "智慧助理", "智能助理")
+QUERY_AI_COMMERCE_CONTEXT_TERMS = ("購物", "導購", "電商", "商家", "店家", "官方帳號", "客服", "比價", "訂位", "訂餐", "送禮", "支付", "付款")
 QUERY_MOBILE_GAME_TERMS = ("天堂M", "神魔之塔", "寒霜啟示錄", "傳說對決", "勝利女神 妮姬", "崩壞 星穹鐵道", "楓之谷M", "SD鋼彈", "鳴潮", "明日方舟", "Pokemon GO", "Roblox")
 QUERY_SOFTWORLD_TERMS = tuple(dict.fromkeys(company['aliases'][0] for company in COMPANIES))
 QUERY_OEN_TERMS = ("應援科技", "應援金流", "Oen", "Oen Tech")
@@ -61,6 +64,7 @@ AGGREGATE_QUERIES = (
     ("stablecoin", QUERY_STABLECOIN_TERMS),
     ("competitor", QUERY_COMPETITOR_TERMS),
     ("industry", QUERY_INDUSTRY_TERMS),
+    ("ai_commerce", QUERY_AI_COMMERCE_TERMS),
     # 完整分類仍由版本化規則逐筆判定；這組只是讓白名單媒體的 Google
     # News RSS 聚合能主動涵蓋具代表性的高營收手遊名稱。
     ("mobile_games", QUERY_MOBILE_GAME_TERMS),
@@ -76,6 +80,8 @@ def taipei_now() -> datetime:
 def google_feed_url(domain: str, start: str, end: str, topic_terms: tuple[str, ...] = (), source: dict | None = None) -> str:
     end_exclusive = (datetime.strptime(end, "%Y-%m-%d") + timedelta(days=1)).strftime("%Y-%m-%d")
     topic = f"({' OR '.join(topic_terms)}) " if topic_terms else ""
+    if topic_terms == QUERY_AI_COMMERCE_TERMS:
+        topic += f"({' OR '.join(QUERY_AI_COMMERCE_CONTEXT_TERMS)}) "
     site = f"site:{domain} " if domain else ""
     query = f"{site}{topic}after:{start} before:{end_exclusive}"
     source = source or {}

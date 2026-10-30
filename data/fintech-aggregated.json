@@ -12154,11 +12154,11 @@
       "excerpt": "Google News RSS 聚合僅提供標題與發布時間；請開啟原文閱讀完整內容。",
       "url": "https://news.google.com/rss/articles/CBMizgJBVV95cUxQMTFzYjdRejF4Y2xuS0NnQmlka1VldW8wSFAzNWM2YXZrWHQ1Z3NTS0JiQ2JKbV9rZExhbk5DYWtxR1pubGViZHdHczhrMnotOWg3QmxhM0p5dFZTZFJFdnN6bXZOLThBU2pUNDhCSFdWZXVfNjZzUDJ4TE5EWkJzSXVVSUVlejl0Q1ZUVU9LNDlYRUZGU0liSjJRUXpyRklzazBRTkJleEJNRnk2YTFqcnVPcEx5X3Q3ZFpQVV9DU0RiR2YtbWFtOURyNUliYktZaGM2blpCOFJYdGNiR3E3MkM2SHhQbklUQlN0dHBWbml0XzdoTi1SSVU0d3ctQlp3VWROS0dVZW1yZ245QkRWN2dpZ0tpUU1aTEV4TXJlTmtmWFBGOHhRQjhrTGc5dkhmSThFek50SEc1TUc3NWROdWMzSnhfaTJMUUtxT093?oc=5",
       "published_at": "2026-10-13T07:00:00Z",
-      "fetched_at": "2026-10-29T22:30:22.283515Z",
+      "fetched_at": "2026-10-30T02:14:11.138784Z",
       "source_id": "xfastest-google-news",
       "source": "XFastest",
       "source_region": "TW",
-      "source_feed": "https://news.google.com/rss/search?q=site%3Axfastest.com+%28%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E6%94%AF%E4%BB%98+OR+%E8%A1%8C%E5%8B%95%E6%94%AF%E4%BB%98+OR+%E9%87%91%E6%B5%81+OR+%E4%BF%A1%E7%94%A8%E5%8D%A1+OR+%E7%AC%AC%E4%B8%89%E6%96%B9%E6%94%AF%E4%BB%98+OR+%E9%9B%BB%E5%AD%90%E7%A5%A8%E8%AD%89+OR+%E8%B7%A8%E5%A2%83%E6%94%AF%E4%BB%98+OR+BNPL+OR+%E5%85%88%E8%B2%B7%E5%BE%8C%E4%BB%98+OR+%E8%A1%97%E5%8F%A3%E6%94%AF%E4%BB%98+OR+LINE+Pay+OR+LINE+Bank+OR+%E5%BD%88%E6%80%A7%E4%BB%98+OR+%E5%8F%B0%E7%81%A3Pay%29+after%3A2026-08-30+before%3A2026-10-31&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
+      "source_feed": "https://news.google.com/rss/search?q=site%3Axfastest.com+%28AI+OR+%E4%BA%BA%E5%B7%A5%E6%99%BA%E6%85%A7+OR+%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD+OR+%22AI+Agent%22+OR+%22Agentic+AI%22+OR+AI%E4%BB%A3%E7%90%86+OR+%22AI+%E4%BB%A3%E7%90%86%22+OR+%E6%99%BA%E6%85%A7%E5%8A%A9%E7%90%86+OR+%E6%99%BA%E8%83%BD%E5%8A%A9%E7%90%86%29+%28%E8%B3%BC%E7%89%A9+OR+%E5%B0%8E%E8%B3%BC+OR+%E9%9B%BB%E5%95%86+OR+%E5%95%86%E5%AE%B6+OR+%E5%BA%97%E5%AE%B6+OR+%E5%AE%98%E6%96%B9%E5%B8%B3%E8%99%9F+OR+%E5%AE%A2%E6%9C%8D+OR+%E6%AF%94%E5%83%B9+OR+%E8%A8%82%E4%BD%8D+OR+%E8%A8%82%E9%A4%90+OR+%E9%80%81%E7%A6%AE+OR+%E6%94%AF%E4%BB%98+OR+%E4%BB%98%E6%AC%BE%29+after%3A2026-08-30+before%3A2026-10-31&hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant",
       "source_homepage": "https://news.xfastest.com",
       "source_kind": "google_news_rss",
       "source_access_mode": "google_news_rss",
@@ -12168,8 +12168,12 @@
       "url_kind": "google_news_redirect",
       "review_status": "approved",
       "folder_ids": "folder_4",
-      "rule_ids": "industry-platform-business",
+      "rule_ids": "industry-platform-business,industry-ai-commerce",
       "matched_terms": [
+        "AI",
+        "AI Agent",
+        "購物",
+        "商家",
         "功能",
         "LINE"
       ]

@@ -20,6 +20,6 @@
   ],
   "vars": {
     "CORS_ORIGIN": "https://yin0612.github.io",
-    "RULES_VERSION": "2026-10-08-rss-precision-v1"
+    "RULES_VERSION": "2026-10-30-ai-commerce-v1"
   }
 }

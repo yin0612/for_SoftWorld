@@ -258,12 +258,12 @@ const HUIKE_2025_STRUCTURE = [
         folderName: "4. 產業新聞 (主機/產值/發票/AI廣告)",
         badge: "產業與技術",
         icon: "🚀",
-        desc: "涵蓋遊戲主機、Steam、產值趨勢、雲端發票載具、數位行銷AI Martech、社群新平台",
+        desc: "涵蓋遊戲主機、Steam、產值趨勢、雲端發票載具、數位行銷AI Martech、AI 商務與生活服務、社群新平台",
         keywords: [
             "Steam平台", "XBOX", "SWITCH", "PS5", "主機遊戲", "電競聯賽", 
             "暴雪Blizzard", "魔獸世界", "二次元", "手遊市場產值", "雲端遊戲", 
             "元宇宙", "NFT遊戲", "GameFi", "雲端發票載具", "發票存摺", "發票怪獸", 
-            "數位廣告", "Martech", "生成式AI", "KOL網紅行銷", "小紅書", "Threads"
+            "數位廣告", "Martech", "生成式AI", "AI Agent", "代理式 AI", "AI導購", "購物助手", "商家AI", "KOL網紅行銷", "小紅書", "Threads"
         ]
     },
     {
