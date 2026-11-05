@@ -106,3 +106,31 @@ test('RSS backup cannot restore rejected URLs and failed review lookup is report
     assert.equal(blocked.size, 2);
     assert.equal(diagnostics[0].result, 'review_lookup_error');
 });
+
+test('validated RSS backups replace duplicate database rows without repeating checks; database-only rows remain validated', async () => {
+    const checked = [];
+    const context = vm.createContext({ URL, URLSearchParams, Date, Intl, Request, Response, AbortController, AbortSignal,
+        console, setTimeout, clearTimeout, verifyItemSource, normalizeFeedDate, sourceIsFresh, evaluateRule,
+        ruleAutoPublishes, ruleAllowsSource, configuredRules, parseRss,
+        revalidateArticle: (article, source, rules) => { checked.push(article.id); return revalidateArticle(article, source, rules); },
+        coreSourceConfig: JSON.parse(read('../config/core_media_sources.json')),
+        monitoringRuleConfig: JSON.parse(read('../config/monitoring_rules.json')),
+        googleSourceConfig: JSON.parse(read('../config/fintech_media_sources.json')) });
+    vm.runInContext(read('../worker/src/index.js').replace(/^import .*;\r?\n/gm, '').replace('export default {', 'globalThis.worker = {'), context);
+    const published_at = new Date(Date.now() - 3600000).toISOString();
+    const duplicate = row('duplicate', { published_at, review_status: 'approved' });
+    const valid = row('database-only', { published_at, review_status: 'approved' });
+    const invalid = row('invalid', { published_at, review_status: 'approved', title: '普通科技消息' });
+    context.fetchStaticAggregatedArticles = async () => [];
+    context.fetchStaticRssArticles = async () => [{ ...duplicate, title: '智冠最新新聞',
+        canonical_url: duplicate.url, snapshot_fallback: true }];
+    const env = { DB: { prepare: sql => ({ bind: () => ({ all: async () => ({ results:
+        sql.includes('GROUP BY a.id') ? [duplicate, valid, invalid] : [] }) }) }) } };
+    const response = await context.worker.fetch(new Request('https://example.test/api/articles?debug=1&limit=2000'), env);
+    const payload = await response.json();
+    assert.equal(response.status, 200);
+    assert.equal(payload.total, 2);
+    assert.equal(payload.articles.find(article => article.id === 'duplicate').title, '智冠最新新聞');
+    assert.ok(payload.articles.some(article => article.id === 'database-only'));
+    assert.deepEqual(checked, ['database-only', 'invalid']);
+});

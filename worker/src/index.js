@@ -584,9 +584,11 @@ async function fetchStaticRssArticles(from, to, folderId, diagnostics) {
     if (!response.ok) throw Error(`RSS snapshot HTTP ${response.status}`);
     const payload = await response.json();
     diagnostics.push({ result: 'rss_snapshot', generated_at: payload.generated_at, results: payload.results || [], error_count: (payload.errors || []).length });
-    return (payload.articles || []).map(revalidatePublicArticle).filter(Boolean).filter(article => article.source_kind === 'official_rss'
+    return (payload.articles || []).filter(article => article.source_kind === 'official_rss'
       && isPublishedInRange(article.published_at, from, to)
       && (!folderId || String(article.folder_ids).split(',').includes(folderId)))
+      .map(revalidatePublicArticle).filter(Boolean)
+      .filter(article => !folderId || String(article.folder_ids).split(',').includes(folderId))
       .map(article => ({ ...article, canonical_url: article.url, snapshot_fallback: true, live_fallback: true }));
   } catch (error) {
     diagnostics.push({ result: 'rss_snapshot_error', error: String(error).slice(0, 160) });
@@ -1135,7 +1137,12 @@ export default {
             && (article.snapshot_fallback === true || !existingLiveUrls.has(article.canonical_url)))
           .map((article) => [article.canonical_url, article])
       ).values()];
+      // Validated RSS backup rows replace the same database URLs below. Avoid
+      // repeating their keyword checks as the two-month archive grows.
+      const snapshotUrls = new Set(liveArticles.filter(article => article.snapshot_fallback === true)
+        .map(article => article.canonical_url));
       const persistedArticles = (Array.isArray(result.results) ? result.results : [])
+        .filter(article => !snapshotUrls.has(article.url))
         .map(revalidatePublicArticle).filter(Boolean)
         .filter(article => !folder || article.folder_ids.split(',').includes(folder));
       const merged = new Map();
