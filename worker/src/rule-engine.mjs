@@ -44,7 +44,7 @@ function containsTerm(target, term) {
   }
   const normalizedTerm = prepared.normalized;
   if (!normalizedTerm) return false;
-  if (prepared.word) return prepared.word.test(target);
+  if (prepared.word) return target.includes(normalizedTerm) && prepared.word.test(target);
   return target.includes(normalizedTerm);
 }
 
@@ -59,9 +59,17 @@ function evaluateRule(article, rule) {
   for (const target of ruleTargets(article, rule.scope)) {
     const normalizedTarget = target.normalized;
     const hits = (terms) => terms.filter((term) => containsTerm(normalizedTarget, term));
-    const groupHits = requiredAnyGroups.map(hits);
     const excludedHits = hits(excluded);
-    const matched = groupHits.every((group) => group.length > 0) && excludedHits.length === 0;
+    if (excludedHits.length) continue;
+    const groupHits = [];
+    for (const terms of requiredAnyGroups) {
+      const found = hits(terms);
+      // A missing required group already rejects this target. In particular,
+      // do not scan a long game/company list if the game context is absent.
+      if (!found.length) break;
+      groupHits.push(found);
+    }
+    const matched = groupHits.length === requiredAnyGroups.length;
     if (matched) {
       return {
         matched: true,
