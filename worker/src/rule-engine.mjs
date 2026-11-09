@@ -49,6 +49,7 @@ function containsTerm(target, term) {
 }
 
 function evaluateRule(article, rule) {
+  if (/^(?:標籤\s*[:：]|标签\s*[:：]|討論牆\s*[|｜]|搜尋結果|搜索结果)/i.test(textFromXml(article.title || ''))) return { matched: false };
   let prepared = ruleCache.get(rule);
   if (!prepared || prepared.anyJson !== rule.any_of_json || prepared.allJson !== rule.all_of_json || prepared.excludeJson !== rule.exclude_any_json) {
     prepared = { requiredAnyGroups: [parseJson(rule.any_of_json, []), parseJson(rule.all_of_json, [])].filter((group) => group.length),

@@ -857,15 +857,17 @@ const SOFTWORLD_FINTECH_RULE_IDS = new Set(['softworld-fintech-services']);
 const TAIWAN_PAYMENT_PEER_RULE_IDS = new Set(['taiwan-payment-peer-oen']);
 let gamingMode = 'all';
 let gamingPage = 1;
+let gamingTopic = '';
 const GAMING_PER_PAGE = 20;
 const GAMING_MODE_RULE_IDS = {
     softworld: new Set(['softworld-brand', 'softworld-games', 'softworld-ip']),
-    competitor: new Set(['competitor-tw-game', 'competitor-global-game']),
+    competitor: new Set(['competitor-tw-game', 'competitor-global-game', 'competitor-game-event']),
     mobile: new Set(['mobile-top-grossing-games', 'mobile-game-watchlist', 'mobile-game-context-watchlist']),
-    platform: new Set(['industry-game-platform']),
+    platform: new Set(['industry-game-platform', 'industry-game-store-policy', 'industry-game-instant', 'industry-game-cloud', 'industry-game-ugc', 'industry-game-monetization']),
     approval: new Set(['industry-cn-game-approval'])
 };
 const GAMING_RULE_IDS = new Set([
+    'industry-game-release', 'industry-game-product', 'industry-game-ip', 'industry-game-business',
     ...GAMING_MODE_RULE_IDS.softworld,
     ...GAMING_MODE_RULE_IDS.competitor,
     ...GAMING_MODE_RULE_IDS.mobile,
@@ -1987,13 +1989,13 @@ function initFintechMonitoringPage() {
 // 遊戲頁只採用可明確對應遊戲內容的規則，避免資料夾中的泛商業、
 // 金融或加密貨幣文章因關鍵字過寬而混入遊戲產業新聞。
 function isGamingMonitoringArticle(news) {
-    return articleHasAnyMonitoringRule(news, GAMING_RULE_IDS);
+    return articleHasAnyMonitoringRule(news, GAMING_RULE_IDS) && !(window.GamingMonitoring?.isIndex(news));
 }
 
 function getGamingMonitoringArticles() {
-    return monitoringNews
-        .filter(isGamingMonitoringArticle)
-        .sort((a, b) => String(b.date || '').localeCompare(String(a.date || '')));
+    const articles = monitoringNews.filter(isGamingMonitoringArticle);
+    return (window.GamingMonitoring?.groupArticles(articles) || articles)
+        .sort((a, b) => String(b.publishedAt || b.date || '').localeCompare(String(a.publishedAt || a.date || '')) || String(a.url || '').localeCompare(String(b.url || '')));
 }
 
 function getGamingCategoryLabels(news) {
@@ -2007,13 +2009,16 @@ function getGamingCategoryLabels(news) {
 }
 
 function gamingSearchText(news) {
+    const info = window.GamingMonitoring?.classify(news);
     return [
         news?.title,
         news?.excerpt,
         news?.source,
         ...(news?.matchedTerms || []),
         ...getMonitoringRuleIdsForArticle(news),
-        ...getGamingCategoryLabels(news)
+        ...getGamingCategoryLabels(news),
+        ...(info?.products || []), ...(info?.markets || []), ...(info?.platforms || []),
+        ...(info?.events || []).map(key => window.GamingMonitoring.eventLabels[key])
     ].filter(Boolean).join(' ').toLowerCase();
 }
 
@@ -2029,17 +2034,15 @@ function renderGamingKeywordPills(articles) {
     const container = document.getElementById('gamingKeywordPills');
     if (!container) return;
     container.replaceChildren();
-    const scopes = [
-        { label: '智冠集團與旗下遊戲', ruleIds: GAMING_MODE_RULE_IDS.softworld },
-        { label: '遊戲競業', ruleIds: GAMING_MODE_RULE_IDS.competitor },
-        { label: '高營收手遊', ruleIds: GAMING_MODE_RULE_IDS.mobile },
-        { label: '平台、主機與電競', ruleIds: GAMING_MODE_RULE_IDS.platform },
-        { label: '中國遊戲版號與審批', ruleIds: GAMING_MODE_RULE_IDS.approval }
-    ];
-    scopes.forEach((scope) => {
-        const pill = document.createElement('span');
-        pill.className = 'fintech-scope-pill gaming-scope-pill';
-        pill.textContent = `${scope.label} ${articles.filter((article) => articleHasAnyMonitoringRule(article, scope.ruleIds)).length} 篇`;
+    const model = window.GamingMonitoring;
+    const scopes = [['', '全部子主題'], ...(model?.topics[gamingMode] || [])];
+    scopes.forEach(([id, label]) => {
+        const pill = document.createElement('button');
+        pill.type = 'button';
+        pill.className = 'fintech-mode-button gaming-mode-button gaming-topic-button' + (id === gamingTopic ? ' active' : '');
+        pill.setAttribute('aria-pressed', String(id === gamingTopic));
+        pill.textContent = `${label} ${articles.filter(article => !id || model.classify(article).topics.includes(id)).length} 篇`;
+        pill.addEventListener('click', () => { gamingTopic = id; gamingPage = 1; renderGamingMonitoring(); });
         container.appendChild(pill);
     });
 }
@@ -2077,7 +2080,7 @@ function renderGamingSummary(summary, articles) {
         [String(competitorCount), '遊戲競業'],
         [String(mobileCount), '高營收手遊與重點手遊'],
         [String(platformCount), '平台／主機／電競'],
-        [range.from + ' 至 ' + range.to, '資料範圍']
+        [String(approvalCount), '中國遊戲版號與審批']
     ].forEach(([value, label]) => {
         const item = document.createElement('div');
         item.className = 'fintech-stat gaming-stat';
@@ -2091,10 +2094,16 @@ function renderGamingSummary(summary, articles) {
         grid.appendChild(item);
     });
     summary.appendChild(grid);
+    const note = document.createElement('p');
+    note.className = 'fintech-summary-state';
+    note.textContent = `全資料範圍統計：${range.from} 至 ${range.to}；各分類可重複命中，不可加總。包含新遊、IP／商標、商店政策及創作平台的正式遊戲規則；市場與平台標籤只表示文中提及，發行狀態以原文為準。`;
+    summary.appendChild(note);
 }
 
 function createGamingArticleCard(news) {
-    return createFintechArticleCard(news, {
+    const model = window.GamingMonitoring;
+    const info = model?.classify(news);
+    const card = createFintechArticleCard(news, {
         cardClass: 'fintech-news-card gaming-news-card',
         categoryLabels: getGamingCategoryLabels(news),
         categoryBadgeClass: 'fintech-category-badge gaming-category-badge',
@@ -2102,6 +2111,40 @@ function createGamingArticleCard(news) {
         additionalMatchedTerms: [],
         disableKeyPoint: true
     });
+    if (!info) return card;
+    const facts = document.createElement('div');
+    facts.className = 'gaming-event-facts';
+    const labels = [...info.events.map(key => model.eventLabels[key]), ...info.products.slice(0, 3), ...info.markets.map(label => `市場提及：${label}`), ...info.platforms.map(label => `平台提及：${label}`)];
+    if (!labels.length) labels.push('未細分');
+    labels.forEach(label => { const span = document.createElement('span'); span.className = 'fintech-term'; span.textContent = label; facts.appendChild(span); });
+    const title = card.querySelector('.fintech-card-title');
+    if (title) title.after(facts); else card.appendChild(facts);
+    if (news.relatedReports?.length) {
+        const details = document.createElement('details');
+        const heading = document.createElement('summary'); heading.textContent = `相關報導 ${news.relatedReports.length} 篇`; details.appendChild(heading);
+        news.relatedReports.forEach(report => { const link = document.createElement('a'); const url = safeHttpUrl(report.url); if (url === '#') return; link.href = url; link.target = '_blank'; link.rel = 'noopener'; link.textContent = `${report.source || '來源'}｜${report.title}`; const row = document.createElement('p'); row.appendChild(link); details.appendChild(row); });
+        card.appendChild(details);
+    }
+    return card;
+}
+
+function gamingFilterState() {
+    const value = id => document.getElementById(id)?.value || '';
+    return { mode: gamingMode, topic: gamingTopic, market: value('gamingMarketFilter'), platform: value('gamingPlatformFilter'), event: value('gamingEventFilter'), content: value('gamingContentFilter') };
+}
+
+function refreshGamingAdvanced(articles) {
+    const model = window.GamingMonitoring;
+    if (!model) return;
+    for (const [id, field, label] of [['gamingMarketFilter', 'markets', '全部市場'], ['gamingPlatformFilter', 'platforms', '全部平台'], ['gamingEventFilter', 'events', '全部事件']]) {
+        const select = document.getElementById(id);
+        if (!select) continue;
+        const selected = select.value;
+        const values = [...new Set(articles.flatMap(article => model.classify(article)[field]))];
+        if (selected && !values.includes(selected)) values.push(selected);
+        select.replaceChildren(new Option(label, ''), ...values.map(value => new Option(field === 'events' ? model.eventLabels[value] : value, value)));
+        select.value = selected;
+    }
 }
 
 function renderGamingMonitoring() {
@@ -2136,28 +2179,35 @@ function renderGamingMonitoring() {
     }
 
     const allArticles = getGamingMonitoringArticles();
-    refreshMonitoringSourceOptions('gamingSourceFilter', allArticles);
+    const model = window.GamingMonitoring;
+    const modeArticles = allArticles.filter(article => gamingMode === 'all' || articleHasAnyMonitoringRule(article, GAMING_MODE_RULE_IDS[gamingMode]));
+    refreshMonitoringSourceOptions('gamingSourceFilter', modeArticles);
+    refreshGamingAdvanced(modeArticles);
     renderGamingSummary(summary, allArticles);
-    renderGamingKeywordPills(allArticles);
 
     const selectedSource = document.getElementById('gamingSourceFilter')?.value || '';
     const keyword = document.getElementById('gamingKeywordFilter')?.value.trim().toLowerCase() || '';
     const clearButton = document.getElementById('gamingClearFilters');
-    if (clearButton) clearButton.disabled = gamingMode === 'all' && !selectedSource && !keyword;
+    const state = gamingFilterState();
+    if (clearButton) clearButton.disabled = gamingMode === 'all' && !selectedSource && !keyword && !gamingTopic && !state.market && !state.platform && !state.event && !state.content;
     const selectedRuleIds = GAMING_MODE_RULE_IDS[gamingMode] || new Set();
     const filtered = allArticles.filter((article) => {
         const matchMode = gamingMode === 'all' || articleHasAnyMonitoringRule(article, selectedRuleIds);
         const matchSource = !selectedSource || article.source === selectedSource;
         const matchKeyword = !keyword || gamingSearchText(article).includes(keyword);
-        return matchMode && matchSource && matchKeyword;
+        return matchMode && matchSource && matchKeyword && (!model || model.matches(article, { ...state, topic: '' }));
     });
+    renderGamingKeywordPills(filtered);
+    const selectedArticles = filtered.filter(article => !gamingTopic || model?.classify(article).topics.includes(gamingTopic));
+    const active = document.getElementById('gamingActiveFilters');
+    if (active) active.textContent = '目前條件：' + [getGamingModeLabel(), (model?.topics[gamingMode] || []).find(([id]) => id === gamingTopic)?.[1], selectedSource, keyword && `搜尋「${keyword}」`, state.market, state.platform, model?.eventLabels[state.event], state.content && document.getElementById('gamingContentFilter')?.selectedOptions[0]?.textContent].filter(Boolean).join(' ／ ');
 
-    const visible = filtered.slice(0, gamingPage * GAMING_PER_PAGE);
+    const visible = selectedArticles.slice(0, gamingPage * GAMING_PER_PAGE);
     const aggregatedVisible = visible.filter((article) => article.sourceKind === 'google_news_rss').length;
     const aggregationLabel = aggregatedVisible ? `（含 ${aggregatedVisible} 篇 Google News 聚合）` : '';
-    resultCount.textContent = `顯示 ${visible.length}／${filtered.length} 篇真實新聞${aggregationLabel}`;
+    resultCount.textContent = `顯示 ${visible.length}／${selectedArticles.length} 篇真實新聞${aggregationLabel}`;
     grid.replaceChildren();
-    if (!filtered.length) {
+    if (!selectedArticles.length) {
         const emptyMessage = !allArticles.length
             ? '近兩個月目前沒有符合遊戲核心規則的文章；資料服務正常，請稍後重試。'
             : (selectedSource || keyword || gamingMode !== 'all'
@@ -2171,8 +2221,10 @@ function renderGamingMonitoring() {
     } else {
         visible.forEach((article) => grid.appendChild(createGamingArticleCard(article)));
     }
-    loadMore.hidden = visible.length >= filtered.length;
+    loadMore.hidden = visible.length >= selectedArticles.length;
 }
+
+function getGamingModeLabel() { return ({ all: '全部遊戲產業', softworld: '智冠集團與旗下遊戲', competitor: '遊戲競業', mobile: '高營收手遊', platform: '平台、主機與電競', approval: '中國遊戲版號與審批' })[gamingMode]; }
 
 function initGamingMonitoringPage() {
     const modeButtons = document.getElementById('gamingModeButtons');
@@ -2186,6 +2238,9 @@ function initGamingMonitoringPage() {
         modeButtons.querySelectorAll('[data-gaming-mode]').forEach((button) => {
             button.addEventListener('click', () => {
                 gamingMode = button.getAttribute('data-gaming-mode') || 'all';
+                gamingTopic = '';
+                const event = document.getElementById('gamingEventFilter');
+                if (event) event.value = '';
                 gamingPage = 1;
                 renderGamingMonitoring();
             });
@@ -2198,6 +2253,10 @@ function initGamingMonitoringPage() {
             renderGamingMonitoring();
         });
     }
+    ['gamingMarketFilter', 'gamingPlatformFilter', 'gamingEventFilter', 'gamingContentFilter'].forEach(id => {
+        const field = document.getElementById(id);
+        if (field && !field.dataset.bound) { field.dataset.bound = 'true'; field.addEventListener('change', () => { gamingPage = 1; renderGamingMonitoring(); }); }
+    });
     if (keywordFilter && !keywordFilter.dataset.bound) {
         keywordFilter.dataset.bound = 'true';
         keywordFilter.addEventListener('input', () => {
@@ -2209,6 +2268,8 @@ function initGamingMonitoringPage() {
         clearButton.dataset.bound = 'true';
         clearButton.addEventListener('click', () => {
             gamingMode = 'all';
+            gamingTopic = '';
+            ['gamingMarketFilter', 'gamingPlatformFilter', 'gamingEventFilter', 'gamingContentFilter'].forEach(id => { const field = document.getElementById(id); if (field) field.value = ''; });
             gamingPage = 1;
             if (sourceFilter) sourceFilter.value = '';
             if (keywordFilter) keywordFilter.value = '';

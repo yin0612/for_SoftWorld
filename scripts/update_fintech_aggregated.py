@@ -53,6 +53,11 @@ QUERY_MOBILE_GAME_TERMS = ("天堂M", "神魔之塔", "寒霜啟示錄", "傳說
 QUERY_SOFTWORLD_TERMS = tuple(dict.fromkeys(company['aliases'][0] for company in COMPANIES))
 QUERY_OEN_TERMS = ("應援科技", "應援金流", "Oen", "Oen Tech")
 QUERY_GAME_APPROVAL_TERMS = ("版號", "版号", "遊戲審批", "游戏审批", "网络游戏审批", "網路遊戲審批")
+QUERY_GAME_RELEASE_TERMS = ('"手遊" "事前預約"', '"MMORPG" "測試"', '"手遊" "正式上市"', '"手遊" "新作"')
+QUERY_GAME_IP_TERMS = ('"Gravity" "商標"', '"仙境傳說" "授權"', '"Nexon" "新作"', '"遊戲" "代理"')
+QUERY_GAME_POLICY_TERMS = ('"App Store" "抽成"', '"Google Play" "第三方支付"', '"App Store" "外部付款"', '"Apple" "App內" "裁罰"')
+QUERY_GAME_PLATFORM_TERMS = ('"Playables"', '"遊戲角落"', '"RAGLAND"', '"RO PlayZone"')
+QUERY_GAME_PRODUCT_TERMS = ('"RO仙境傳說"', '"RO 仙境傳說"', '"迴響編年史"', '"我在三國當村長"', '"天翼之鍊MOBILE"', '"RO FESTA"')
 AGGREGATE_QUERIES = (
     # 智冠／MyCard 未提供可驗證官方 RSS 時，僅以其官方網域的 Google
     # News RSS 取回公開 metadata；完整分類仍由 folder_1 規則判定。
@@ -70,6 +75,11 @@ AGGREGATE_QUERIES = (
     ("mobile_games", QUERY_MOBILE_GAME_TERMS),
     # Monthly approvals need a dedicated query, separate from product guides.
     ("game_approval", QUERY_GAME_APPROVAL_TERMS),
+    ("game_new_release", QUERY_GAME_RELEASE_TERMS),
+    ("game_ip_business", QUERY_GAME_IP_TERMS),
+    ("game_store_policy", QUERY_GAME_POLICY_TERMS),
+    ("game_platform_service", QUERY_GAME_PLATFORM_TERMS),
+    ("game_product_watch", QUERY_GAME_PRODUCT_TERMS),
 )
 
 
@@ -119,7 +129,9 @@ def load_huike_rules() -> list[dict]:
 def source_queries(source: dict):
     """Keep rare brands from being crowded out by a single broad OR query."""
     selected = set(source.get('query_topics') or [])
-    queries = [(topic, terms, None) for topic, terms in AGGREGATE_QUERIES if not selected or topic in selected]
+    dedicated_gaming = {'game_new_release', 'game_ip_business', 'game_store_policy', 'game_platform_service', 'game_product_watch'}
+    queries = [(topic, terms, None) for topic, terms in AGGREGATE_QUERIES
+               if topic in selected or (not selected and topic not in dedicated_gaming)]
     if source.get('company_queries'):
         queries.extend(('company:' + company['id'], tuple('"' + alias + '"' for alias in company['aliases']), company)
                        for company in COMPANIES)
@@ -141,6 +153,8 @@ def company_check(company, feed_url, fetched_at, rows, error=None):
 def classify_huike_title(title: str, rules: list[dict]) -> list[tuple[dict, list[str]]]:
     """Apply the same required-group semantics to title-only aggregate metadata."""
     target = title.casefold()
+    if re.match(r'^(?:標籤\s*[:：]|标签\s*[:：]|討論牆\s*[|｜]|搜尋結果|搜索结果)', title):
+        return []
     matches: list[tuple[dict, list[str]]] = []
     for rule in rules:
         groups = rule.get("required_any_groups") or []

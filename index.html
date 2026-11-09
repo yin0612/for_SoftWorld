@@ -23,7 +23,7 @@
     <link rel="stylesheet" href="css/index.css?v=20260929_06">
     <link rel="stylesheet" href="css/components.css?v=20261005_02">
     <link rel="stylesheet" href="css/animations.css?v=20260929_01">
-    <link rel="stylesheet" href="css/enhancements.css?v=20260930_01">
+    <link rel="stylesheet" href="css/enhancements.css?v=20261109_02">
 
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
@@ -405,10 +405,20 @@
                 </div>
             </div>
 
-            <div class="fintech-keyword-pills gaming-keyword-pills animate-on-scroll" id="gamingKeywordPills" aria-label="本頁遊戲監測範圍"></div>
+            <div class="fintech-keyword-pills gaming-keyword-pills animate-on-scroll" id="gamingKeywordPills" role="group" aria-label="遊戲監測子主題"></div>
+            <details class="fintech-glossary gaming-glossary gaming-advanced">
+                <summary class="fintech-glossary-toggle">進階篩選：市場、平台與事件</summary>
+                <div class="gaming-advanced-fields">
+                    <label>市場提及<select class="filter-select" id="gamingMarketFilter"><option value="">全部市場</option></select></label>
+                    <label>平台提及<select class="filter-select" id="gamingPlatformFilter"><option value="">全部平台</option></select></label>
+                    <label>事件階段<select class="filter-select" id="gamingEventFilter"><option value="">全部事件</option></select></label>
+                    <label>內容性質<select class="filter-select" id="gamingContentFilter"><option value="">全部內容</option><option value="industry">產業與新遊事件</option><option value="operation">產品營運與活動</option><option value="player">攻略與玩家話題</option><option value="unclassified">未細分</option></select></label>
+                </div>
+            </details>
+            <p class="fintech-result-count" id="gamingActiveFilters" aria-live="polite"></p>
             <details class="fintech-glossary gaming-glossary">
                 <summary class="fintech-glossary-toggle">資料範圍與監測口徑</summary>
-                <div class="fintech-glossary-content"><strong>收錄範圍：</strong>本頁只使用智冠集團／旗下遊戲與 IP、遊戲競業、高營收手遊與重點手遊，以及遊戲平台、主機、電競技術與中國遊戲版號審批等正式規則。版號新聞涵蓋國產、進口及審批變更，繁簡關鍵字皆納入；獲批不代表已上線。手遊項目只以直接遊戲名稱或明確別名命中，不公開排名、合作狀態或內部標記。支付、金融科技、發票、一般行銷與非遊戲商業新聞不會因同時出現在其他分類而列入。<strong>版號查核：</strong><a href="https://www.nppa.gov.cn/bsfw/jggs/yxspjg/gcwlyxspxx/" target="_blank" rel="noopener noreferrer">國產官方公告</a>、<a href="https://www.nppa.gov.cn/bsfw/jggs/yxspjg/jkwlyxspxx/" target="_blank" rel="noopener noreferrer">進口官方公告</a>、<a href="https://www.nppa.gov.cn/bsfw/jggs/yxspjg/yxspbgxx/" target="_blank" rel="noopener noreferrer">審批變更</a>。<strong>來源標示：</strong>官方 RSS 與 Google News RSS 聚合會分別標示；Google News 聚合並不等同媒體官方 RSS。每則文章均保留命中詞、資料類型與原文連結供追溯。</div>
+                <div class="fintech-glossary-content"><strong>收錄範圍：</strong>本頁只使用智冠集團／旗下遊戲與 IP、遊戲競業、高營收手遊與重點手遊，以及遊戲平台、主機、電競技術與中國遊戲版號審批等正式規則。版號新聞涵蓋國產、進口及審批變更，繁簡關鍵字皆納入；獲批不代表已上線。手遊項目只以直接遊戲名稱或明確別名命中，不公開排名、合作狀態或內部標記。App商店抽成、外部付款與監管等明確政策亦收錄於平台子主題；一般支付或金融新聞不因此列入。市場與平台標籤表示文中提及，實際發行狀態以原文為準。<strong>版號查核：</strong><a href="https://www.nppa.gov.cn/bsfw/jggs/yxspjg/gcwlyxspxx/" target="_blank" rel="noopener noreferrer">國產官方公告</a>、<a href="https://www.nppa.gov.cn/bsfw/jggs/yxspjg/jkwlyxspxx/" target="_blank" rel="noopener noreferrer">進口官方公告</a>、<a href="https://www.nppa.gov.cn/bsfw/jggs/yxspjg/yxspbgxx/" target="_blank" rel="noopener noreferrer">審批變更</a>。<strong>來源標示：</strong>官方 RSS 與 Google News RSS 聚合會分別標示；Google News 聚合並不等同媒體官方 RSS。每則文章均保留命中詞、資料類型與原文連結供追溯。</div>
             </details>
             <p class="fintech-result-count gaming-result-count" id="gamingResultCount">正在載入遊戲產業真實新聞</p>
             <div class="fintech-news-grid gaming-news-grid" id="gamingNewsGrid"></div>
@@ -743,6 +753,7 @@
     <script src="js/compare.js?v=20261002_01"></script>
     <script src="js/refresh.js?v=20261001_05"></script>
     <script src="js/monitoring.js?v=20261013_01"></script>
-    <script src="js/app.js?v=20261013_01"></script>
+    <script src="js/gaming.js?v=20261109_02"></script>
+    <script src="js/app.js?v=20261109_02"></script>
 </body>
 </html>

@@ -1221,6 +1221,13 @@ mark {
   color: #ffffff;
 }
 
+.gaming-topic-button { font-size: .82rem; white-space: normal; }
+.gaming-advanced-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap: 12px; padding: 16px; }
+.gaming-advanced-fields label { display: grid; gap: 6px; color: var(--text-primary); }
+.gaming-advanced-fields select { width: 100%; min-width: 0; }
+.gaming-event-facts { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+#gaming .gaming-mode-buttons { flex-wrap: wrap; }
+#gaming .gaming-topic-button { cursor: pointer; }
 .gaming-scope-pill {
   border-color: #c9d8f2;
   background: #f6f9ff;
