@@ -995,7 +995,34 @@ export default {
       const result = await env.DB.prepare('SELECT health_status, COUNT(*) AS count, MAX(last_success_at) AS latest_success FROM media_sources GROUP BY health_status').all();
       return json({ sources: result.results }, 200, headers);
     }
-    if (url.pathname === '/api/status') return json(await monitoringStatus(env), 200, headers);
+    if (url.pathname === '/api/status') {
+      const cacheKey = new Request(`${url.origin}/api/status?version=${encodeURIComponent(env.RULES_VERSION || '')}`);
+      const cache = typeof caches === 'undefined' ? null : caches.default;
+      const cached = await cache?.match(cacheKey);
+      if (cached) return cached;
+      let status;
+      try {
+        status = { ...await monitoringStatus(env), data_store_available: true };
+      } catch (error) {
+        // Configured sources are not observed database totals or health checks.
+        const sources = coreSourceConfig.sources.filter(source => source.enabled && source.auto_publish && source.access_mode === 'rss');
+        const aggregated = googleSourceConfig.sources.filter(source => source.enabled && source.auto_publish && source.access_mode === 'google_news_rss');
+        status = {
+          data_store_available: false,
+          degradation_reason: isD1ReadQuotaError(error) ? 'd1_read_quota' : 'temporary_data_store_error',
+          rules_version: env.RULES_VERSION || null,
+          source_summary: { enabled: sources.length, healthy: 0, latest_success: null },
+          enabled_sources: sources.map(source => ({ id: source.id, name: source.name, region: source.region, health_status: 'unavailable', last_success_at: null })),
+          article_summary: { unavailable: true }, media_catalog_summary: { unavailable: true },
+          aggregated_source_count: aggregated.length,
+          live_fallback_source_count: LIVE_DOMESTIC_SOURCES.length,
+          live_fallback_sources: LIVE_DOMESTIC_SOURCES.map(source => source.name)
+        };
+      }
+      const response = json(status, 200, { ...headers, 'cache-control': `public, max-age=${status.data_store_available ? 300 : 60}` });
+      if (cache) await cache.put(cacheKey, response.clone());
+      return response;
+    }
 
     // Relay only explicitly configured public publisher feeds. The GitHub
     // backup still validates dates, publisher URLs and publication rules.

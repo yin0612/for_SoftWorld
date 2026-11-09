@@ -1103,7 +1103,9 @@ function renderMonitoringTransparency() {
     ].filter(Boolean);
     const configSyncText = pendingConfigMessages.length ? ' ' + pendingConfigMessages.join(' ') : '';
     const sourceQuality = monitoringFreshness(monitoringRuntimeStatus, monitoringLoadState, monitoringRefreshState);
-    const statusText = monitoringRuntimeStatus
+    const statusText = monitoringRuntimeStatus?.data_store_available === false
+        ? '資料庫統計暫時無法確認；目前仍可閱讀已驗證快照，收錄數量以實際載入結果為準。'
+        : monitoringRuntimeStatus
         ? `已啟用 ${sources.enabled || 0} 個官方 RSS 管道（近兩小時可讀 ${sourceQuality.healthy} 個，含備援查核；台灣來源 ${sourceQuality.sources.filter((source) => source?.region === 'TW' && monitoringSourceIsFresh(source)).length} 個）；另有 ${monitoringRuntimeStatus.live_fallback_source_count || 0} 個官方 RSS 即時唯讀補位來源與 ${monitoringRuntimeStatus.aggregated_source_count || 0} 個 Google News RSS 聚合來源；文件媒體清單 ${catalog.total || 0} 家，其中 ${catalog.verified_rss || 0} 家已完成 RSS 驗證；已公開 ${articles.approved || 0} 篇資料庫文章，${articles.pending || 0} 篇寬鬆規則命中資料待覆核。`
         : '正在讀取來源健康與收錄狀態。';
     summary.textContent = `真實性原則：官方 RSS 與 Google News RSS 聚合來源分開標示；兩者都必須命中年度監測規則且附可開啟的原文跳轉連結，不顯示展示資料。${statusText}${loadText}${liveFallbackText}${aggregatedText}${degradedText}${configSyncText}`;

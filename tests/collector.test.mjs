@@ -20,6 +20,20 @@ function worker(overrides = {}) {
     return context;
 }
 
+test('status remains honest and readable when a D1 quota failure prevents statistics', async () => {
+    const context = worker();
+    const env = { RULES_VERSION: 'gaming-v2', DB: { prepare: () => { throw Error('D1_ERROR: Your account has exceeded D1 free tier daily row read limit'); } } };
+    const response = await context.worker.fetch(new Request('https://example.test/api/status'), env);
+    assert.equal(response.status, 200);
+    const status = await response.json();
+    assert.equal(status.data_store_available, false);
+    assert.equal(status.degradation_reason, 'd1_read_quota');
+    assert.equal(status.article_summary.unavailable, true);
+    assert.equal(status.article_summary.approved, undefined);
+    assert.ok(status.enabled_sources.every(source => source.health_status === 'unavailable'));
+    assert.match(response.headers.get('cache-control'), /max-age=60/);
+});
+
 test('scheduled collection isolates a failed invocation and awaits every source with at most four concurrent children', async () => {
     const context = worker();
     context.syncDomesticConfig = async () => {};

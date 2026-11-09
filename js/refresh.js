@@ -22,6 +22,7 @@ function monitoringSourceIsFresh(source, now = Date.now()) {
 
 function monitoringFreshness(status, load, refresh, now = Date.now()) {
     const issues = [];
+    if (status?.data_store_available === false) issues.push('資料庫統計暫時無法確認');
     if (refresh?.error) issues.push('同步失敗，保留上次資料');
     if (load?.complete === false) issues.push('文章未完整載入');
     if (load?.degraded) issues.push('資料庫暫時受限');
