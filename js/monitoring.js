@@ -136,6 +136,7 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     let partial = false;
     let aggregatedSnapshot = null;
     let rssSnapshot = null;
+    let datasetId = null;
     const seen = new Set();
 
     // The Worker returns a total and cursor-like offset. Fetch every page so the
@@ -156,6 +157,8 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
             break;
         }
         const pageArticles = Array.isArray(payload.articles) ? payload.articles : [];
+        if (datasetId && payload.dataset_id !== datasetId) { complete = false; partial = true; break; }
+        if (payload.dataset_id) { datasetId = payload.dataset_id; baseParams.set('snapshot', datasetId); }
         partial ||= payload.partial === true;
         aggregatedSnapshot = payload.aggregated_snapshot || aggregatedSnapshot;
         rssSnapshot = payload.rss_snapshot || rssSnapshot;

@@ -34,6 +34,29 @@ test('status remains honest and readable when a D1 quota failure prevents statis
     assert.match(response.headers.get('cache-control'), /max-age=60/);
 });
 
+test('pagination pins one verified dataset and does not query D1 again during a quota change', async () => {
+    const stored = new Map();
+    const context = worker({ caches: { default: {
+        match: async key => stored.get(key.url)?.clone(),
+        put: async (key, response) => stored.set(key.url, response.clone())
+    } } });
+    const published_at = new Date(Date.now() - 3600000).toISOString();
+    context.fetchStaticAggregatedArticles = async () => [1,2,3].map(id => ({ id: String(id), title: '國產遊戲版號公布', source_id: 'nppa-game-approval-google-news', source: 'NPPA', source_homepage: 'https://www.nppa.gov.cn/', source_kind: 'google_news_rss', published_at, url: `https://news.google.com/rss/articles/${id}` }));
+    context.fetchStaticRssArticles = async () => [];
+    let reads = 0;
+    const env = { DB: { prepare: () => { reads++; throw Error('D1_ERROR: exceeded D1 row read limit'); } } };
+    const first = await (await context.worker.fetch(new Request('https://example.test/api/articles?limit=1&debug=1'),env)).json();
+    const before = reads;
+    assert.equal(first.total,3); assert.equal(first.articles.length,1);
+    context.fetchStaticAggregatedArticles = async () => { throw Error('The next page must not rebuild a dataset'); };
+    const second = await (await context.worker.fetch(new Request(`https://example.test/api/articles?limit=1&offset=1&snapshot=${encodeURIComponent(first.dataset_id)}`),env)).json();
+    assert.equal(second.total,3); assert.equal(second.dataset_id,first.dataset_id);
+    assert.equal(second.articles.length,1); assert.notEqual(second.articles[0].id,first.articles[0].id); assert.equal(reads,before);
+    stored.clear();
+    const expired = await context.worker.fetch(new Request(`https://example.test/api/articles?limit=1&offset=2&snapshot=${encodeURIComponent(first.dataset_id)}`),env);
+    assert.equal(expired.status,409); assert.equal(reads,before);
+});
+
 test('scheduled collection isolates a failed invocation and awaits every source with at most four concurrent children', async () => {
     const context = worker();
     context.syncDomesticConfig = async () => {};

@@ -51,6 +51,15 @@ test('first-page failure remains unavailable after retries', async () => {
     await assert.rejects(unavailable.context.loadVerifiedMonitoringArticles(), /offline/);
     assert.equal(unavailable.calls(), 3);
 });
+
+test('client refuses to mix different publication snapshots across pages', async () => {
+    const { context } = client([
+        { articles: [row('1')], dataset_id: 'first', total: 2, has_more: true, next_offset: 1 },
+        { articles: [row('2')], dataset_id: 'changed', total: 2, has_more: false }
+    ]);
+    const payload = await context.loadVerifiedMonitoringArticles();
+    assert.equal(payload.complete,false); assert.equal(payload.partial,true); assert.equal(payload.articles.length,1);
+});
 test('a later failed page retains validated articles and reports incomplete partial data', async () => {
     const snapshot = { generated_at: '2026-09-20T00:00:00Z' };
     const partial = client([

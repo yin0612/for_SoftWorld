@@ -3,6 +3,7 @@ import json
 import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
+from urllib.parse import urlencode
 from company_coverage import COMPANIES
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -98,7 +99,10 @@ def main():
         if not isinstance(offset, int) or offset in seen_offsets or not page.get("articles"):
             raise RuntimeError("Incomplete pagination: invalid cursor")
         seen_offsets.add(offset)
-        page = load(API + f"/api/articles?limit=2000&debug=1&offset={offset}")
+        params = urlencode({'limit': 2000, 'debug': 1, 'offset': offset, 'snapshot': payload.get('dataset_id', '')})
+        page = load(API + '/api/articles?' + params)
+        if payload.get('dataset_id') and page.get('dataset_id') != payload['dataset_id']:
+            raise RuntimeError('Publication dataset changed during pagination')
         rows.extend(page.get("articles", []))
     payload["articles"] = rows
     payload["has_more"] = False

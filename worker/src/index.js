@@ -291,7 +291,20 @@ function publicationCacheRequest(url) {
   return new Request(cacheUrl.toString(), { method: 'GET' });
 }
 
-async function articleResponseWithCache(request, url, headers, payload) {
+function publicationDatasetRequest(url, range, snapshot = '') {
+  const key = new URL('/api/__verified-window', url.origin);
+  key.search = new URLSearchParams({ folder: url.searchParams.get('folder') || '', from: range.from, to: range.to,
+    policy: monitoringRuleConfig.version, snapshot }).toString();
+  return new Request(key, { method: 'GET' });
+}
+
+function paginatePublication(payload, offset, limit) {
+  const page = payload.articles.slice(offset, offset + limit);
+  return { ...payload, dataset_id: payload.dataset_id || payload.generated_at, articles: page,
+    has_more: offset + page.length < payload.total, next_offset: offset + page.length };
+}
+
+async function articleResponseWithCache(request, url, headers, payload, fullPayload = payload) {
   const cacheSeconds = payload.degraded ? DEGRADED_ARTICLE_CACHE_SECONDS : ARTICLE_CACHE_SECONDS;
   const response = json(payload, 200, {
     ...headers,
@@ -300,7 +313,10 @@ async function articleResponseWithCache(request, url, headers, payload) {
   });
   if (request.method !== 'GET') return response;
   try {
-    await caches.default.put(publicationCacheRequest(url), response.clone());
+    const dataset = { ...fullPayload, dataset_id: fullPayload.dataset_id || fullPayload.generated_at };
+    const stored = json(dataset, 200, { ...headers, 'cache-control': `public, max-age=${cacheSeconds}, s-maxage=${cacheSeconds}` });
+    await caches.default.put(publicationDatasetRequest(url, dataset.range), stored.clone());
+    await caches.default.put(publicationDatasetRequest(url, dataset.range, dataset.dataset_id), stored);
   } catch (error) {
     console.warn('Unable to cache public monitoring response.', String(error).slice(0, 120));
   }
@@ -1073,11 +1089,16 @@ export default {
       const folder = url.searchParams.get('folder');
       const { fromDate, toDate, from, to } = articleQueryRange(url.searchParams);
       const cacheEnabled = request.method === 'GET' && url.searchParams.get('debug') !== '1';
-      const cacheRequest = publicationCacheRequest(url);
-      if (cacheEnabled) {
+      const snapshot = url.searchParams.get('snapshot') || '';
+      const cacheRequest = publicationDatasetRequest(url, { from: fromDate, to: toDate }, snapshot);
+      if (cacheEnabled || offset > 0 || snapshot) {
         try {
           const cached = await caches.default.match(cacheRequest);
-          if (cached) return cached;
+          if (cached) {
+            const stored = await cached.json();
+            return json(paginatePublication(stored, offset, limit), 200, { ...headers, 'x-monitoring-data-mode': stored.data_mode });
+          }
+          if (snapshot) return json({ error: 'Publication snapshot expired; restart from the first page.' }, 409, headers);
         } catch (error) {
           console.warn('Unable to read public monitoring cache.', String(error).slice(0, 120));
         }
@@ -1139,8 +1160,8 @@ export default {
         const snapshotArticles = await fetchStaticAggregatedArticles(from, to, folder || '', aggregateDiagnostics);
         if (!snapshotArticles.length) throw error;
         const payload = makeArticlePayload(snapshotArticles, {
-          offset,
-          limit,
+          offset: 0,
+          limit: Number.MAX_SAFE_INTEGER,
           fromDate,
           toDate,
           dataMode: 'verified_google_news_snapshot_fallback',
@@ -1150,9 +1171,10 @@ export default {
         payload.aggregated_snapshot = aggregateDiagnostics.find(entry => entry.result === 'snapshot') || null;
         payload.partial = !payload.aggregated_snapshot;
         if (url.searchParams.get('debug') === '1') payload.aggregated_diagnostics = aggregateDiagnostics;
-        return cacheEnabled
-          ? articleResponseWithCache(request, url, headers, payload)
-          : json(payload, 200, headers);
+        const page = paginatePublication(payload, offset, limit);
+        return request.method === 'GET' && typeof caches !== 'undefined'
+          ? articleResponseWithCache(request, url, headers, page, payload)
+          : json(page, 200, headers);
       }
       const candidateUrls = liveCandidates.map(article => article.canonical_url);
       const [existingLiveUrls, rejectedUrls] = await Promise.all([
@@ -1182,8 +1204,8 @@ export default {
         }
       });
       const responsePayload = makeArticlePayload([...merged.values()], {
-        offset,
-        limit,
+        offset: 0,
+        limit: Number.MAX_SAFE_INTEGER,
         fromDate,
         toDate,
         dataMode: 'verified_rss_plus_google_news_aggregation'
@@ -1193,9 +1215,10 @@ export default {
       responsePayload.partial = !responsePayload.aggregated_snapshot || !responsePayload.rss_snapshot
         || aggregateDiagnostics.some(entry => entry.result === 'review_lookup_error');
       if (url.searchParams.get('debug') === '1') responsePayload.aggregated_diagnostics = aggregateDiagnostics;
-      return cacheEnabled
-        ? articleResponseWithCache(request, url, headers, responsePayload)
-        : json(responsePayload, 200, headers);
+      const page = paginatePublication(responsePayload, offset, limit);
+      return request.method === 'GET' && typeof caches !== 'undefined'
+        ? articleResponseWithCache(request, url, headers, page, responsePayload)
+        : json(page, 200, headers);
     }
     return json({ error: 'Not found' }, 404, headers);
   },
