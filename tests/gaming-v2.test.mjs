@@ -49,6 +49,8 @@ test('planned launch, recruitment and geographical mentions retain their meaning
     const google=gaming.classify({title:'RAGLAND首次曝光',excerpt:'台灣正式上市',sourceKind:'google_news_rss'});
     assert.ok(!google.events.includes('launch')); assert.deepEqual(google.markets,[]);
     assert.ok(!google.topics.includes('new')); assert.ok(google.events.includes('serviceAnnounce'));
+    const platform=gaming.classify({title:'GRAVITY公開新 H5 平台「AIWAN」',ruleIds:['competitor-game-event']});
+    assert.ok(!platform.topics.includes('new')); assert.ok(platform.events.includes('serviceAnnounce'));
 });
 test('snapshot and D1 backfill preserve approvals, provenance and reject protection',()=>{
     const row={id:'old',title:cases[8][0],source_id:'technews',review_status:'approved',rule_ids:'industry-platform-business',folder_ids:'folder_4',published_at:'2026-10-30T00:00:00Z'};

@@ -88,7 +88,7 @@
         if (has(title, stages.planned) && has(title, stages.launch)) { const index = events.indexOf('launch'); if (index >= 0) events.splice(index, 1); }
         const parents = Object.keys(parentRules).filter(key => ruleIds.some(id => parentRules[key].includes(id)));
         const foundProducts = products.filter(([, aliases]) => has(text, aliases)).map(([label]) => label);
-        const serviceOnly = (foundProducts.some(label => services.includes(label)) || has(text, ['Playables', '遊戲角落'])) && !foundProducts.some(label => !services.includes(label));
+        const serviceOnly = (foundProducts.some(label => services.includes(label)) || has(text, ['Playables', '遊戲角落']) || /新.{0,10}(?:H5\s*平台|遊戲平台|游戏平台|UGC\s*平台|網頁(?:型)?服務)/i.test(title)) && !foundProducts.some(label => !services.includes(label));
         if (serviceOnly && events.includes('announce')) { events.splice(events.indexOf('announce'),1); events.push('serviceAnnounce'); }
         const player = has(title, ['攻略', '序號', '序号', '抽卡', '玩家趣聞', '玩家趣闻', '懷舊', '神曲', '論戰', '明信片']);
         const operation = has(text, ['改版', '更新', '聯動', '联动', '合作活動', '週年', '周年', '簽到', '儲值優惠']);
