@@ -99,6 +99,7 @@ function ruleAutoPublishes(rule, evidence) {
 }
 
 function ruleAllowsSource(rule, source) {
+  if (Array.isArray(rule.source_ids) && !rule.source_ids.includes(source.id)) return false;
   if (Array.isArray(source.allowed_rule_ids) && !source.allowed_rule_ids.includes(rule.id)) return false;
   const allowedRegions = parseJson(rule.region_scope_json || '[]', []);
   return allowedRegions.length === 0 || allowedRegions.includes(source.region);

@@ -51,6 +51,30 @@ test('IT之家 RSS admits approval, game and competitor stories but excludes bro
   }
 });
 
+test('FSC RSS publishes only scoped payment, stablecoin and VASP matches', () => {
+  const now = new Date('2026-10-08T00:00:00Z');
+  const link = 'https://www.fsc.gov.tw/ch/home.jsp';
+  const feed = (title, body) => rss(title, body).replace('https://www.ithome.com/1/010/363.htm', link);
+  for (const id of ['fsc-news', 'fsc-draft-regulations']) {
+    const source = sources.find(entry => entry.id === id);
+    for (const [title, body, folders] of [
+      ['行動支付業務資訊', '', 'folder_2'],
+      ['監理公告', '電子支付機構業務資訊', 'folder_2'],
+      ['穩定幣發行許可及管理辦法', '', 'folder_6'],
+      ['虛擬資產監理', '提供虛擬資產服務之事業或人員（ＶＡＳＰ）', 'folder_6'],
+      ['電子支付機構及穩定幣發行人', '', 'folder_2,folder_6']
+    ]) {
+      const rows = approvedFeedArticles(feed(title, body), source, rules, now);
+      assert.equal(rows.length, 1, title);
+      assert.equal(rows[0].folder_ids, folders);
+    }
+    assert.deepEqual(approvedFeedArticles(feed('金管會發布信用卡統計及支付資訊', 'CVASP2'), source, rules, now), []);
+    assert.deepEqual(approvedFeedArticles(rss('電子支付'), source, rules, now), []);
+  }
+  const row = { title: '電子支付業務資訊', review_status: 'approved', rule_ids: 'fsc-payments' };
+  assert.equal(revalidateArticle(row, tw, rules), null);
+});
+
 test('old database and snapshot evidence is replaced; invalid rows cannot return after refresh', () => {
   const row = { title: '汽車品牌進軍海外', excerpt: '<p style="text-align:center">汽車品牌</p>',
     review_status: 'approved', source_kind: 'official_rss', rule_ids: 'industry-martech',

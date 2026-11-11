@@ -121,8 +121,10 @@ def load_huike_rules() -> list[dict]:
     config = json.loads(RULE_CONFIG.read_text(encoding="utf-8"))
     return [
         rule for rule in config.get("rules", [])
-        if rule.get("folder_id") in {"folder_1", "folder_3", "folder_4", "folder_6"}
-        or rule.get("id") in {"softworld-fintech-services", "taiwan-payment-peer-oen"}
+        if not rule.get("source_ids") and (
+            rule.get("folder_id") in {"folder_1", "folder_3", "folder_4", "folder_6"}
+            or rule.get("id") in {"softworld-fintech-services", "taiwan-payment-peer-oen"}
+        )
     ]
 
 

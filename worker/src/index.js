@@ -7,6 +7,7 @@ import { evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, rev
 import { parseRss } from './rss-parser.mjs';
 
 const PUBLICATION_RULES = configuredRules(monitoringRuleConfig);
+const RULE_SOURCE_SCOPES = new Map(PUBLICATION_RULES.filter(rule => rule.source_ids).map(rule => [rule.id, rule.source_ids]));
 function revalidatePublicArticle(article) {
   const source = coreSourceConfig.sources.find(entry => entry.id === article.source_id)
     || googleSourceConfig.sources.find(entry => entry.id === article.source_id);
@@ -797,7 +798,9 @@ async function activeRules(env) {
     FROM monitoring_rules r
     LEFT JOIN monitoring_folders f ON f.id = r.folder_id
     WHERE r.active = 1`).all();
-  return result.results;
+  return result.results.map(rule => RULE_SOURCE_SCOPES.has(rule.id)
+    ? { ...rule, source_ids: RULE_SOURCE_SCOPES.get(rule.id) }
+    : rule);
 }
 
 async function collectSource(source, rules, env) {
