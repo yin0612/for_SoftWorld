@@ -25,7 +25,7 @@ function monitoringFreshness(status, load, refresh, now = Date.now()) {
     if (status?.data_store_available === false) issues.push('資料庫統計暫時無法確認');
     if (refresh?.error) issues.push('同步失敗，保留上次資料');
     if (load?.complete === false) issues.push('文章未完整載入');
-    if (load?.degraded) issues.push('資料庫暫時受限');
+    if (load?.degraded) issues.push(monitoringDegradationMessage(load));
     if (load?.partial) issues.push('部分資料管線暫時無法讀取');
     const latest = Date.parse(status?.source_summary?.latest_success);
     const backupTime = Date.parse(load?.rssSnapshot?.generated_at);
@@ -43,6 +43,10 @@ function monitoringFreshness(status, load, refresh, now = Date.now()) {
     const failed = sources.filter(source => !monitoringSourceIsFresh(source, now)).length;
     if (failed) issues.push(`${failed} 個 RSS 管道待確認`);
     return { issues, healthy: sources.filter(source => monitoringSourceIsFresh(source, now)).length, sources };
+}
+
+function monitoringDegradationMessage(load) {
+    return load.degradationReason === 'article_api_unavailable' ? '新聞服務暫時無法回應' : '資料庫讀取暫時受限';
 }
 
 function createMonitoringRefreshCoordinator({ load, isVisible, now = Date.now, interval = setInterval, onError = () => {} }) {

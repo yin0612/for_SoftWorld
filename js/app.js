@@ -948,7 +948,7 @@ function renderGlobalDataStatusBar() {
     const aggregatedCount = Number(monitoringLoadState?.aggregatedCount || 0);
     if (monitoringDataMode === 'verified') {
         if (monitoringLoadState?.degraded) {
-            statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜資料庫讀取暫時受限，現正顯示 ${aggregatedCount} 篇已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。`;
+            statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜${monitoringDegradationMessage(monitoringLoadState)}，現正顯示 ${aggregatedCount} 篇已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。`;
             return;
         }
         const updated = lastRun ? `最後成功更新 ${lastRun}（台北時間）` : '最後成功更新時間待服務回報';
@@ -1091,7 +1091,7 @@ function renderMonitoringTransparency() {
         ? ` 其中 ${monitoringLoadState.aggregatedCount} 篇為 Google News RSS 聚合（非媒體官方 RSS），僅保留標題、發布時間與原文跳轉連結。`
         : '';
     const degradedText = monitoringLoadState?.degraded
-        ? ' 資料庫讀取暫時受限，目前僅顯示已驗證的 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入，不以模擬資料補足。'
+        ? ` ${monitoringDegradationMessage(monitoringLoadState)}，目前僅顯示已驗證的 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。`
         : '';
     const pendingConfigMessages = [
         monitoringRuntimeStatus?.domestic_config?.pending
@@ -1216,8 +1216,9 @@ function refreshMonitoringData() {
 
     monitoringDataRequest = Promise.all([loadVerifiedMonitoringArticles(), manifestPromise, statusPromise]).then(([result, manifest, status]) => {
         if (!result.loaded) throw new Error('Monitoring API is not configured.');
-        if (result.complete === false && monitoringLoadState) {
-            // 後續同步缺頁時保留先前資料，避免已載入的新聞被較少的結果覆蓋。
+        if (monitoringLoadState && (result.complete === false || (result.degradationReason === 'article_api_unavailable'
+            && monitoringLoadState.complete && !monitoringLoadState.degraded && !monitoringLoadState.partial))) {
+            // 後續同步缺頁或只剩聚合快照時，保留上次取得的完整資料。
             monitoringRefreshState.error = true;
             renderGlobalDataStatusBar();
             return;
@@ -1687,7 +1688,7 @@ function renderFintechSummary(summary, articles) {
     state.className = 'fintech-summary-state';
     const aggregatedCount = Number(monitoringLoadState?.aggregatedCount || 0);
     const degradedText = monitoringLoadState?.degraded
-        ? ' 資料庫讀取暫時受限，目前僅顯示已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。'
+        ? ` ${monitoringDegradationMessage(monitoringLoadState)}，目前僅顯示已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。`
         : '';
     state.textContent = '官方 RSS＋Google News RSS 聚合資料，台灣支付為預設視圖。資料範圍 ' + range.from + ' 至 ' + range.to + '；每則新聞皆保留來源類型、原文跳轉連結與命中證據。' + (aggregatedCount ? ` 本次聚合來源 ${aggregatedCount} 篇，非媒體官方 RSS。` : '') + degradedText;
     contextContent.appendChild(state);
@@ -2070,7 +2071,7 @@ function renderGamingSummary(summary, articles) {
 
     const state = document.createElement('p');
     state.className = 'fintech-summary-state';
-    state.textContent = `官方 RSS＋Google News RSS 聚合資料；資料範圍 ${range.from} 至 ${range.to}。其中 ${approvalCount} 篇為中國遊戲版號與審批新聞。只納入智冠集團與旗下遊戲、遊戲競業、高營收手遊／重點手遊、平台／主機／電競、中國遊戲版號與審批等精準規則；手遊僅以直接遊戲名稱或明確別名命中。每則新聞皆保留來源類型、原文連結與命中詞。${sources.size ? ` 可追溯來源 ${sources.size} 個。` : ''}${aggregatedCount ? ` 其中 ${aggregatedCount} 篇為 Google News RSS 聚合，非媒體官方 RSS。` : ''}${monitoringLoadState?.degraded ? ' 資料庫讀取暫時受限，目前僅顯示已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。' : ''}`;
+    state.textContent = `官方 RSS＋Google News RSS 聚合資料；資料範圍 ${range.from} 至 ${range.to}。其中 ${approvalCount} 篇為中國遊戲版號與審批新聞。只納入智冠集團與旗下遊戲、遊戲競業、高營收手遊／重點手遊、平台／主機／電競、中國遊戲版號與審批等精準規則；手遊僅以直接遊戲名稱或明確別名命中。每則新聞皆保留來源類型、原文連結與命中詞。${sources.size ? ` 可追溯來源 ${sources.size} 個。` : ''}${aggregatedCount ? ` 其中 ${aggregatedCount} 篇為 Google News RSS 聚合，非媒體官方 RSS。` : ''}${monitoringLoadState?.degraded ? ` ${monitoringDegradationMessage(monitoringLoadState)}，目前僅顯示已驗證 Google News RSS 聚合快照；官方 RSS 資料會在服務恢復後自動併入。` : ''}`;
     contextContent.appendChild(state);
     summary.appendChild(contextDetails);
 

@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import { fileURLToPath } from 'node:url';
 import { verifyItemSource } from '../worker/src/source-verification.mjs';
 import { normalizeFeedDate, sourceIsFresh } from '../worker/src/time-quality.mjs';
 import { evaluateRule, ruleAutoPublishes, ruleAllowsSource, configuredRules, revalidateArticle } from '../worker/src/rule-engine.mjs';
@@ -14,15 +15,19 @@ const row = (id, extra = {}) => ({ id, source_id: 'ithome', source: 'iThome', ti
 
 function client(payloads, globals = {}) {
     let calls = 0;
-    const context = vm.createContext({ Date, Intl, URLSearchParams, AbortSignal,
+    const context = vm.createContext({ Date, Intl, URL, URLSearchParams, AbortSignal,
         setTimeout: callback => { callback(); },
         fetch: async () => {
             const payload = payloads[calls++];
             if (payload instanceof Error) throw payload;
+            if (typeof payload === 'number') return { ok: false, status: payload };
             return { ok: true, json: async () => payload };
         }, ...globals });
     context.window = context;
-    vm.runInContext(read('../js/monitoring.js'), context);
+    vm.runInContext(read('../js/monitoring.js'), context, {
+        filename: fileURLToPath(new URL('../js/monitoring.js', import.meta.url)),
+        importModuleDynamically: vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER
+    });
     return { context, calls: () => calls };
 }
 test('local previews use their proxy origin while public pages and explicit overrides retain their API', () => {
@@ -50,6 +55,40 @@ test('first-page failure remains unavailable after retries', async () => {
     const unavailable = client([Error('offline'), Error('offline'), Error('offline')]);
     await assert.rejects(unavailable.context.loadVerifiedMonitoringArticles(), /offline/);
     assert.equal(unavailable.calls(), 3);
+});
+
+test('article API outage falls back to published Google News rows with valid sources and dates', async () => {
+    const article = row('google', { source_id: 'ithome-cn-google-news', source: 'IT之家',
+        source_homepage: 'https://www.ithome.com/', url: 'https://news.google.com/rss/articles/valid',
+        source_kind: 'google_news_rss', review_status: 'approved' });
+    const config = JSON.parse(read('../config/fintech_media_sources.json'));
+    const snapshot = { method: 'google-news-rss-site-query', generated_at: '2026-09-20T02:00:00Z', errors: [],
+        articles: [article, article, { ...article, published_at: '2026-08-01T00:00:00Z' },
+            { ...article, source_homepage: 'https://ithome.com.example.org/', url: 'https://news.google.com/rss/articles/bad' },
+            row('official')] };
+    const { context, calls } = client([503, 503, 503, snapshot, config], {
+        getRollingMonitoringDateRange: () => ({ from: '2026-09-01', to: '2026-09-30' })
+    });
+    const data = await context.loadVerifiedMonitoringArticles();
+    assert.equal(data.articles.length, 1);
+    assert.equal(data.articles[0].url, article.url);
+    assert.equal(data.officialRssCount, 0);
+    assert.equal(data.degradationReason, 'article_api_unavailable');
+    assert.equal(data.partial, true);
+    assert.equal(calls(), 5);
+});
+
+test('expired pagination restarts once with a fresh publication', async () => {
+    const { context, calls } = client([
+        { articles: [row('old')], dataset_id: 'first', total: 2, has_more: true, next_offset: 1 },
+        409,
+        { articles: [row('new-1')], dataset_id: 'second', total: 2, has_more: true, next_offset: 1 },
+        { articles: [row('new-2')], dataset_id: 'second', total: 2, has_more: false }
+    ]);
+    const data = await context.loadVerifiedMonitoringArticles();
+    assert.equal(data.complete, true);
+    assert.equal(data.articles[0].url, row('new-1').url);
+    assert.equal(calls(), 4);
 });
 
 test('client refuses to mix different publication snapshots across pages', async () => {

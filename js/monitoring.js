@@ -4,9 +4,9 @@ const monitoringPreviewLocation = window.location;
 const monitoringUsesLocalProxy = monitoringPreviewLocation
     && /^https?:$/.test(monitoringPreviewLocation.protocol)
     && ['localhost', '127.0.0.1'].includes(monitoringPreviewLocation.hostname);
-window.MONITORING_API_BASE = window.MONITORING_API_BASE
-    ?? (monitoringUsesLocalProxy ? monitoringPreviewLocation.origin
-        : 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev');
+const defaultMonitoringApiBase = monitoringUsesLocalProxy ? monitoringPreviewLocation.origin
+    : 'https://softworld-monitoring-api.media-monitoring-worker.workers.dev';
+window.MONITORING_API_BASE = window.MONITORING_API_BASE ?? defaultMonitoringApiBase;
 
 function monitoringApiBase() {
     return (window.MONITORING_API_BASE || '').replace(/\/$/, '');
@@ -17,9 +17,14 @@ async function fetchMonitoringJson(url, options = {}, maxAttempts = 3) {
     for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
         try {
             const response = await fetch(url, { cache: 'no-store', ...options, signal: AbortSignal.timeout(25000) });
-            if (!response.ok) throw new Error(`Monitoring request returned ${response.status}`);
+            if (!response.ok) {
+                const error = new Error(`Monitoring request returned ${response.status}`);
+                error.status = response.status;
+                throw error;
+            }
             return await response.json();
         } catch (error) {
+            if (error.status === 409) throw error;
             lastError = error;
             if (attempt < maxAttempts - 1) {
                 // 短暫 502/503 或網路抖動時退避重試，避免整頁誤判為無法驗證。
@@ -110,17 +115,54 @@ function normalizeMonitoringArticle(article) {
     };
 }
 
-window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArticles() {
+async function loadMonitoringSnapshot(range) {
+    const [snapshot, config, { verifyItemSource }] = await Promise.all([
+        fetchMonitoringJson('https://raw.githubusercontent.com/yin0612/for_SoftWorld/main/data/fintech-aggregated.json', {}, 1),
+        fetchMonitoringJson('config/fintech_media_sources.json', {}, 1),
+        import('../worker/src/source-verification.mjs')
+    ]);
+    const generatedAt = Date.parse(snapshot.generated_at);
+    const now = Date.now();
+    if (snapshot.method !== 'google-news-rss-site-query' || !Number.isFinite(generatedAt) || generatedAt > now) {
+        throw new Error('Invalid monitoring snapshot');
+    }
+    const sources = new Map(config.sources.filter(source => source.enabled && source.auto_publish
+        && source.access_mode === 'google_news_rss').map(source => [source.id, source]));
+    const from = Date.parse(`${range.from}T00:00:00+08:00`);
+    const to = Math.min(now, Date.parse(`${range.to}T23:59:59.999+08:00`));
+    const articles = snapshot.articles.filter(article => {
+        const source = sources.get(article.source_id);
+        const publishedAt = Date.parse(article.published_at);
+        return source && article.title && article.rule_ids && article.review_status === 'approved'
+            && article.source_kind === 'google_news_rss' && publishedAt >= from && publishedAt <= to
+            && verifyItemSource({ link: article.url, publisherName: article.source, publisherUrl: article.source_homepage }, source, true);
+    }).map(article => ({ ...article, live_fallback: true }));
+    if (!articles.length) throw new Error('Monitoring snapshot contains no verified articles in range');
+    return {
+        articles,
+        range,
+        degraded: true,
+        degradation_reason: 'article_api_unavailable',
+        partial: true,
+        aggregated_snapshot: {
+            generated_at: snapshot.generated_at,
+            source_count: snapshot.source_count,
+            error_count: Array.isArray(snapshot.errors) ? snapshot.errors.length : 0
+        }
+    };
+}
+
+window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArticles(restartExpiredSnapshot = true) {
     const base = monitoringApiBase();
     if (!base) return { loaded: false, reason: 'not_configured' };
 
     // Worker 已提供較大的安全上限；近兩個月資料通常可在一次請求完成，
     // 避免多個 offset 請求重複掃描資料庫而消耗免費 D1 讀取額度。
     const baseParams = new URLSearchParams({ limit: '2000', v: '20261001-quality' });
-    if (typeof getRollingMonitoringDateRange === 'function') {
-        const range = getRollingMonitoringDateRange();
-        baseParams.set('from', range.from);
-        baseParams.set('to', range.to);
+    const requestedRange = typeof getRollingMonitoringDateRange === 'function' ? getRollingMonitoringDateRange() : null;
+    if (requestedRange) {
+        baseParams.set('from', requestedRange.from);
+        baseParams.set('to', requestedRange.to);
     }
     const articles = [];
     let liveFallbackCount = 0;
@@ -150,11 +192,25 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
                 headers: { Accept: 'application/json' }
             });
         } catch (error) {
-            if (page === 0) throw error;
-            // 已通過檢查的前頁仍可顯示；後續頁失敗時明確標示未完整載入。
-            complete = false;
-            partial = true;
-            break;
+            if (page === 0) {
+                if (!requestedRange || base !== defaultMonitoringApiBase) throw error;
+                try {
+                    payload = await loadMonitoringSnapshot(requestedRange);
+                } catch (_) {
+                    throw error;
+                }
+            } else {
+                if (datasetId && error.status === 409 && restartExpiredSnapshot) {
+                    try {
+                        const restarted = await loadVerifiedMonitoringArticles(false);
+                        if (restarted.complete && !restarted.degraded && !restarted.partial) return restarted;
+                    } catch (_) { /* Keep the already verified pages below. */ }
+                }
+                // 已通過檢查的前頁仍可顯示；後續頁失敗時明確標示未完整載入。
+                complete = false;
+                partial = true;
+                break;
+            }
         }
         const pageArticles = Array.isArray(payload.articles) ? payload.articles : [];
         if (datasetId && payload.dataset_id !== datasetId) { complete = false; partial = true; break; }
