@@ -20,6 +20,22 @@ function worker(overrides = {}) {
     return context;
 }
 
+test('collection and API clamp dates to the same one-month Taipei window', () => {
+    class FixedDate extends Date {
+        constructor(...args) { super(...(args.length ? args : ['2026-11-20T04:00:00Z'])); }
+        static now() { return new Date('2026-11-20T04:00:00Z').getTime(); }
+    }
+    const context = worker({ Date: FixedDate });
+    for (const params of ['', 'from=2026-09-20&to=2026-12-20']) {
+        const range = context.articleQueryRange(new URLSearchParams(params));
+        assert.equal(range.fromDate, '2026-10-20');
+        assert.equal(range.toDate, '2026-11-20');
+        assert.equal(range.from, '2026-10-19T16:00:00.000Z');
+    }
+    assert.equal(context.isWithinCollectionWindow('2026-10-19T15:59:59Z'), false);
+    assert.equal(context.isWithinCollectionWindow('2026-10-19T16:00:00Z'), true);
+});
+
 test('status remains honest and readable when a D1 quota failure prevents statistics', async () => {
     const context = worker();
     const env = { RULES_VERSION: 'gaming-v2', DB: { prepare: () => { throw Error('D1_ERROR: Your account has exceeded D1 free tier daily row read limit'); } } };

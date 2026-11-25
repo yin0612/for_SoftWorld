@@ -14,7 +14,7 @@ const read = async path => JSON.parse(await fs.readFile(new URL(path, root), 'ut
 function cutoffFor(now) {
   const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit' })
     .formatToParts(now).filter(part => part.type !== 'literal').map(part => [part.type, Number(part.value)]));
-  const index = parts.year * 12 + parts.month - 3;
+  const index = parts.year * 12 + parts.month - 2;
   const year = Math.floor(index / 12), month = ((index % 12) + 12) % 12;
   const day = Math.min(parts.day, new Date(Date.UTC(year, month + 1, 0)).getUTCDate());
   return new Date(Date.UTC(year, month, day) - 8 * 60 * 60 * 1000);

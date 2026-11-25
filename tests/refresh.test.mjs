@@ -8,9 +8,12 @@ vm.runInContext(fs.readFileSync(new URL('../js/refresh.js', import.meta.url), 'u
 
 test('Taipei date boundaries and month-end clamping are independent of browser timezone', () => {
     for (const [time, from, to] of [
-        ['2026-09-30T16:01:00Z', '2026-08-01', '2026-10-01'],
-        ['2026-08-30T16:01:00Z', '2026-06-30', '2026-08-31'],
-        ['2026-01-30T16:01:00Z', '2025-11-30', '2026-01-31'],
+        ['2026-09-30T16:01:00Z', '2026-09-01', '2026-10-01'],
+        ['2026-08-30T16:01:00Z', '2026-07-31', '2026-08-31'],
+        ['2026-01-30T16:01:00Z', '2025-12-31', '2026-01-31'],
+        ['2026-03-30T16:01:00Z', '2026-02-28', '2026-03-31'],
+        ['2024-03-30T16:01:00Z', '2024-02-29', '2024-03-31'],
+        ['2026-11-20T04:00:00Z', '2026-10-20', '2026-11-20'],
     ]) {
         const range = context.monitoringDateRange(new Date(time));
         assert.equal(range.from, from);

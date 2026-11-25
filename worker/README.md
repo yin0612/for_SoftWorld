@@ -4,7 +4,7 @@
 
 ## 資料品質政策
 
-- 收集和公開 API 都硬性限制在台北時間「今天往前兩個月」。無發布日期或超出區間的 RSS 項目不會入庫。
+- 收集和公開 API 都硬性限制在台北時間「今天往前一個月」。無發布日期或超出區間的 RSS 項目不會入庫。
 - 媒體來源必須同時是 `enabled=1`、`auto_publish=1`、`access_mode='rss'`，才會收集並自動公開。
 - `config/fintech_media_sources.json` 是金融科技與智冠集團關鍵字的非 RSS 媒體白名單。清單中的 `access_mode='google_news_rss'` 只走指定官方／媒體網域的 Google News RSS 補位；「Google News 媒體露出」只接受核准主流媒體網域且必須命中智冠規則，不寫入 D1，也不宣稱是媒體官方 RSS。MyCard 與智冠新聞中心同樣只會在 Google 已索引時收錄，未確認網域的候選來源維持人工／授權流程。
 - `.github/workflows/update_fintech_aggregated.yml` 每 6 小時執行 `scripts/update_fintech_aggregated.py`，並額外於台北時間 12:00、17:00 產生快照，將成功取得的公開 metadata 寫入 `data/fintech-aggregated.json`。Worker 只讀取這份 GitHub 快照，不在每次頁面請求時重新查詢 Google News，避免節流／503 造成頁面逾時；若排程暫時失敗，仍可維持上一份可追溯快照，不會以空白或模擬數據取代。
@@ -13,7 +13,7 @@
 - Google News RSS 聚合快照現在同時查詢智冠集團、支付、穩定幣、競業、產業與具代表性的高營收手遊主題；聚合結果只保留標題符合完整規則的公開 metadata，並在 API／前端標示為聚合來源。
 - 台灣來源白名單包含中央社產經／科技 RSS、聯合信用卡處理中心最新消息／卡友活動／特約商店公告 RSS、卡優、自由、科技報橘、動區動趨與 ABMedia；所有來源均先以公開 RSS 可讀取、近期有內容及原文連結檢查後才啟用。
 - `GET /api/articles` 會對新增台灣來源做唯讀即時補位，並以原文 URL 與 D1 內容去重；補位不取代 D1 排程，排程恢復後會自動轉為持久化收錄。
-- 公開 `GET /api/articles` 會以 5 分鐘 Cloudflare 快取回應，前端一次取得近兩個月資料，避免多次 offset 請求重複掃描 D1。若 D1 免費方案的當日讀取額度暫時用盡，API 僅回傳已驗證的 Google News RSS 聚合快照，並附 `degraded=true`／資料來源標示；快照最多快取 1 分鐘，官方 RSS 資料在服務恢復後會自動重新併入。
+- 公開 `GET /api/articles` 會以 5 分鐘 Cloudflare 快取回應，前端一次取得近一個月資料，避免多次 offset 請求重複掃描 D1。若 D1 免費方案的當日讀取額度暫時用盡，API 僅回傳已驗證的 Google News RSS 聚合快照，並附 `degraded=true`／資料來源標示；快照最多快取 1 分鐘，官方 RSS 資料在服務恢復後會自動重新併入。
 - 公開 API 固定只回傳 `articles.review_status='approved'` 且 `article_matches.status='approved'` 的資料，忽略外部傳入的 `status` 參數。
 - 不鏡像未取得授權的全文。資料庫僅保存原始 URL、標題、RSS 摘要、發布／擷取時間與規則命中證據。
 
@@ -51,11 +51,11 @@ npx wrangler deploy
 
 ## API
 
-- `GET /api/articles?limit=30&folder=folder_1`：只回傳可公開的官方 RSS 或 Google News RSS 聚合文章；日期參數一律限制近兩個月。每筆資料以 `source_kind`、`source_access_mode`、`verification_status`、`url_kind` 區分官方 RSS 與聚合來源。
+- `GET /api/articles?limit=30&folder=folder_1`：只回傳可公開的官方 RSS 或 Google News RSS 聚合文章；日期參數一律限制近一個月。每筆資料以 `source_kind`、`source_access_mode`、`verification_status`、`url_kind` 區分官方 RSS 與聚合來源。
 - `GET /api/status`：規則版本、來源健康、已公開／待覆核數量與監測媒體清單覆蓋狀態；前端會將最後成功更新時間與台灣健康 RSS 數量顯示在全站狀態列。
 - `GET /api/health`：來源健康摘要。
 - `POST /api/internal/collect`：須附帶 `Authorization: Bearer <MONITORING_ADMIN_TOKEN>`；用於立即執行收集，不對公開前端開放。
 
 官方 RSS 收集排程每小時第 17 分鐘執行一次，並額外於台北時間 12:00、17:00 執行；寫入為冪等，並保留每次收集紀錄。
 
-另由 GitHub Actions 每小時第 23 分產生官方 RSS 備援快照。Worker 讀取 `data/rss-snapshot.json`，使用原文 URL 與 D1 合併；備援同樣套用啟用來源白名單、完整規則、台北近兩個月及未來時間檢查。已拒絕的 URL 不會被備援恢復；拒絕狀態查詢失敗時，暫停該批補位並標記 `partial=true`。API 的 `rss_snapshot`、`aggregated_snapshot` 提供快照時間與來源查核資訊，前端據此顯示實際新鮮度。
+另由 GitHub Actions 每小時第 23 分產生官方 RSS 備援快照。Worker 讀取 `data/rss-snapshot.json`，使用原文 URL 與 D1 合併；備援同樣套用啟用來源白名單、完整規則、台北近一個月及未來時間檢查。已拒絕的 URL 不會被備援恢復；拒絕狀態查詢失敗時，暫停該批補位並標記 `partial=true`。API 的 `rss_snapshot`、`aggregated_snapshot` 提供快照時間與來源查核資訊，前端據此顯示實際新鮮度。

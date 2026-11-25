@@ -150,7 +150,7 @@ function companyLatestArticleHtml(company) {
     const article = monitoringNews.filter(news => companyMatchesArticle(company, news))
         .sort((a, b) => String(b.publishedAt || b.date).localeCompare(String(a.publishedAt || a.date)))[0];
     const title = monitoringDataMode === 'loading' ? '正在載入近期新聞'
-        : monitoringDataMode === 'unavailable' ? '新聞服務暫時無法讀取' : '近兩個月未收錄明確命中的新聞';
+        : monitoringDataMode === 'unavailable' ? '新聞服務暫時無法讀取' : '近一個月未收錄明確命中的新聞';
     if (!article) return `<div class="company-event-summary"><strong>近期收錄新聞</strong><p>${title}</p></div>`;
     return `<div class="company-event-summary"><div class="company-event-heading"><strong>近期收錄新聞</strong>
         <span class="data-type-badge data-type-real">自動同步</span></div>
@@ -959,7 +959,7 @@ function renderGlobalDataStatusBar() {
         const rssBackup = formatMonitoringTimestamp(monitoringLoadState?.rssSnapshot?.generated_at);
         statusText.textContent = `真實新聞：${range.from} 至 ${range.to}｜近期可讀 RSS ${sources} 個（台灣 ${taiwanSources} 個，含備援查核）｜Worker ${updated}${liveSourceText}${aggregatedText}${liveText}；RSS 備援 ${rssBackup || '時間待確認'}；聚合快照 ${snapshot || '時間待確認'}（台北時間）${quality.issues.length ? `；${quality.issues.join('；')}` : ''}`;
     } else if (monitoringDataMode === 'loading') {
-        statusText.textContent = '真實新聞：正在確認官方 RSS、Google News RSS 聚合來源與近兩個月資料。';
+        statusText.textContent = '真實新聞：正在確認官方 RSS、Google News RSS 聚合來源與近一個月資料。';
     } else {
         statusText.textContent = '真實新聞服務目前無法驗證；頁面不會以其他資料補足結果。';
     }
@@ -1873,7 +1873,7 @@ function renderFintechMonitoring() {
         const state = document.createElement('p');
         state.className = 'fintech-summary-state';
         state.textContent = isLoading
-            ? '正在讀取官方 RSS 與 Google News RSS 聚合來源、近兩個月資料與關鍵字命中結果。'
+            ? '正在讀取官方 RSS 與 Google News RSS 聚合來源、近一個月資料與關鍵字命中結果。'
             : '真實新聞服務目前無法驗證，頁面不會改以展示資料替代。';
         summary.appendChild(state);
         renderFintechKeywordPills([]);
@@ -1882,7 +1882,7 @@ function renderFintechMonitoring() {
             isLoading ? '⏳' : '⚠️',
             isLoading ? '正在讀取金融科技新聞' : '真實新聞服務暫時無法驗證',
             isLoading
-                ? '系統正在確認來源健康狀態、Google News 聚合結果與兩個月資料窗口。'
+                ? '系統正在確認來源健康狀態、Google News 聚合結果與一個月資料窗口。'
                 : '為避免未驗證內容被誤認為新聞，請稍後重新整理。'
         ));
         resultCount.textContent = isLoading ? '正在載入金融科技真實新聞' : '真實新聞服務目前無法驗證';
@@ -1923,7 +1923,7 @@ function renderFintechMonitoring() {
     grid.replaceChildren();
     if (!filtered.length) {
         const emptyMessage = !allArticles.length
-            ? '近兩個月目前沒有符合金融科技規則的文章；資料服務正常，請稍後重試。'
+            ? '近一個月目前沒有符合金融科技規則的文章；資料服務正常，請稍後重試。'
             : (selectedSource || keyword || fintechMode !== 'all'
                 ? '目前篩選條件沒有命中；請調整分類、來源或搜尋文字。'
             : '資料服務已連線，但目前沒有可公開的官方 RSS 或 Google News 聚合文章。');
@@ -2164,7 +2164,7 @@ function renderGamingMonitoring() {
         const state = document.createElement('p');
         state.className = 'fintech-summary-state';
         state.textContent = isLoading
-            ? '正在讀取官方 RSS 與 Google News RSS 聚合來源、近兩個月資料與遊戲規則命中結果。'
+            ? '正在讀取官方 RSS 與 Google News RSS 聚合來源、近一個月資料與遊戲規則命中結果。'
             : '真實新聞服務目前無法驗證，頁面不會改以展示資料替代。';
         summary.appendChild(state);
         renderGamingKeywordPills([]);
@@ -2173,7 +2173,7 @@ function renderGamingMonitoring() {
             isLoading ? '⏳' : '⚠️',
             isLoading ? '正在讀取遊戲產業新聞' : '真實新聞服務暫時無法驗證',
             isLoading
-                ? '系統正在確認來源健康狀態、Google News 聚合結果與兩個月資料窗口。'
+                ? '系統正在確認來源健康狀態、Google News 聚合結果與一個月資料窗口。'
                 : '為避免未驗證內容被誤認為新聞，請稍後重新整理。'
         ));
         resultCount.textContent = isLoading ? '正在載入遊戲產業真實新聞' : '真實新聞服務目前無法驗證';
@@ -2212,7 +2212,7 @@ function renderGamingMonitoring() {
     grid.replaceChildren();
     if (!selectedArticles.length) {
         const emptyMessage = !allArticles.length
-            ? '近兩個月目前沒有符合遊戲核心規則的文章；資料服務正常，請稍後重試。'
+            ? '近一個月目前沒有符合遊戲核心規則的文章；資料服務正常，請稍後重試。'
             : (selectedSource || keyword || gamingMode !== 'all'
                 ? '目前篩選條件沒有命中；請調整分類、來源或搜尋文字。'
                 : '資料服務已連線，但目前沒有可公開的官方 RSS 或 Google News 聚合文章。');
@@ -2552,7 +2552,7 @@ function setupNewsFilters() {
     const dateFromInput = document.getElementById('filterDateFrom');
     const dateToInput = document.getElementById('filterDateTo');
 
-    // 網站與 API 均只保留「今天往前兩個月」的監測窗口。
+    // 網站與 API 均只保留「今天往前一個月」的監測窗口。
     constrainMonitoringDateInputs(dateFromInput, dateToInput);
 
     if (categorySelect) categorySelect.addEventListener('change', applyNewsFilters);
@@ -2711,7 +2711,7 @@ function renderNews(append = false) {
         const emptyState = {
             loading: {
                 icon: '⏳', title: '正在讀取真實新聞',
-                message: '系統正在確認來源健康狀態、近兩個月日期範圍與關鍵字命中結果。', reset: false
+                message: '系統正在確認來源健康狀態、近一個月日期範圍與關鍵字命中結果。', reset: false
             },
             unavailable: {
                 icon: '⚠️', title: '真實新聞服務暫時無法驗證',
@@ -2731,7 +2731,7 @@ function renderNews(append = false) {
                 <div style="font-size: 2rem; margin-bottom: 8px;">${state.icon}</div>
                 <h4 style="font-size: 1.1rem; color: var(--text-primary); margin-bottom: 6px;">${state.title}</h4>
                 <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px;">${state.message}</p>
-                ${state.reset ? '<button class="btn btn-primary btn-sm" id="resetNewsFiltersBtn" style="padding: 6px 18px; border-radius: 20px;">↻ 一鍵重設為近兩個月全部新聞</button>' : ''}
+                ${state.reset ? '<button class="btn btn-primary btn-sm" id="resetNewsFiltersBtn" style="padding: 6px 18px; border-radius: 20px;">↻ 一鍵重設為近一個月全部新聞</button>' : ''}
             </div>
         `;
         const resetBtn = document.getElementById('resetNewsFiltersBtn');

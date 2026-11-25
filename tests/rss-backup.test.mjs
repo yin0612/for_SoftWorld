@@ -7,6 +7,18 @@ const config = { global_exclude_any: ['大宇紡織'], automatic_publication_rul
   rules: [{ id: 'test', folder_id: 'folder_1', scope: 'full_text', required_any_groups: [['智冠'], ['遊戲']] }] };
 const rss = (title, link = 'https://news.gamebase.com.tw/news/123') => `<rss><channel><item><title>${title}</title><link>${link}</link><pubDate>Thu, 01 Oct 2026 16:00:00 GMT</pubDate></item></channel></rss>`;
 
+test('RSS backup retains the one-month Taipei boundary and drops older items', () => {
+  const now = new Date('2026-11-20T04:00:00Z');
+  const rules = configuredRules(config);
+  for (const [published, expected] of [
+    ['2026-10-19T15:59:59Z', 0], ['2026-10-19T16:00:00Z', 1],
+    ['2026-09-20T00:00:00Z', 0], ['2026-11-20T04:00:01Z', 0],
+  ]) {
+    const xml = rss('智冠遊戲').replace('Thu, 01 Oct 2026 16:00:00 GMT', published);
+    assert.equal(approvedFeedArticles(xml, source, rules, now).length, expected, published);
+  }
+});
+
 test('blocked feeds use the configured relay and preserve the direct error and transport', async () => {
   const calls = [];
   const fakeFetch = async url => {

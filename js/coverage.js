@@ -97,7 +97,7 @@ function renderCompanyCoverage(articles) {
         <tbody>${rows.map((row) => `<tr><th scope="row">${coverageEscape(row.name)}</th><td><strong>${row.sources.length}</strong> 家</td><td>${row.total} 篇${row.unknown ? `<br><small>其中 ${row.unknown} 篇未提供來源</small>` : ''}</td><td>${row.sources.length ? `<details><summary>查看 ${row.sources.length} 家媒體</summary><div class="coverage-sources">${row.sources.map((source) => `<details><summary>${coverageEscape(source.name)} · ${source.articles.length} 篇</summary><ul>${source.articles.slice().sort((a, b) => String(b.date || '').localeCompare(String(a.date || ''))).map((article) => {
             const url = coverageUrl(article.url);
             return `<li><span class="chart-card-subtitle">${coverageEscape(article.date || '日期未提供')} · ${article.sourceKind === 'google_news_rss' ? 'Google News 聚合' : 'RSS'}</span><br>${url ? `<a href="${coverageEscape(url)}" target="_blank" rel="noopener noreferrer">${coverageEscape(article.title)}</a>` : coverageEscape(article.title)}</li>`;
-        }).join('')}</ul></details>`).join('')}</div></details>` : (articles.length ? '近兩個月未收錄具名媒體報導' : '等待新聞資料載入') }</td><td><a href="${coverageEscape(coverageUrl(row.reference_url))}" target="_blank" rel="noopener noreferrer">公司／品牌資料依據</a><br><span data-company-check="${coverageEscape(row.id)}">正在讀取更新檢查…</span></td></tr>`).join('')}</tbody></table></div>`;
+        }).join('')}</ul></details>`).join('')}</div></details>` : (articles.length ? '近一個月未收錄具名媒體報導' : '等待新聞資料載入') }</td><td><a href="${coverageEscape(coverageUrl(row.reference_url))}" target="_blank" rel="noopener noreferrer">公司／品牌資料依據</a><br><span data-company-check="${coverageEscape(row.id)}">正在讀取更新檢查…</span></td></tr>`).join('')}</tbody></table></div>`;
     renderCompanyChecks();
 }
 

@@ -28,7 +28,7 @@ const json = (data, status = 200, headers = {}) => new Response(JSON.stringify(d
 // Some publisher feeds retain years of entries. Bound each run to the most
 // recent feed entries so a newly enabled source cannot overwhelm D1.
 const MAX_RSS_ITEMS_PER_SOURCE = 200;
-// 公開頁每次載入會取得近兩個月完整資料；提高單次回傳上限並以短快取保護
+// 公開頁每次載入會取得近一個月完整資料；提高單次回傳上限並以短快取保護
 // D1 免費方案，避免前端用十多個 offset 請求重複掃描同一批文章。
 const MAX_PUBLIC_ARTICLES_PER_REQUEST = 2000;
 const ARTICLE_CACHE_SECONDS = 300;
@@ -381,7 +381,7 @@ function parseTaipeiDate(value, fallback) {
 
 function articleQueryRange(searchParams) {
   const today = taipeiDate();
-  const earliest = subtractCalendarMonths(today, 2);
+  const earliest = subtractCalendarMonths(today, 1);
   const clamp = (date) => date < earliest ? earliest : date > today ? today : date;
   let fromDate = clamp(parseTaipeiDate(searchParams.get('from'), earliest));
   let toDate = clamp(parseTaipeiDate(searchParams.get('to'), today));
@@ -394,7 +394,7 @@ function isWithinCollectionWindow(publishedAt) {
   const publishedDay = parseTaipeiDate(publishedAt, '');
   if (!publishedDay) return false;
   const today = taipeiDate();
-  const earliest = subtractCalendarMonths(today, 2);
+  const earliest = subtractCalendarMonths(today, 1);
   return publishedDay >= earliest && publishedDay <= today;
 }
 
@@ -827,7 +827,7 @@ async function collectSource(source, rules, env) {
     for (const item of items) {
       const publishedAt = normalizeFeedDate(item.publishedAt, source);
       if (!publishedAt) continue;
-      // The database itself observes the same rolling two-month window as the public API.
+      // The database itself observes the same rolling one-month window as the public API.
       if (!isWithinCollectionWindow(publishedAt)) continue;
       const canonicalUrl = new URL(item.link, source.feed_url).toString();
       if (!verifyItemSource({ ...item, link: canonicalUrl }, sourceDefinition(source))) continue;
@@ -1120,7 +1120,7 @@ export default {
       }
       const joins = 'FROM articles a JOIN media_sources s ON s.id = a.source_id JOIN article_matches m ON m.article_id = a.id JOIN monitoring_rules r ON r.id = m.rule_id';
       const whereSql = `WHERE ${where.join(' AND ')}`;
-      // 先讀取完整的近兩個月 D1 結果，再與唯讀即時補位合併後分頁，
+      // 先讀取完整的近一個月 D1 結果，再與唯讀即時補位合併後分頁，
       // 避免新來源插在排序前端時造成 offset 分頁漏項。
       const articlesSql = `SELECT a.id, a.source_id, a.title, a.excerpt, a.canonical_url AS url, a.published_at, a.fetched_at, a.review_status,
           s.name AS source, s.region AS source_region, s.feed_url AS source_feed, s.access_mode AS source_access_mode,
@@ -1190,7 +1190,7 @@ export default {
           .map((article) => [article.canonical_url, article])
       ).values()];
       // Validated RSS backup rows replace the same database URLs below. Avoid
-      // repeating their keyword checks as the two-month archive grows.
+      // repeating their keyword checks as the one-month archive grows.
       const snapshotUrls = new Set(liveArticles.filter(article => article.snapshot_fallback === true)
         .map(article => article.canonical_url));
       const persistedArticles = (Array.isArray(result.results) ? result.results : [])

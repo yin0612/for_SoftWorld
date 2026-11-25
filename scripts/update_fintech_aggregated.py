@@ -276,15 +276,28 @@ def parse_feed(
     return rows, None
 
 
+def collection_date_range(now):
+    end = now.date()
+    month_index = end.year * 12 + end.month - 2
+    target_year, target_month = divmod(month_index, 12)
+    target_month += 1
+    start = end.replace(year=target_year, month=target_month, day=min(end.day, calendar.monthrange(target_year, target_month)[1]))
+    return start, end
+
+
+def within_collection_range(row, start, end, now):
+    try:
+        published = datetime.fromisoformat(row['published_at'].replace('Z', '+00:00'))
+        return start <= published.astimezone(now.tzinfo).date() <= end and published <= now
+    except (KeyError, ValueError, TypeError):
+        return False
+
+
 def main() -> int:
     config = json.loads(SOURCE_CONFIG.read_text(encoding="utf-8"))
     huike_rules = load_huike_rules()
     now = taipei_now()
-    end = now.date()
-    month_index = end.year * 12 + end.month - 3
-    target_year, target_month = divmod(month_index, 12)
-    target_month += 1
-    start = end.replace(year=target_year, month=target_month, day=min(end.day, calendar.monthrange(target_year, target_month)[1]))
+    start, end = collection_date_range(now)
     fetched_at = now.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
     articles: dict[str, dict] = {}
     errors: list[dict] = []
@@ -306,9 +319,9 @@ def main() -> int:
                     errors.append({"source_id": source["id"], "topic": _topic_name, "error": error})
                 else:
                     succeeded += 1
+                rows = [row for row in rows if within_collection_range(row, start, end, now)]
                 if company:
                     rows = [row for row in rows if any(contains_term(row['title'], alias) for alias in company['aliases'])]
-                    rows = [row for row in rows if start.isoformat() <= row['published_at'][:10] <= end.isoformat()]
                     company_checks.append(company_check(company, feed_url, fetched_at, rows, error))
                 for row in rows:
                     existing = articles.get(row["url"])
@@ -338,7 +351,7 @@ def main() -> int:
         previous = json.loads(OUTPUT.read_text(encoding="utf-8"))
         failed_sources = {error["source_id"] for error in errors}
         for row in previous.get("articles", []):
-            if row.get("source_id") in failed_sources and start.isoformat() <= row.get("published_at", "")[:10] <= end.isoformat():
+            if row.get("source_id") in failed_sources and within_collection_range(row, start, end, now):
                 articles.setdefault(row["url"], row)
     ordered = sorted(articles.values(), key=lambda row: row["published_at"], reverse=True)
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)

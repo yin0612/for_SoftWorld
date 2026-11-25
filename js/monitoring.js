@@ -156,7 +156,7 @@ window.loadVerifiedMonitoringArticles = async function loadVerifiedMonitoringArt
     const base = monitoringApiBase();
     if (!base) return { loaded: false, reason: 'not_configured' };
 
-    // Worker 已提供較大的安全上限；近兩個月資料通常可在一次請求完成，
+    // Worker 已提供較大的安全上限；近一個月資料通常可在一次請求完成，
     // 避免多個 offset 請求重複掃描資料庫而消耗免費 D1 讀取額度。
     const baseParams = new URLSearchParams({ limit: '2000', v: '20261001-quality' });
     const requestedRange = typeof getRollingMonitoringDateRange === 'function' ? getRollingMonitoringDateRange() : null;

@@ -35,7 +35,7 @@ function getRealRange() {
         const fallback = getRollingMonitoringDateRange();
         return `${fallback.from} — ${fallback.to}`;
     }
-    return '近兩個月 — 今天';
+    return '近一個月 — 今天';
 }
 
 function destroyChart(id) {

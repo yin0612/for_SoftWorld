@@ -6,7 +6,7 @@ function monitoringDateRange(now = new Date()) {
     const parts = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit'
     }).formatToParts(now).filter(p => p.type !== 'literal').map(p => [p.type, p.value]));
-    const index = Number(parts.year) * 12 + Number(parts.month) - 3;
+    const index = Number(parts.year) * 12 + Number(parts.month) - 2;
     const year = Math.floor(index / 12);
     const month = ((index % 12) + 12) % 12 + 1;
     const day = Math.min(Number(parts.day), new Date(Date.UTC(year, month, 0)).getUTCDate());

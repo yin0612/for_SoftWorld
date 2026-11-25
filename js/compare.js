@@ -64,7 +64,7 @@ function renderCompareUI(container) {
     container.innerHTML = `
         <div class="compare-controls" style="margin-bottom:20px;text-align:center;">
             <div class="company-selectors" id="compare-company-selectors" style="display:flex;flex-wrap:wrap;justify-content:center;margin-bottom:14px;">${selectors}</div>
-            <p class="method-muted">僅顯示近兩個月 API 真實新聞命中數；沒有資料時顯示 0，不使用估算值。</p>
+            <p class="method-muted">僅顯示近一個月 API 真實新聞命中數；沒有資料時顯示 0，不使用估算值。</p>
         </div>
         <div class="compare-table-container" style="background:#f8fafc;padding:20px;border-radius:12px;border:1px solid #f1f5f9;overflow-x:auto;">
             <div id="compareTableContainer"></div>
