@@ -194,7 +194,7 @@ const COMPANIES = [
         stock: '電子支付服務',
         industry: '金融支付',
         website: 'https://www.pxpayplus.com.tw/',
-        newsUrl: 'https://www.pxpayplus.com/news/新聞發布/1',
+        newsUrl: 'https://www.pxpayplus.com/news/新聞發佈/1',
         mopsUrl: MOPS_HOME_URL,
         color: '#1d70b7',
         products: ['全支付錢包', '掃碼支付', '跨境支付', '會員生態整合'],
