@@ -168,7 +168,7 @@ const COMPANIES = [
         stock: '電子支付服務',
         industry: '金融支付',
         website: 'https://pay.line.me/portal/tw-lpm/',
-        newsUrl: 'https://pay.line.me/portal/tw-lpm/',
+        newsUrl: 'https://pay.line.me/portal/tw/customer/press',
         mopsUrl: MOPS_HOME_URL,
         color: '#06c755',
         products: ['儲值與付款', '好友轉帳', '生活繳費', 'LINE 生態系'],
@@ -237,7 +237,7 @@ const HUIKE_2025_STRUCTURE = [
             "簡單收", "歐付寶", "街口支付", "綠界科技", "全支付", "全盈支付",
             "LINE Pay", "LINE Pay Money", "LINE Bank", "彈性付", "第三方支付", "電子支付",
             "行動支付", "數位支付", "電支", "支付安全", "非現金支付", "跨境交易",
-            "代收付", "金管會", "聯卡中心", "財金公司", "悠遊付", "一卡通", "台灣Pay", "純網銀"
+            "代收付", "金管會", "聯卡中心", "財金公司", "悠遊付", "一卡通", "iPASS MONEY", "icash Pay", "台灣Pay", "純網銀"
         ]
     },
     {
