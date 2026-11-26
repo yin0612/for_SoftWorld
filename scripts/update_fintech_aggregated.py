@@ -28,7 +28,7 @@ MAX_ITEMS_PER_SOURCE = 80
 PAYMENT_TERMS = (
     "藍新科技", "藍新金流", "newebpay", "簡單付", "簡單支付", "簡單行動支付", "ezpay", "歐付寶", "o'pay", "opay",
     "街口支付", "街口電子支付", "綠界科技", "ecpay", "全支付", "全盈支付", "台灣pay",
-    "悠遊付", "一卡通", "ipass money", "line pay", "line pay money", "line bank", "彈性付", "pi拍錢包",
+    "悠遊付", "一卡通", "ipass money", "icash pay", "line pay", "line pay money", "line bank", "彈性付", "pi拍錢包",
     "pchomepay", "hami pay", "friday錢包", "蝦皮支付", "電子支付", "行動支付",
     "數位支付", "第三方支付", "支付基礎設施", "跨境支付", "金流", "收單", "代收付",
     "電子票證", "信用卡支付", "信用卡", "刷卡", "電子錢包", "數位錢包", "掃碼支付",
@@ -130,6 +130,8 @@ def load_huike_rules() -> list[dict]:
 
 def source_queries(source: dict):
     """Keep rare brands from being crowded out by a single broad OR query."""
+    if brand := source.get("required_brand"):
+        return [("payment", (f'"{brand}"',), None)]
     selected = set(source.get('query_topics') or [])
     dedicated_gaming = {'game_new_release', 'game_ip_business', 'game_store_policy', 'game_platform_service', 'game_product_watch'}
     queries = [(topic, terms, None) for topic, terms in AGGREGATE_QUERIES
@@ -215,6 +217,8 @@ def parse_feed(
         ):
             continue
         title = strip_suffix(item.findtext("title"), source, publisher_name)
+        if source.get("required_brand") and not contains_term(title, source["required_brand"]):
+            continue
         link = text(item.findtext("link"))
         link_parts = urllib.parse.urlparse(link)
         if link_parts.scheme != "https" or link_parts.hostname != "news.google.com":
